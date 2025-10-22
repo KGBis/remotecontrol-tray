@@ -1,79 +1,93 @@
 package com.kikegg.remote.shutdown;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.util.List;
 
+import static com.kikegg.remote.shutdown.Main.REMOTE_SHUTDOWN;
 
-@Log
+@Slf4j
 public class ShowIpFrame implements FocusListener {
 
-    private final JFrame frame;
-    private final JLabel label = new JLabel();
-    private PopupMenu parentPopup;
+	public static final String INFO_TEXT = "<html><span style=\"text-align: center;\">"
+			+ "By Enrique García (c) 2022  (kike.g.garcia at gmail.com)<br>"
+			+ "Based on the 'RemoteShutdownPCServer' by Isah Rikovic (https://github.com/rikovicisah) (rikovicisah at gmail.com)"
+			+ "</span><p/><p/><span><b>Detected non-loopback IPs:</b><p>{IP_TEXT}<br><i>(IPs copied to clipboard)</i></span></html>";
 
-    ShowIpFrame() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ignored) {}
+	private final JFrame frame;
 
-        frame = new JFrame("Remote Shutdown");
-        frame.setIconImage(IconImage.getIcon());
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLayout(new BorderLayout(5, 5));
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(false);
-        frame.addFocusListener(this);
-    }
+	private final JLabel label = new JLabel();
 
-    public void show(String ipText, PopupMenu parent) {
-        this.parentPopup = parent;
-        EventQueue.invokeLater(() -> {
-            // remove old label, IP should not change but just in case...
-            frame.remove(label);
+	private PopupMenu parentPopup;
 
-            // set new label text and border
-            label.setText("<html>" +
-                    "<span style=\"text-align: center;\">" +
-                    "By Enrique García (c) 2022  (kike.g.garcia at gmail.com)" + "<br>" +
-                    "Based on the 'RemoteShutdownPCServer' by Isah Rikovic (https://github.com/rikovicisah) (rikovicisah at gmail.com)" +
-                    "</span><p/><p/>" +
-                    "<span>" +
-                    ipText +"  <i>(copied to clipboard)</i>" +
-                    "</span>" +
-                    "</html>");
-            label.setBorder(new EmptyBorder(10,10,10,10));
+	ShowIpFrame() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException ignored) {
+			// Ignored
+		}
 
-            // add the label, pack and make visible
-            frame.add(label);
-            frame.pack();
-            frame.setVisible(true);
-        });
+		frame = new JFrame(REMOTE_SHUTDOWN);
+		frame.setIconImage(IconImage.getIcon());
+		frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		frame.setLayout(new BorderLayout(5, 5));
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(false);
+		frame.addFocusListener(this);
+	}
 
-        copyToClipboard(ipText);
-    }
+	public void show(List<String> ipList, PopupMenu parent) {
+		this.parentPopup = parent;
+		String ips = formatIpListToShow(ipList);
 
-    private void copyToClipboard(String ip) {
-        StringSelection stringSelection = new StringSelection(ip);
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        clipboard.setContents(stringSelection, null);
-        log.info("IP " + ip + " copied to the clipboard.");
-    }
+		String text = StringUtils.replace(INFO_TEXT, "{IP_TEXT}", ips);
 
-    @Override
-    public void focusGained(FocusEvent e) {}
+		EventQueue.invokeLater(() -> {
+			// remove old label, IP should not change but just in case...
+			frame.remove(label);
 
-    @Override
-    public void focusLost(FocusEvent e) {
-        this.parentPopup.setEnabled(true);
-    }
+			// set new label text and border
+			label.setText(text);
+			label.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+			// add the label, pack and make visible
+			frame.add(label);
+			frame.pack();
+			frame.setVisible(true);
+		});
+
+		copyToClipboard(ipList.toString());
+	}
+
+	private String formatIpListToShow(List<String> ipList) {
+		return StringUtils.join(ipList, "<br>");
+	}
+
+	private void copyToClipboard(String ip) {
+		StringSelection stringSelection = new StringSelection(ip);
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(stringSelection, null);
+		log.info("IP(s) {} copied to the clipboard.", ip);
+	}
+
+	@Override
+	public void focusGained(FocusEvent e) {
+		// no action on focus
+	}
+
+	@Override
+	public void focusLost(FocusEvent e) {
+		this.parentPopup.setEnabled(true);
+	}
+
 }
-

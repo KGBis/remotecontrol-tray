@@ -1,74 +1,81 @@
 package com.kikegg.remote.shutdown;
 
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-@Log
+@Slf4j
 public class Main {
 
-    private void loadTray() {
-        TrayIcon trayIcon;
-        if (SystemTray.isSupported()) {
-            // get the SystemTray instance
-            SystemTray tray = SystemTray.getSystemTray();
+	public static final String REMOTE_SHUTDOWN = "Remote Shutdown";
 
-            // create a action listener to listen for default action executed on the tray icon
-            ActionListener listener = new TrayActionListener();
+	private void loadTray() {
+		TrayIcon trayIcon;
+		if (SystemTray.isSupported()) {
+			// get the SystemTray instance
+			SystemTray tray = SystemTray.getSystemTray();
 
-            // create a popup menu
-            PopupMenu popup = new PopupMenu();
-            popup.setName("Remote Shutdown");
+			// create a action listener to listen for default action executed on the tray
+			// icon
+			ActionListener listener = new TrayActionListener();
 
-            // create menu item for the default action
-            MenuItem defaultItem = new MenuItem("Show Computer IP");
-            defaultItem.setActionCommand("IP_CMD");
-            defaultItem.addActionListener(listener);
-            popup.add(defaultItem);
+			// create a popup menu
+			PopupMenu popup = new PopupMenu();
+			popup.setName(REMOTE_SHUTDOWN);
 
-            popup.addSeparator();
+			// create menu item for the default action
+			MenuItem defaultItem = new MenuItem("Show Computer IP");
+			defaultItem.setActionCommand("IP_CMD");
+			defaultItem.addActionListener(listener);
+			popup.add(defaultItem);
 
-            // create menu item for the default action
-            MenuItem exitItem = new MenuItem("Exit");
-            exitItem.setActionCommand("EXIT_CMD");
-            exitItem.addActionListener(listener);
-            popup.add(exitItem);
+			popup.addSeparator();
 
-            // construct a TrayIcon and set properties
-            trayIcon = new TrayIcon(IconImage.getIcon(), "Remote Shutdown", popup);
-            trayIcon.setImageAutoSize(true);
-            trayIcon.addActionListener(listener);
+			// create menu item for the default action
+			MenuItem exitItem = new MenuItem("Exit");
+			exitItem.setActionCommand("EXIT_CMD");
+			exitItem.addActionListener(listener);
+			popup.add(exitItem);
 
-            // add the tray image
-            try {
-                tray.add(trayIcon);
-            } catch (AWTException e) {
-                log.warning("Could not add tray icon: " + e.getMessage());
-            }
-            // ...
-        } else {
-            log.severe("System tray is not supported. Sorry. Application will be working as expected but without system tray menu.");
-        }
-    }
+			// construct a TrayIcon and set properties
+			trayIcon = new TrayIcon(IconImage.getIcon(), REMOTE_SHUTDOWN, popup);
+			trayIcon.setImageAutoSize(true);
+			trayIcon.addActionListener(listener);
 
-    private void loadServer() throws IOException, ExecutionException, InterruptedException {
-        NetListener netListener = new NetListener();
-        netListener.listen();
-    }
+			// add the tray image
+			try {
+				tray.add(trayIcon);
+			}
+			catch (AWTException e) {
+				log.warn("Could not add tray icon: {}", e.getMessage());
+			}
+			// ...
+		}
+		else {
+			log.error(
+					"System tray is not supported. Sorry. Application will be working as expected but without system tray menu.");
+		}
+	}
 
-    public static void main(String[] args) {
-        Main main = new Main();
-        main.loadTray();
-        try {
-            main.loadServer();
-        } catch (IOException | ExecutionException | InterruptedException e) {
-            log.severe("Cannot start program. Error: " + e);
-            System.exit(-1);
-        }
-    }
+	private void loadServer() throws IOException, ExecutionException, InterruptedException {
+		NetListener netListener = new NetListener();
+		netListener.listen();
+	}
 
+	public static void main(String[] args) {
+		Main main = new Main();
+		main.loadTray();
+		try {
+			main.loadServer();
+		}
+		catch (IOException | ExecutionException | InterruptedException e) {
+			log.error("Something happened. Error: ", e);
+			Thread.currentThread().interrupt();
+			System.exit(-1);
+		}
+	}
 
 }
