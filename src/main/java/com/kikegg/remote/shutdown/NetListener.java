@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -31,7 +32,8 @@ public class NetListener implements Runnable {
 
 	@SuppressWarnings("InfiniteLoopStatement")
 	public void listen() throws IOException, ExecutionException, InterruptedException {
-		// Initialize
+        String hostAddress = Inet4Address.getLocalHost().getHostAddress();
+        // Initialize
 		serverSocket = new ServerSocket(PORT);
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -47,7 +49,7 @@ public class NetListener implements Runnable {
 	@Override
 	public void run() {
 		try {
-			// Wait to incomming messages (accept method is blocking)
+			// Wait to incoming messages (accept method is blocking)
 			Socket socket = serverSocket.accept();
 			log.info("Socket message received");
 
