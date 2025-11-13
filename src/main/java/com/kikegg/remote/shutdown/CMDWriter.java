@@ -21,6 +21,11 @@ public class CMDWriter {
 		parseAndSetTime(clientMessage);
 		String[] cmdLine = buildCommandLine();
 		try {
+			if (timeInSeconds == -1) {
+				log.debug("timeInSeconds is -1. Message received via socket: {}",
+						StringUtils.isBlank(clientMessage) ? "** BLANK MESSAGE **" : clientMessage);
+				return;
+			}
 			Runtime.getRuntime().exec(cmdLine);
 		}
 		catch (IOException e) {
@@ -54,6 +59,7 @@ public class CMDWriter {
 
 	private void parseAndSetTime(String clientMessage) {
 		if (StringUtils.isBlank(clientMessage)) {
+			timeInSeconds = -1;
 			return;
 		}
 
@@ -67,6 +73,7 @@ public class CMDWriter {
 		// Trim and extract time suffix ("s" = seconds, "m" = minutes or "h" = hours)
 		String[] strings = StringUtils.splitByCharacterType(timeParam);
 		if (strings.length != 2) {
+			timeInSeconds = -1;
 			return;
 		}
 		String timerStr = strings[0];

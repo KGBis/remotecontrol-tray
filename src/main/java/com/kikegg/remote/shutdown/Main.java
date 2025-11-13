@@ -12,6 +12,19 @@ public class Main {
 
 	public static final String REMOTE_SHUTDOWN = "Remote Shutdown";
 
+	public static void main(String[] args) {
+		Main main = new Main();
+		main.loadTray();
+		try {
+			main.loadServer();
+		}
+		catch (IOException | ExecutionException | InterruptedException e) {
+			log.error("Something happened. Error: ", e);
+			Thread.currentThread().interrupt();
+			System.exit(-1);
+		}
+	}
+
 	private void loadTray() {
 		TrayIcon trayIcon;
 		if (SystemTray.isSupported()) {
@@ -63,19 +76,6 @@ public class Main {
 	private void loadServer() throws IOException, ExecutionException, InterruptedException {
 		NetListener netListener = new NetListener();
 		netListener.listen();
-	}
-
-	public static void main(String[] args) {
-		Main main = new Main();
-		main.loadTray();
-		try {
-			main.loadServer();
-		}
-		catch (IOException | ExecutionException | InterruptedException e) {
-			log.error("Something happened. Error: ", e);
-			Thread.currentThread().interrupt();
-			System.exit(-1);
-		}
 	}
 
 }

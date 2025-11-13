@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
@@ -52,9 +53,10 @@ public class NetListener implements Runnable {
 
 			// When server receives message, get message, send ack
 			DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
-			outToClient.writeBytes(ACK);
-			log.info("Response ACK sent");
+			outToClient.writeBytes(getLocalHostName() + "\n");
+			log.info("Response ACK sent: {}", getLocalHostName());
 
+			// Read client input (if any)
 			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			String clientMessage = inFromClient.readLine();
 			log.info("Socket message read");
@@ -63,6 +65,15 @@ public class NetListener implements Runnable {
 		}
 		catch (IOException e) {
 			log.error("Socket error: {}", e.getMessage());
+		}
+	}
+
+	String getLocalHostName() {
+		try {
+			return InetAddress.getLocalHost().getHostName();
+		}
+		catch (Exception e) {
+			return "<Unknown>";
 		}
 	}
 
