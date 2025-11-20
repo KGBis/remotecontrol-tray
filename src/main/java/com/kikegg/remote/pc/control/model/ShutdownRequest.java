@@ -1,15 +1,15 @@
 package com.kikegg.remote.pc.control.model;
 
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.time.temporal.ChronoUnit;
 
-import java.util.concurrent.TimeUnit;
-
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class ShutdownRequest extends Request {
+@Builder
+public class ShutdownRequest {
 
-    private Integer delay;
+	private Integer delay;
 
-    private TimeUnit unit;
+	private ChronoUnit unit;
+
 }

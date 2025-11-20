@@ -5,14 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static com.kikegg.remote.pc.control.network.NetworkAction.getIPv4Addresses;
 
 @Slf4j
 public class TrayActionListener implements ActionListener {
@@ -40,24 +34,6 @@ public class TrayActionListener implements ActionListener {
 			default:
 				break;
 		}
-	}
-
-	public List<String> getIPv4Addresses() {
-		Stream<NetworkInterface> networkInterfaceStream;
-		try {
-			networkInterfaceStream = Collections.list(NetworkInterface.getNetworkInterfaces()).stream();
-		}
-		catch (SocketException e) {
-			log.warn(e.getMessage());
-			networkInterfaceStream = Stream.empty();
-		}
-
-		return networkInterfaceStream
-			.flatMap(networkInterface -> Collections.list(networkInterface.getInetAddresses()).stream())
-			.filter(inetAddress -> !inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address)
-			.map(InetAddress::getHostAddress)
-			.sorted()
-			.collect(Collectors.toList());
 	}
 
 }

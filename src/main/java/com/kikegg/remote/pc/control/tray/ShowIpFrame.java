@@ -2,6 +2,7 @@ package com.kikegg.remote.pc.control.tray;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -50,7 +51,7 @@ public class ShowIpFrame implements FocusListener {
 		this.parentPopup = parent;
 		String ips = formatIpListToShow(ipList);
 
-		String text = StringUtils.replace(INFO_TEXT, "{IP_TEXT}", ips);
+		String text = Strings.CS.replace(INFO_TEXT, "{IP_TEXT}", ips);
 
 		EventQueue.invokeLater(() -> {
 			// remove old label, IP should not change but just in case...

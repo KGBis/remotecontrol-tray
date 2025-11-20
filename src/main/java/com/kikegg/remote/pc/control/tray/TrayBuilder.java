@@ -10,6 +10,7 @@ import static com.kikegg.remote.pc.control.Main.REMOTE_PC_CONTROL;
 @Slf4j
 public class TrayBuilder {
 
+	@SuppressWarnings("UnusedReturnValue")
 	public TrayBuilder loadTray() {
 		TrayIcon trayIcon;
 		if (SystemTray.isSupported()) {

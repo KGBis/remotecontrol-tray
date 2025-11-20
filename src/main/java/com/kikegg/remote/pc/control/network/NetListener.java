@@ -21,8 +21,6 @@ public class NetListener implements Runnable {
 
 	private ServerSocket serverSocket;
 
-	// private final CMDWriter cmdWriter;
-
 	@SuppressWarnings("InfiniteLoopStatement")
 	public void listen() throws IOException, ExecutionException, InterruptedException {
 		// Initialize
@@ -49,7 +47,7 @@ public class NetListener implements Runnable {
 			String inMessage = getIncomingMessage(socket);
 
 			// execute action
-            execute(socket, inMessage);
+			execute(socket, inMessage);
 		}
 		catch (IOException e) {
 			log.error("Socket error: {}", e.getMessage());
@@ -57,29 +55,29 @@ public class NetListener implements Runnable {
 	}
 
 	private void execute(Socket socket, String inMessage) throws IOException {
-		String[] strings = StringUtils.split(inMessage);
+		String[] arguments = StringUtils.split(inMessage);
 
-		Action action;
+		Action action = Action.ACK;
 		try {
-			if (strings == null) {
-				action = Action.ACK;
-			}
-			else {
-				action = Action.valueOf(strings[0]);
+			if (arguments != null) {
+				action = Action.valueOf(arguments[0]);
 			}
 		}
 		catch (Exception e) {
-			log.error("Invalid action {}", strings[0]);
+			log.error("Invalid action {}", arguments[0]);
 			return;
 		}
 
 		NetworkAction netAction;
 		switch (action) {
 			case SHUTDOWN:
-				netAction = new ShutdownNetworkAction(socket, strings);
+				netAction = new ShutdownNetworkAction(socket, arguments);
+				break;
+			case INFO:
+				netAction = new InfoNetworkAction(socket, arguments);
 				break;
 			default:
-                netAction = new InfoNetworkAction(socket, strings);
+				netAction = new AckNetworkAction(socket, arguments);
 		}
 
 		netAction.execute();
