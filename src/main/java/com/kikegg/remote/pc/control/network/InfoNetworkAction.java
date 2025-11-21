@@ -3,8 +3,7 @@ package com.kikegg.remote.pc.control.network;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.net.*;
 import java.util.List;
 
 @Slf4j
@@ -24,7 +23,9 @@ public class InfoNetworkAction extends NetworkAction {
 		}
 
 		// "HOSTNAME MAC"
-		String msg = String.format("%s %s", getLocalHostName(), "00:00:11:11:00:00");
+        long s = System.currentTimeMillis();
+		String msg = String.format("%s %s", getLocalHostName(), getMac());
+        log.info("Took {}ms to get hostname and mac", (System.currentTimeMillis() -s));
 		writeToSocket(socket, msg);
 	}
 
@@ -36,5 +37,24 @@ public class InfoNetworkAction extends NetworkAction {
 			return args[1]; // requested IP
 		}
 	}
+
+    private String getMac() {
+        InetAddress localHost;
+        try {
+            localHost = InetAddress.getLocalHost();
+            NetworkInterface ni = NetworkInterface.getByInetAddress(localHost);
+            byte[] hardwareAddress = ni.getHardwareAddress();
+            if (hardwareAddress != null) {
+                String[] hexadecimalFormat = new String[hardwareAddress.length];
+                for (int i = 0; i < hardwareAddress.length; i++) {
+                    hexadecimalFormat[i] = String.format("%02X", hardwareAddress[i]);
+                }
+                return String.join(":", hexadecimalFormat);
+            }
+        } catch (Exception e) {
+            log.error("error while getting MAC:", e);
+        }
+        return "";
+    }
 
 }

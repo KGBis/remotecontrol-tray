@@ -37,7 +37,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 		// noinspection ConfusingArgumentToVarargsMethod
 		log.info("Executing -> {}", StringUtils.joinWith(" ", cmdLine));
 		writeToSocket(socket, "ACK");
-		// Runtime.getRuntime().exec(cmdLine);
+		Runtime.getRuntime().exec(cmdLine);
 	}
 
 	private ShutdownData parseArguments() {
