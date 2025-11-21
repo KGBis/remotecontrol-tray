@@ -6,7 +6,7 @@ import java.time.temporal.ChronoUnit;
 
 @Data
 @Builder
-public class ShutdownRequest {
+public class ShutdownData {
 
 	private Integer delay;
 

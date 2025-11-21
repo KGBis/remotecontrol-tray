@@ -1,6 +1,6 @@
 package com.kikegg.remote.pc.control.network;
 
-import com.kikegg.remote.pc.control.model.ShutdownRequest;
+import com.kikegg.remote.pc.control.model.ShutdownData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -22,7 +22,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 
 	@Override
 	public void execute() throws IOException {
-		ShutdownRequest request = parseArguments();
+		ShutdownData request = parseArguments();
 
 		if (request == null) {
 			log.warn("Request arguments are wrong. delay={}, unit={}", args[1], args[2]);
@@ -40,7 +40,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 		// Runtime.getRuntime().exec(cmdLine);
 	}
 
-	private ShutdownRequest parseArguments() {
+	private ShutdownData parseArguments() {
 		String delay = args[1];
 		String unit = args[2];
 
@@ -48,7 +48,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 		boolean isTimeUnit = Arrays.stream(ChronoUnit.values()).anyMatch(timeUnit -> timeUnit.name().equals(unit));
 
 		if (isNumericDelay && isTimeUnit) {
-			return ShutdownRequest.builder().delay(Integer.parseInt(delay)).unit(ChronoUnit.valueOf(unit)).build();
+			return ShutdownData.builder().delay(Integer.parseInt(delay)).unit(ChronoUnit.valueOf(unit)).build();
 		}
 
 		return null;
