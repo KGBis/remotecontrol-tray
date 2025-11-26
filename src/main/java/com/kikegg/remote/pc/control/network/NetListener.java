@@ -22,19 +22,15 @@ public class NetListener implements Runnable {
 
 	private ServerSocket serverSocket;
 
-    private boolean isDebug = false;
+	private boolean isDebug = false;
 
-	public NetListener() {
-		Runtime.getRuntime().addShutdownHook(new Thread(this::cleanUpOnSuspend));
+	public NetListener setTest(String[] args) {
+		if (ArrayUtils.isNotEmpty(args) && "--isDebug".equalsIgnoreCase(args[0])) {
+			isDebug = true;
+		}
+
+		return this;
 	}
-
-    public NetListener setTest(String[] args) {
-        if(ArrayUtils.isNotEmpty(args) && "--isDebug".equalsIgnoreCase(args[0])) {
-            isDebug = true;
-        }
-
-        return this;
-    }
 
 	@SuppressWarnings("InfiniteLoopStatement")
 	public void listen() throws IOException, ExecutionException, InterruptedException {
@@ -103,18 +99,6 @@ public class NetListener implements Runnable {
 		String clientMessage = inFromClient.readLine();
 		log.info("Socket message read: {}", clientMessage);
 		return clientMessage;
-	}
-
-	private void cleanUpOnSuspend() {
-		if (serverSocket != null && !serverSocket.isClosed()) {
-			try {
-				serverSocket.close();
-				log.info("Socket being closed for suspension/hibernanion");
-			}
-			catch (IOException e) {
-				log.error("Error:", e);
-			}
-		}
 	}
 
 }
