@@ -2,6 +2,7 @@ package com.kikegg.remote.pc.control.network;
 
 import com.kikegg.remote.pc.control.model.Action;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -21,9 +22,19 @@ public class NetListener implements Runnable {
 
 	private ServerSocket serverSocket;
 
+    private boolean isDebug = false;
+
 	public NetListener() {
 		Runtime.getRuntime().addShutdownHook(new Thread(this::cleanUpOnSuspend));
 	}
+
+    public NetListener setTest(String[] args) {
+        if(ArrayUtils.isNotEmpty(args) && "--isDebug".equalsIgnoreCase(args[0])) {
+            isDebug = true;
+        }
+
+        return this;
+    }
 
 	@SuppressWarnings("InfiniteLoopStatement")
 	public void listen() throws IOException, ExecutionException, InterruptedException {
@@ -75,7 +86,7 @@ public class NetListener implements Runnable {
 		NetworkAction netAction;
 		switch (action) {
 			case SHUTDOWN:
-				netAction = new ShutdownNetworkAction(socket, arguments);
+				netAction = new ShutdownNetworkAction(socket, arguments, isDebug);
 				break;
 			case INFO:
 				netAction = new InfoNetworkAction(socket, arguments);

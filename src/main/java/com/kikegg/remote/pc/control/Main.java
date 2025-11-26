@@ -15,7 +15,7 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			new TrayBuilder().loadTray();
-			new NetListener().listen();
+			new NetListener().setTest(args).listen();
 		}
 		catch (IOException | ExecutionException | InterruptedException e) {
 			log.error("Something bad happened. Please report the following error: ", e);

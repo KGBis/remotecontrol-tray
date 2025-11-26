@@ -16,8 +16,11 @@ import java.util.List;
 @Slf4j
 public class ShutdownNetworkAction extends NetworkAction {
 
-	public ShutdownNetworkAction(Socket socket, String[] args) {
+    private final boolean debug;
+
+	public ShutdownNetworkAction(Socket socket, String[] args, boolean isDebug) {
 		super(socket, args);
+        debug = isDebug;
 	}
 
 	@Override
@@ -37,7 +40,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 		// noinspection ConfusingArgumentToVarargsMethod
 		log.info("Executing -> {}", StringUtils.joinWith(" ", cmdLine));
 		writeToSocket(socket, "ACK");
-		Runtime.getRuntime().exec(cmdLine);
+		if(!debug) Runtime.getRuntime().exec(cmdLine);
 	}
 
 	private ShutdownData parseArguments() {
