@@ -1,4 +1,4 @@
-package com.kikegg.remote.pc.control.model;
+package com.kikegg.remote.pc.control.network.actions;
 
 import lombok.Builder;
 import lombok.Data;
@@ -6,7 +6,7 @@ import java.time.temporal.ChronoUnit;
 
 @Data
 @Builder
-public class ShutdownData {
+public class ShutdownNetworkActionData {
 
 	private Integer delay;
 

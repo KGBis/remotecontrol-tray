@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static com.kikegg.remote.pc.control.network.NetworkAction.getIPv4Addresses;
+import static com.kikegg.remote.pc.control.network.actions.NetworkAction.getIPv4Addresses;
 
 @Slf4j
 public class TrayActionListener implements ActionListener {
