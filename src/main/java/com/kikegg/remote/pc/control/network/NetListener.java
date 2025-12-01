@@ -27,6 +27,7 @@ public class NetListener implements Runnable {
 	public NetListener setTest(String[] args) {
 		if (ArrayUtils.isNotEmpty(args) && "--isDebug".equalsIgnoreCase(args[0])) {
 			isDebug = true;
+            log.debug("Executing in debug mode. No shutdown will be performed!");
 		}
 
 		return this;
