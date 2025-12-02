@@ -8,10 +8,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class NetworkChangeListener {
 
-    public interface NetworkChangeCallback {
-        void onNetworkChange(List<NetworkIF> activeInterfaces);
-    }
-
     private final SystemInfo systemInfo = new SystemInfo();
     private final List<NetworkChangeCallback> listeners = new CopyOnWriteArrayList<>();
     private Map<String, String> lastIpMacMap = new HashMap<>();

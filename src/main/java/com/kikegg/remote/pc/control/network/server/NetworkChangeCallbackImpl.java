@@ -10,7 +10,7 @@ import java.util.Map;
 
 @Slf4j
 @Getter
-public class NetworkChangeCallbackImpl implements NetworkChangeListener.NetworkChangeCallback {
+public class NetworkChangeCallbackImpl implements NetworkChangeCallback {
 
     private final Map<String, String> ipMacMap = new HashMap<>();
 

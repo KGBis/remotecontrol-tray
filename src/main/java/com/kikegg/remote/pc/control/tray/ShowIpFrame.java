@@ -1,5 +1,6 @@
 package com.kikegg.remote.pc.control.tray;
 
+import com.kikegg.remote.pc.control.network.server.NetworkChangeCallbackImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -11,7 +12,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.kikegg.remote.pc.control.Main.REMOTE_PC_CONTROL;
 
@@ -19,9 +21,9 @@ import static com.kikegg.remote.pc.control.Main.REMOTE_PC_CONTROL;
 public class ShowIpFrame implements FocusListener {
 
 	public static final String INFO_TEXT = "<html><span style=\"text-align: center;\">"
-			+ "By Enrique García (c) 2022  (kike.g.garcia at gmail.com)<br>"
+			+ "Version {VERSION} - (c) Enrique García (kike.g.garcia at gmail.com)<br>"
 			+ "Based on the 'RemoteShutdownPCServer' by Isah Rikovic (https://github.com/rikovicisah) (rikovicisah at gmail.com)"
-			+ "</span><p/><p/><span><b>Detected non-loopback IPs:</b><p>{IP_TEXT}<br><i>(IPs copied to clipboard)</i></span></html>";
+			+ "</span><p/><p/><span><b>Detected non-loopback IPs and MACs:</b><i> (copied to clipboard)</i><p>{IP_TEXT}</span></html>";
 
 	private final JFrame frame;
 
@@ -29,7 +31,10 @@ public class ShowIpFrame implements FocusListener {
 
 	private PopupMenu parentPopup;
 
-	ShowIpFrame() {
+	private final NetworkChangeCallbackImpl networkChangeCallback;
+
+	ShowIpFrame(NetworkChangeCallbackImpl networkChangeCallback) {
+		this.networkChangeCallback = networkChangeCallback;
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}
@@ -47,11 +52,13 @@ public class ShowIpFrame implements FocusListener {
 		frame.addFocusListener(this);
 	}
 
-	public void show(List<String> ipList, PopupMenu parent) {
+	public void show(PopupMenu parent) {
 		this.parentPopup = parent;
-		String ips = formatIpListToShow(ipList);
+		String ips = formatIpListToShow();
 
-		String text = Strings.CS.replace(INFO_TEXT, "{IP_TEXT}", ips);
+        String versionNumber = getClass().getPackage().getImplementationVersion();
+        String v = versionNumber == null ? "unknown" : versionNumber;
+		String text = Strings.CS.replace(Strings.CS.replace(INFO_TEXT, "{IP_TEXT}", ips), "{VERSION}", v);
 
 		EventQueue.invokeLater(() -> {
 			// remove old label, IP should not change but just in case...
@@ -67,11 +74,21 @@ public class ShowIpFrame implements FocusListener {
 			frame.setVisible(true);
 		});
 
-		copyToClipboard(ipList.toString());
+		copyToClipboard(networkChangeCallback.getIpMacMap().toString());
 	}
 
-	private String formatIpListToShow(List<String> ipList) {
-		return StringUtils.join(ipList, "<br>");
+	private String formatIpListToShow() {
+		Map<String, String> ipMacMap = networkChangeCallback.getIpMacMap();
+		String table = "<table><tr><th style=\"text-decoration: underline;\">IP</th>"
+				+ "<th style=\"text-decoration: underline;\">MAC</th></tr>";
+
+		String row = "<tr><td>%s</td><td>%s</td></tr>";
+		String data = ipMacMap.entrySet()
+			.stream()
+			.map(entry -> String.format(row, entry.getKey(), entry.getValue()))
+			.collect(Collectors.joining("\n"));
+
+		return StringUtils.join(table, data, "</table>");
 	}
 
 	private void copyToClipboard(String ip) {

@@ -15,8 +15,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			new TrayBuilder().loadTray();
-			new NetworkServer(6800, new NetworkInfoProvider(new NetworkChangeCallbackImpl())).setTest(args).start();
+            NetworkChangeCallbackImpl networkChangeCallback = new NetworkChangeCallbackImpl();
+            new TrayBuilder(networkChangeCallback).loadTray();
+            new NetworkServer(6800, new NetworkInfoProvider(networkChangeCallback)).setTest(args).start();
 		}
 		catch (IOException e) {
 			log.error("Something bad happened. Please report the following error: ", e);

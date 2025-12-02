@@ -1,5 +1,7 @@
 package com.kikegg.remote.pc.control.tray;
 
+import com.kikegg.remote.pc.control.network.server.NetworkChangeCallbackImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
@@ -7,8 +9,11 @@ import java.awt.event.ActionListener;
 
 import static com.kikegg.remote.pc.control.Main.REMOTE_PC_CONTROL;
 
+@RequiredArgsConstructor
 @Slf4j
 public class TrayBuilder {
+
+	private final NetworkChangeCallbackImpl networkChangeCallback;
 
 	@SuppressWarnings("UnusedReturnValue")
 	public TrayBuilder loadTray() {
@@ -18,7 +23,7 @@ public class TrayBuilder {
 			SystemTray tray = SystemTray.getSystemTray();
 
 			// to listen for default action executed on the tray icon
-			ActionListener listener = new TrayActionListener();
+			ActionListener listener = new TrayActionListener(networkChangeCallback);
 
 			// create a popup menu
 			PopupMenu popup = new PopupMenu();

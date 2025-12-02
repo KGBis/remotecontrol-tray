@@ -1,20 +1,19 @@
 package com.kikegg.remote.pc.control.tray;
 
+import com.kikegg.remote.pc.control.network.server.NetworkChangeCallbackImpl;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static com.kikegg.remote.pc.control.network.actions.NetworkAction.getIPv4Addresses;
-
 @Slf4j
 public class TrayActionListener implements ActionListener {
 
 	private final ShowIpFrame ipFrame;
 
-	TrayActionListener() {
-		ipFrame = new ShowIpFrame();
+	TrayActionListener(NetworkChangeCallbackImpl networkChangeCallback) {
+		ipFrame = new ShowIpFrame(networkChangeCallback);
 	}
 
 	@Override
@@ -29,7 +28,7 @@ public class TrayActionListener implements ActionListener {
 				System.exit(0);
 				break;
 			case "IP_CMD":
-				ipFrame.show(getIPv4Addresses(), parent);
+				ipFrame.show(parent);
 				break;
 			default:
 				break;

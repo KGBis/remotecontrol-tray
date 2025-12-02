@@ -35,6 +35,7 @@ public class NetworkServer {
 	public NetworkServer(int port, NetworkInfoProvider networkInfoProvider) {
 		this.port = port;
 		this.networkInfoProvider = networkInfoProvider;
+		registerNetworkCallback(networkInfoProvider.getCallback());
 	}
 
 	public NetworkServer setTest(String[] args) {
@@ -125,6 +126,24 @@ public class NetworkServer {
 				// ignored
 			}
 		}
+	}
+
+	private void registerNetworkCallback(NetworkChangeCallbackImpl networkChangeCallback) {
+		NetworkChangeListener listener = new NetworkChangeListener(1000);
+		listener.addListener(networkChangeCallback);
+
+		log.info("Starting NetworkChangeListener");
+		listener.start();
+
+		// register shutdown hook to remove listener daemon
+		log.info("Registering shutdown hook");
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			log.debug("Removing networkChangeCallback listener");
+			listener.removeListener(networkChangeCallback);
+			listener.stop();
+			log.debug("Stopping NetworkServer");
+			stop();
+		}, "ShutdownHook"));
 	}
 
 }
