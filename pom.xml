@@ -6,7 +6,7 @@
 
     <groupId>com.kikegg</groupId>
     <artifactId>remote-pc-control-tray</artifactId>
-    <version>2025.12.02.1</version> <!-- yyyy.MM.dd.commit-number -->
+    <version>2025.12.02.2</version> <!-- yyyy.MM.dd.commit-number -->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
