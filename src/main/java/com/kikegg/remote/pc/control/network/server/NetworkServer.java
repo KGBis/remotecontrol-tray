@@ -4,6 +4,7 @@ import com.kikegg.remote.pc.control.network.actions.NetworkAction;
 import com.kikegg.remote.pc.control.network.actions.NetworkActionFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,7 +72,7 @@ public class NetworkServer {
 				}
 			}
 			cleanup();
-		});
+		}, "socket-thread");
 
 		serverThread.start();
 	}
@@ -109,7 +110,7 @@ public class NetworkServer {
 			String message = br.readLine();
 			log.info("Received message: {}", message);
 
-			String[] args = message.split(" ");
+			String[] args = StringUtils.split(message, " ");
 			NetworkAction action = NetworkActionFactory.createAction(args, socket, networkInfoProvider, isDebug);
 			action.execute();
 		}
