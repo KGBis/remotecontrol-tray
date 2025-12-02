@@ -1,13 +1,13 @@
-package com.kikegg.remote.pc.control.tray;
+package io.github.kgbis.remotecontrol.tray.ui;
 
-import com.kikegg.remote.pc.control.network.server.NetworkChangeCallbackImpl;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallbackImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-import static com.kikegg.remote.pc.control.Main.REMOTE_PC_CONTROL;
+import static io.github.kgbis.remotecontrol.tray.Main.REMOTE_PC_CONTROL;
 
 @RequiredArgsConstructor
 @Slf4j

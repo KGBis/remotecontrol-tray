@@ -1,6 +1,6 @@
-package com.kikegg.remote.pc.control.network.actions;
+package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import com.kikegg.remote.pc.control.network.server.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;

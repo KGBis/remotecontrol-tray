@@ -1,6 +1,6 @@
-package com.kikegg.remote.pc.control.network.actions;
+package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import com.kikegg.remote.pc.control.network.server.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.DataOutputStream;
@@ -28,7 +28,7 @@ public abstract class NetworkAction {
 
 	public abstract void execute() throws IOException;
 
-    protected abstract <T> T parseArguments();
+	protected abstract <T> T parseArguments();
 
 	void writeToSocket(Socket socket, String message) throws IOException {
 		DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());

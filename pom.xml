@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.kikegg</groupId>
-    <artifactId>remote-pc-control-tray</artifactId>
+    <groupId>io.github.kgbis</groupId>
+    <artifactId>remotecontrol-tray</artifactId>
     <version>2025.12.02.3</version> <!-- yyyy.MM.dd.commit-number -->
 
     <properties>
@@ -79,7 +79,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.kikegg.remote.pc.control.Main</mainClass>
+                            <mainClass>io.github.kgbis.remotecontrol.tray.Main</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                         </manifest>

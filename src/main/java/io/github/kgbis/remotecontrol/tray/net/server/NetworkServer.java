@@ -1,7 +1,10 @@
-package com.kikegg.remote.pc.control.network.server;
+package io.github.kgbis.remotecontrol.tray.net.server;
 
-import com.kikegg.remote.pc.control.network.actions.NetworkAction;
-import com.kikegg.remote.pc.control.network.actions.NetworkActionFactory;
+import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
+import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallbackImpl;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;

@@ -1,4 +1,4 @@
-package com.kikegg.remote.pc.control.network.actions;
+package io.github.kgbis.remotecontrol.tray.net.actions;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.kikegg.remote.pc.control.tray;
+package io.github.kgbis.remotecontrol.tray.ui;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.kikegg.remote.pc.control.network.server;
+package io.github.kgbis.remotecontrol.tray.net.info;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

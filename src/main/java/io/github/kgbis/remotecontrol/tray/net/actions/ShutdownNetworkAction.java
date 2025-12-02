@@ -1,6 +1,6 @@
-package com.kikegg.remote.pc.control.network.actions;
+package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import com.kikegg.remote.pc.control.network.server.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -51,7 +51,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 		}
 	}
 
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	protected ShutdownNetworkActionData parseArguments() {
 		if (args.length < 3)
 			return null;

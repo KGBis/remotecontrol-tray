@@ -1,6 +1,6 @@
-package com.kikegg.remote.pc.control.tray;
+package io.github.kgbis.remotecontrol.tray.ui;
 
-import com.kikegg.remote.pc.control.network.server.NetworkChangeCallbackImpl;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallbackImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -15,7 +15,7 @@ import java.awt.event.FocusListener;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.kikegg.remote.pc.control.Main.REMOTE_PC_CONTROL;
+import static io.github.kgbis.remotecontrol.tray.Main.REMOTE_PC_CONTROL;
 
 @Slf4j
 public class ShowIpFrame implements FocusListener {
@@ -56,8 +56,8 @@ public class ShowIpFrame implements FocusListener {
 		this.parentPopup = parent;
 		String ips = formatIpListToShow();
 
-        String versionNumber = getClass().getPackage().getImplementationVersion();
-        String v = versionNumber == null ? "unknown" : versionNumber;
+		String versionNumber = getClass().getPackage().getImplementationVersion();
+		String v = versionNumber == null ? "-DEBUG MODE-" : versionNumber;
 		String text = Strings.CS.replace(Strings.CS.replace(INFO_TEXT, "{IP_TEXT}", ips), "{VERSION}", v);
 
 		EventQueue.invokeLater(() -> {
