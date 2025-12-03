@@ -36,7 +36,7 @@ public class NetworkChangeListener {
 		if (running)
 			return;
 		running = true;
-		monitorThread = new Thread(this::monitorLoop, "NetworkChangeListener");
+		monitorThread = new Thread(this::monitorLoop, "net-info-poller");
 		monitorThread.setDaemon(true);
 		monitorThread.start();
 	}

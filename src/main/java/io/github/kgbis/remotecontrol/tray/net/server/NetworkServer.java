@@ -12,18 +12,18 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class NetworkServer {
 
 	private final int port;
 
-	private final ExecutorService executor = Executors.newCachedThreadPool();
+	// Fixed pool to avoid thread destruction/creation
+	private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
 	private final NetworkInfoProvider networkInfoProvider;
 
@@ -49,53 +49,101 @@ public class NetworkServer {
 		return this;
 	}
 
-	public void start() throws IOException {
+	public synchronized void start() throws IOException {
 		if (running) {
-			return; // avoid a restart
+			return;
 		}
 
 		running = true;
 
-		serverSocket = new ServerSocket(port);
-		serverSocket.setSoTimeout(1000); // 1 second to check if running
+		serverSocket = new ServerSocket();
+		// Enable SO_REUSEADDR socket option (important for Windows)
+		serverSocket.setReuseAddress(true);
+		serverSocket.bind(new InetSocketAddress(port));
+		serverSocket.setSoTimeout(1000);
+
 		log.info("NetworkServer listening on port {}", port);
 
-		serverThread = new Thread(() -> {
-			while (running) {
-				try {
-					Socket socket = serverSocket.accept();
-					executor.submit(() -> handleClient(socket));
-				}
-				catch (SocketTimeoutException ignored) {
-					// Timeout to check "running"
-				}
-				catch (IOException e) {
-					if (running) {
-						log.error("Error accepting connection", e);
-					}
-				}
-			}
-			cleanup();
-		}, "socket-thread");
-
+		serverThread = new Thread(this::socketLoop, "socket-thread");
 		serverThread.start();
 	}
 
-	@SuppressWarnings("unused")
-	public void stop() {
+	private void socketLoop() {
+		while (running) {
+			try {
+				Socket socket = serverSocket.accept();
+				log.debug("Connection accepted from {}", socket.getRemoteSocketAddress());
+
+				executor.submit(() -> handleClient(socket));
+
+			}
+			catch (SocketTimeoutException ignored) {
+				// just to re-evaluate "running" state
+			}
+			catch (SocketException e) {
+				logSocketError(e);
+			}
+			catch (IOException e) {
+				log.error("I/O error in accept()", e);
+			}
+		}
+
+		log.debug("Server loop finished. Starting cleanup()");
+		cleanup();
+	}
+
+	private void logSocketError(SocketException e) {
+		if (running) {
+			log.error("Socket exception (still running)", e);
+		}
+		else {
+			log.debug("Socket closed during shutdown");
+		}
+	}
+
+	public synchronized void stop() {
+		if (!running) {
+			return;
+		}
+
 		running = false;
+		log.info("Stopping NetworkServer...");
+
+		// 1) Close socket to wake up accept()
 		try {
 			if (serverSocket != null && !serverSocket.isClosed()) {
-				serverSocket.close(); // force accept() to throw IOException
+				serverSocket.close();
 			}
-			if (serverThread != null) {
-				serverThread.join(); // wait to end
+		}
+		catch (IOException e) {
+			log.warn("Error closing ServerSocket", e);
+		}
+
+		// 2) Wait for server thread
+		if (serverThread != null) {
+			try {
+				serverThread.join(2000);
 			}
-			log.info("NetworkServer stopped.");
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				log.warn("Interrupted while joining serverThread");
+			}
 		}
-		catch (IOException | InterruptedException e) { // NOSONAR
-			log.error("Error stopping server", e);
+
+		// 3) Apagar el executor
+		executor.shutdown();
+		try {
+			if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+				log.warn("Executor did not terminate, forcing shutdownNow()");
+				executor.shutdownNow();
+			}
 		}
+		catch (InterruptedException e) {
+			executor.shutdownNow();
+			Thread.currentThread().interrupt();
+		}
+
+		log.info("NetworkServer stopped.");
 	}
 
 	private void cleanup() {
@@ -105,47 +153,48 @@ public class NetworkServer {
 			}
 		}
 		catch (IOException e) {
-			log.error("Error during cleanup", e);
+			log.warn("Error during cleanup", e);
 		}
 	}
 
 	private void handleClient(Socket socket) {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-			String message = br.readLine();
-			log.info("Received message: {}", message);
+			try {
+				String message = br.readLine();
+				log.info("Received message: {}", message);
 
-			String[] args = StringUtils.split(message, " ");
-			NetworkAction action = NetworkActionFactory.createAction(args, socket, networkInfoProvider, isDebug);
-			action.execute();
+				String[] args = StringUtils.split(message, " ");
+				NetworkAction action = NetworkActionFactory.createAction(args, socket, networkInfoProvider, isDebug);
+
+				action.execute();
+			}
+			finally {
+				socket.close();
+			}
 		}
 		catch (Exception e) {
 			log.error("Error handling client", e);
 		}
-		finally {
-			try {
-				socket.close();
-			}
-			catch (IOException ignored) {
-				// ignored
-			}
-		}
 	}
 
-	private void registerNetworkCallback(NetworkChangeCallbackImpl networkChangeCallback) {
-		NetworkChangeListener listener = new NetworkChangeListener(1000);
+	private void registerNetworkCallback(final NetworkChangeCallbackImpl networkChangeCallback) {
+		final NetworkChangeListener listener = new NetworkChangeListener(1000);
 		listener.addListener(networkChangeCallback);
 
 		log.info("Starting NetworkChangeListener");
 		listener.start();
 
-		// register shutdown hook to remove listener daemon
-		log.info("Registering shutdown hook");
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			log.debug("Removing networkChangeCallback listener");
+			log.debug("ShutdownHook -> stopping listener and server");
 			listener.removeListener(networkChangeCallback);
 			listener.stop();
-			log.debug("Stopping NetworkServer");
-			stop();
+
+			try {
+				NetworkServer.this.stop();
+			}
+			catch (Exception e) {
+				log.warn("Error stopping from ShutdownHook. Nothing to worry about: {}", e.getMessage());
+			}
 		}, "ShutdownHook"));
 	}
 
