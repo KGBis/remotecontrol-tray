@@ -1,87 +1,48 @@
 package io.github.kgbis.remotecontrol.tray.net.info;
 
-import oshi.SystemInfo;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import oshi.hardware.NetworkIF;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class NetworkChangeListener {
 
-	private final SystemInfo systemInfo = new SystemInfo();
+	@Getter
+	private final Map<String, String> ipMacMap = new ConcurrentHashMap<>();
 
-	private final List<NetworkChangeCallback> listeners = new CopyOnWriteArrayList<>();
+	private final CountDownLatch initialized = new CountDownLatch(1);
 
-	private Map<String, String> lastIpMacMap = new HashMap<>();
-
-	private final int pollIntervalMs;
-
-	private Thread monitorThread;
-
-	private volatile boolean running = false;
-
-	public NetworkChangeListener(int pollIntervalMs) {
-		this.pollIntervalMs = pollIntervalMs;
-	}
-
-	public void addListener(NetworkChangeCallback callback) {
-		listeners.add(callback);
-	}
-
-	public void removeListener(NetworkChangeCallback callback) {
-		listeners.remove(callback);
-	}
-
-	public void start() {
-		if (running)
-			return;
-		running = true;
-		monitorThread = new Thread(this::monitorLoop, "net-info-poller");
-		monitorThread.setDaemon(true);
-		monitorThread.start();
-	}
-
-	public void stop() {
-		running = false;
-		if (monitorThread != null)
-			monitorThread.interrupt();
-	}
-
-	@SuppressWarnings("BusyWait")
-	private void monitorLoop() {
-		while (running) {
-			try {
-				List<NetworkIF> activeInterfaces = getActiveInterfaces();
-				Map<String, String> currentIpMacMap = new HashMap<>();
-				for (NetworkIF net : activeInterfaces) {
-					for (String ip : net.getIPv4addr()) {
-						currentIpMacMap.put(ip, net.getMacaddr());
-					}
-				}
-
-				if (!currentIpMacMap.equals(lastIpMacMap)) {
-					lastIpMacMap = currentIpMacMap;
-					for (NetworkChangeCallback listener : listeners) {
-						listener.onNetworkChange(activeInterfaces);
-					}
-				}
-
-				Thread.sleep(pollIntervalMs);
+	public void onNetworkChange(List<NetworkIF> activeInterfaces) {
+		Map<String, String> newMap = new HashMap<>();
+		activeInterfaces.forEach(net -> {
+			for (String ip : net.getIPv4addr()) {
+				newMap.put(ip, net.getMacaddr());
 			}
-			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
+		});
+		ipMacMap.clear();
+		ipMacMap.putAll(newMap);
+
+		ipMacMap.forEach((ip, mac) -> log.info("Detected IP {} bound to MAC addres {}", ip, mac));
+
+		if (!ipMacMap.isEmpty()) {
+			initialized.countDown();
 		}
 	}
 
-	private List<NetworkIF> getActiveInterfaces() {
-		List<NetworkIF> result = new ArrayList<>();
-		for (NetworkIF net : systemInfo.getHardware().getNetworkIFs()) {
-			boolean hasIPv4 = Arrays.stream(net.getIPv4addr()).anyMatch(ip -> !ip.isEmpty());
-			if (hasIPv4)
-				result.add(net);
+	public void awaitInitialization(long timeoutMs) throws InterruptedException {
+		if (!initialized.await(timeoutMs, TimeUnit.MILLISECONDS)) {
+			log.warn("No network interfaces discovered within {} ms. Continuing anyway.", timeoutMs);
 		}
-		return result;
+		else {
+			log.debug("Network interfaces discovered");
+		}
 	}
 
 }

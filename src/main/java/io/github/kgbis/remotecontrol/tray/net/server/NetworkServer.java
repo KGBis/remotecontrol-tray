@@ -3,8 +3,8 @@ package io.github.kgbis.remotecontrol.tray.net.server;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallback;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -177,16 +177,16 @@ public class NetworkServer {
 		}
 	}
 
-	private void registerNetworkCallback(final NetworkChangeCallback networkChangeCallback) {
-		final NetworkChangeListener listener = new NetworkChangeListener(POLL_INTERVAL_MS);
-		listener.addListener(networkChangeCallback);
+	private void registerNetworkCallback(final NetworkChangeListener networkChangeListener) {
+		final NetworkChangeRegistrar listener = new NetworkChangeRegistrar(POLL_INTERVAL_MS);
+		listener.addListener(networkChangeListener);
 
 		log.info("Listening for network interfaces changes");
 		listener.start();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			log.debug("Stopping listener and server");
-			listener.removeListener(networkChangeCallback);
+			listener.removeListener(networkChangeListener);
 			listener.stop();
 
 			try {

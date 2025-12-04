@@ -13,7 +13,7 @@ import java.util.List;
 public class NetworkInfoProvider {
 
 	@Getter
-	private final NetworkChangeCallback callback;
+	private final NetworkChangeListener callback;
 
 	public String getMac(String ip) {
 		return callback.getIpMacMap().getOrDefault(ip, "");

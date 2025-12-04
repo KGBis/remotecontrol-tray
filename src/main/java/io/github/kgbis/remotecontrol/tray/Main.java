@@ -5,7 +5,7 @@ import ch.qos.logback.classic.LoggerContext;
 import com.beust.jcommander.ParameterException;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.cli.CliParser;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallback;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
 import io.github.kgbis.remotecontrol.tray.ui.TrayBuilder;
@@ -23,9 +23,9 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			CliArguments cliArguments = readArgsAndSetLogLevelIfNeeded(args);
-			NetworkChangeCallback networkChangeCallback = new NetworkChangeCallback();
-			new TrayBuilder(networkChangeCallback).loadTray();
-			new NetworkServer(new NetworkInfoProvider(networkChangeCallback)).arguments(cliArguments).start();
+			NetworkChangeListener networkChangeListener = new NetworkChangeListener();
+			new TrayBuilder(networkChangeListener).loadTray();
+			new NetworkServer(new NetworkInfoProvider(networkChangeListener)).arguments(cliArguments).start();
 		}
 		catch (IOException | InterruptedException e) {
 			log.error("Something bad happened. Please report the following error: ", e);

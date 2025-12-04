@@ -1,6 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallback;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +13,7 @@ import static io.github.kgbis.remotecontrol.tray.Main.REMOTE_PC_CONTROL;
 @Slf4j
 public class TrayBuilder {
 
-	private final NetworkChangeCallback networkChangeCallback;
+	private final NetworkChangeListener networkChangeListener;
 
 	@SuppressWarnings("UnusedReturnValue")
 	public TrayBuilder loadTray() {
@@ -23,7 +23,7 @@ public class TrayBuilder {
 			SystemTray tray = SystemTray.getSystemTray();
 
 			// to listen for default action executed on the tray icon
-			ActionListener listener = new TrayActionListener(networkChangeCallback);
+			ActionListener listener = new TrayActionListener(networkChangeListener);
 
 			// create a popup menu
 			PopupMenu popup = new PopupMenu();

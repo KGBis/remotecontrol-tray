@@ -1,6 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallback;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -31,10 +31,10 @@ public class ShowIpFrame implements FocusListener {
 
 	private PopupMenu parentPopup;
 
-	private final NetworkChangeCallback networkChangeCallback;
+	private final NetworkChangeListener networkChangeListener;
 
-	ShowIpFrame(NetworkChangeCallback networkChangeCallback) {
-		this.networkChangeCallback = networkChangeCallback;
+	ShowIpFrame(NetworkChangeListener networkChangeListener) {
+		this.networkChangeListener = networkChangeListener;
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}
@@ -74,11 +74,11 @@ public class ShowIpFrame implements FocusListener {
 			frame.setVisible(true);
 		});
 
-		copyToClipboard(networkChangeCallback.getIpMacMap().toString());
+		copyToClipboard(networkChangeListener.getIpMacMap().toString());
 	}
 
 	private String formatIpListToShow() {
-		Map<String, String> ipMacMap = networkChangeCallback.getIpMacMap();
+		Map<String, String> ipMacMap = networkChangeListener.getIpMacMap();
 		String table = "<table><tr><th style=\"text-decoration: underline;\">IP</th>"
 				+ "<th style=\"text-decoration: underline;\">MAC</th></tr>";
 

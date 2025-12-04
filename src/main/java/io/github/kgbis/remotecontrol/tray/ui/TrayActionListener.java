@@ -1,6 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallback;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
@@ -12,8 +12,8 @@ public class TrayActionListener implements ActionListener {
 
 	private final ShowIpFrame ipFrame;
 
-	TrayActionListener(NetworkChangeCallback networkChangeCallback) {
-		ipFrame = new ShowIpFrame(networkChangeCallback);
+	TrayActionListener(NetworkChangeListener networkChangeListener) {
+		ipFrame = new ShowIpFrame(networkChangeListener);
 	}
 
 	@Override
