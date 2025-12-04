@@ -11,7 +11,7 @@ import java.net.Socket;
 public class NetworkActionFactory {
 
 	public static NetworkAction createAction(String[] remoteCommand, Socket socket, NetworkInfoProvider provider,
-			boolean isDebug) {
+			boolean isDryRun) {
 		// TODO: See if "ACK" option is worth or better to reuse "INFO"
 		if (ArrayUtils.isEmpty(remoteCommand)) {
 			remoteCommand = new String[] { "ACK" };
@@ -21,7 +21,7 @@ public class NetworkActionFactory {
 			case "INFO":
 				return new InfoNetworkAction(socket, remoteCommand, provider);
 			case "SHUTDOWN":
-				return new ShutdownNetworkAction(socket, remoteCommand, provider, isDebug);
+				return new ShutdownNetworkAction(socket, remoteCommand, provider, isDryRun);
 			case "ACK":
 			default:
 				return new AckNetworkAction(socket, remoteCommand, provider);

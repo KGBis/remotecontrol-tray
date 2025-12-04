@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true" scanPeriod="30 seconds">
+<configuration> <!-- scan="true" scanPeriod="30 seconds">-->
 
     <!-- default log level or -DLOG_LEVEL=<level> -->
     <property name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}"/>

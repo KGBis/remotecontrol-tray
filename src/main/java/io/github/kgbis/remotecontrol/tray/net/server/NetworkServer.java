@@ -1,12 +1,12 @@
 package io.github.kgbis.remotecontrol.tray.net.server;
 
+import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallbackImpl;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NetworkServer {
 
-	private final int port;
+	public static final int PORT = 6800;
 
 	// Fixed pool to avoid thread destruction/creation
 	private final ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -29,22 +29,21 @@ public class NetworkServer {
 
 	private volatile boolean running = false;
 
-	private boolean isDebug = false;
+	private Boolean isDryRun;
 
 	private ServerSocket serverSocket;
 
 	private Thread serverThread;
 
-	public NetworkServer(int port, NetworkInfoProvider networkInfoProvider) {
-		this.port = port;
+	public NetworkServer(NetworkInfoProvider networkInfoProvider) {
 		this.networkInfoProvider = networkInfoProvider;
 		registerNetworkCallback(networkInfoProvider.getCallback());
 	}
 
-	public NetworkServer setTest(String[] args) {
-		if (ArrayUtils.isNotEmpty(args) && "--isDebug".equalsIgnoreCase(args[0])) {
-			isDebug = true;
-			log.debug("Executing in debug mode. No shutdown will be performed!");
+	public NetworkServer arguments(CliArguments args) {
+		isDryRun = args.isDryRun();
+		if (args.isDryRun()) {
+			log.debug("Executing in DryRun mode. No shutdown will be performed!");
 		}
 		return this;
 	}
@@ -59,14 +58,54 @@ public class NetworkServer {
 		serverSocket = new ServerSocket();
 		// Enable SO_REUSEADDR socket option (important for Windows)
 		serverSocket.setReuseAddress(true);
-		serverSocket.bind(new InetSocketAddress(port));
+		serverSocket.bind(new InetSocketAddress(PORT));
 		serverSocket.setSoTimeout(1000);
 
-		log.info("NetworkServer listening on port {}", port);
+		log.info("NetworkServer listening on port {}", PORT);
 
 		serverThread = new Thread(this::socketLoop, "socket-thread");
 		serverThread.start();
 	}
+
+	public synchronized void stop() {
+		if (!running) {
+			return;
+		}
+
+		running = false;
+		log.info("Stopping NetworkServer...");
+
+		// 1) Close socket to wake up accept()
+		closeSocket();
+
+		// 2) Wait for server thread
+		if (serverThread != null) {
+			try {
+				serverThread.join(2000);
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				log.warn("Interrupted while joining serverThread");
+			}
+		}
+
+		// 3) Executor shutdown
+		executor.shutdown();
+		try {
+			if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+				log.warn("Executor did not terminate, forcing shutdownNow()");
+				executor.shutdownNow();
+			}
+		}
+		catch (InterruptedException e) {
+			executor.shutdownNow();
+			Thread.currentThread().interrupt();
+		}
+
+		log.info("NetworkServer stopped.");
+	}
+
+	/* private methods */
 
 	private void socketLoop() {
 		while (running) {
@@ -89,7 +128,7 @@ public class NetworkServer {
 		}
 
 		log.debug("Server loop finished. Starting cleanup()");
-		cleanup();
+		closeSocket();
 	}
 
 	private void logSocketError(SocketException e) {
@@ -101,15 +140,7 @@ public class NetworkServer {
 		}
 	}
 
-	public synchronized void stop() {
-		if (!running) {
-			return;
-		}
-
-		running = false;
-		log.info("Stopping NetworkServer...");
-
-		// 1) Close socket to wake up accept()
+	private void closeSocket() {
 		try {
 			if (serverSocket != null && !serverSocket.isClosed()) {
 				serverSocket.close();
@@ -117,43 +148,6 @@ public class NetworkServer {
 		}
 		catch (IOException e) {
 			log.warn("Error closing ServerSocket", e);
-		}
-
-		// 2) Wait for server thread
-		if (serverThread != null) {
-			try {
-				serverThread.join(2000);
-			}
-			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				log.warn("Interrupted while joining serverThread");
-			}
-		}
-
-		// 3) Apagar el executor
-		executor.shutdown();
-		try {
-			if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
-				log.warn("Executor did not terminate, forcing shutdownNow()");
-				executor.shutdownNow();
-			}
-		}
-		catch (InterruptedException e) {
-			executor.shutdownNow();
-			Thread.currentThread().interrupt();
-		}
-
-		log.info("NetworkServer stopped.");
-	}
-
-	private void cleanup() {
-		try {
-			if (serverSocket != null && !serverSocket.isClosed()) {
-				serverSocket.close();
-			}
-		}
-		catch (IOException e) {
-			log.warn("Error during cleanup", e);
 		}
 	}
 
@@ -164,7 +158,7 @@ public class NetworkServer {
 				log.info("Received message: {}", message);
 
 				String[] args = StringUtils.split(message, " ");
-				NetworkAction action = NetworkActionFactory.createAction(args, socket, networkInfoProvider, isDebug);
+				NetworkAction action = NetworkActionFactory.createAction(args, socket, networkInfoProvider, isDryRun);
 
 				action.execute();
 			}

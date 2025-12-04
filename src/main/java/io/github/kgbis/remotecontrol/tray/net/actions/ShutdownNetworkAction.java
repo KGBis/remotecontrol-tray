@@ -16,11 +16,11 @@ import java.util.List;
 @Slf4j
 public class ShutdownNetworkAction extends NetworkAction {
 
-	private final boolean debug;
+	private final boolean isDryRun;
 
-	public ShutdownNetworkAction(Socket socket, String[] args, NetworkInfoProvider provider, boolean debug) {
+	public ShutdownNetworkAction(Socket socket, String[] args, NetworkInfoProvider provider, boolean isDryRun) {
 		super(socket, args, provider);
-		this.debug = debug;
+		this.isDryRun = isDryRun;
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 		ShutdownNetworkActionData request = parseArguments();
 		if (request == null) {
 			log.warn("Request arguments are wrong. args={}", Arrays.toString(args));
-			writeToSocket(socket, "ERROR: invalid arguments");
+			writeToSocket(socket, "ERROR invalid arguments");
 			return;
 		}
 
@@ -38,7 +38,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 		log.info("Executing shutdown -> {}", StringUtils.join(cmdLine, " "));
 		writeToSocket(socket, "ACK");
 
-		if (!debug) {
+		if (!isDryRun) {
 			try {
 				Runtime.getRuntime().exec(cmdLine);
 			}
@@ -47,7 +47,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 			}
 		}
 		else {
-			log.info("Debug mode ON: shutdown not executed");
+			log.info("DryRun mode ON: shutdown not executed");
 		}
 	}
 
