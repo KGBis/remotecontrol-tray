@@ -3,7 +3,7 @@ package io.github.kgbis.remotecontrol.tray.net.server;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallbackImpl;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallback;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 public class NetworkServer {
 
 	public static final int PORT = 6800;
+
+	public static final int POLL_INTERVAL_MS = 1000;
 
 	// Fixed pool to avoid thread destruction/creation
 	private final ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -48,7 +50,11 @@ public class NetworkServer {
 		return this;
 	}
 
-	public synchronized void start() throws IOException {
+	public synchronized void start() throws IOException, InterruptedException {
+		// wait until NetworkInfoProvider has initialized
+        networkInfoProvider.awaitInitialization();
+
+		// Already running. Don't want to start again
 		if (running) {
 			return;
 		}
@@ -59,7 +65,7 @@ public class NetworkServer {
 		// Enable SO_REUSEADDR socket option (important for Windows)
 		serverSocket.setReuseAddress(true);
 		serverSocket.bind(new InetSocketAddress(PORT));
-		serverSocket.setSoTimeout(1000);
+		serverSocket.setSoTimeout(POLL_INTERVAL_MS);
 
 		log.info("NetworkServer listening on port {}", PORT);
 
@@ -171,15 +177,15 @@ public class NetworkServer {
 		}
 	}
 
-	private void registerNetworkCallback(final NetworkChangeCallbackImpl networkChangeCallback) {
-		final NetworkChangeListener listener = new NetworkChangeListener(1000);
+	private void registerNetworkCallback(final NetworkChangeCallback networkChangeCallback) {
+		final NetworkChangeListener listener = new NetworkChangeListener(POLL_INTERVAL_MS);
 		listener.addListener(networkChangeCallback);
 
-		log.info("Starting NetworkChangeListener");
+		log.info("Listening for network interfaces changes");
 		listener.start();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			log.debug("ShutdownHook -> stopping listener and server");
+			log.debug("Stopping listener and server");
 			listener.removeListener(networkChangeCallback);
 			listener.stop();
 
@@ -189,7 +195,7 @@ public class NetworkServer {
 			catch (Exception e) {
 				log.warn("Error stopping from ShutdownHook. Nothing to worry about: {}", e.getMessage());
 			}
-		}, "ShutdownHook"));
+		}, "shutdown-hook"));
 	}
 
 }

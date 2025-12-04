@@ -1,6 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallbackImpl;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallback;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -31,9 +31,9 @@ public class ShowIpFrame implements FocusListener {
 
 	private PopupMenu parentPopup;
 
-	private final NetworkChangeCallbackImpl networkChangeCallback;
+	private final NetworkChangeCallback networkChangeCallback;
 
-	ShowIpFrame(NetworkChangeCallbackImpl networkChangeCallback) {
+	ShowIpFrame(NetworkChangeCallback networkChangeCallback) {
 		this.networkChangeCallback = networkChangeCallback;
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

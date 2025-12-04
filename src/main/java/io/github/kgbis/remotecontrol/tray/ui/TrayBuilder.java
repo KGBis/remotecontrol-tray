@@ -1,6 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallbackImpl;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeCallback;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,7 +13,7 @@ import static io.github.kgbis.remotecontrol.tray.Main.REMOTE_PC_CONTROL;
 @Slf4j
 public class TrayBuilder {
 
-	private final NetworkChangeCallbackImpl networkChangeCallback;
+	private final NetworkChangeCallback networkChangeCallback;
 
 	@SuppressWarnings("UnusedReturnValue")
 	public TrayBuilder loadTray() {

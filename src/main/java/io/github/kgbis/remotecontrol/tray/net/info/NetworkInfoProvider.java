@@ -13,7 +13,7 @@ import java.util.List;
 public class NetworkInfoProvider {
 
 	@Getter
-	private final NetworkChangeCallbackImpl callback;
+	private final NetworkChangeCallback callback;
 
 	public String getMac(String ip) {
 		return callback.getIpMacMap().getOrDefault(ip, "");
@@ -27,6 +27,11 @@ public class NetworkInfoProvider {
 			return ip;
 		}
 	}
+
+    public void awaitInitialization() throws InterruptedException {
+        log.debug("Waiting for network interfaces discovery");
+        callback.awaitInitialization(5000);
+    }
 
 	public List<String> getIPv4Addresses() {
 		return new ArrayList<>(callback.getIpMacMap().keySet());
