@@ -39,7 +39,7 @@
     <!-- Root logger -->
     <root level="${LOG_LEVEL}">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+        <!--<appender-ref ref="FILE"/>--> <!-- not yet, let's see where to put logs -->
     </root>
 
 </configuration>
