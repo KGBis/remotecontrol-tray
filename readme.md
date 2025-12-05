@@ -71,7 +71,7 @@ if you want to keep the project's versioning pattern.
 
 set -e
 
-echo el 
+echo "[pre-commit] Updating version..."
 
 # Current date
 DATE=$(date +"%Y.%m.%d")
