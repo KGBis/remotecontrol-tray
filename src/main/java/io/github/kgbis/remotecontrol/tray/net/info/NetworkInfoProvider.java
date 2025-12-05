@@ -30,7 +30,7 @@ public class NetworkInfoProvider {
 
     public void awaitInitialization() throws InterruptedException {
         log.debug("Waiting for network interfaces discovery");
-        callback.awaitInitialization(5000);
+        callback.awaitInitialization(10000);
     }
 
 	public List<String> getIPv4Addresses() {

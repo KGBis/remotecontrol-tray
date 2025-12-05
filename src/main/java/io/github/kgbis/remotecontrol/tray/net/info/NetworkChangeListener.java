@@ -29,7 +29,7 @@ public class NetworkChangeListener {
 		ipMacMap.clear();
 		ipMacMap.putAll(newMap);
 
-		ipMacMap.forEach((ip, mac) -> log.info("Detected IP {} bound to MAC addres {}", ip, mac));
+		ipMacMap.forEach((ip, mac) -> log.info("Detected IP {} bound to MAC address {}", ip, mac));
 
 		if (!ipMacMap.isEmpty()) {
 			initialized.countDown();

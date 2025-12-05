@@ -3,7 +3,7 @@ package io.github.kgbis.remotecontrol.tray;
 import com.beust.jcommander.ParameterException;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.cli.CliParser;
-import io.github.kgbis.remotecontrol.tray.logging.LogConfigurator;
+import io.github.kgbis.remotecontrol.tray.logging.LogbackConfiguration;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
@@ -17,10 +17,15 @@ public class Main {
 
 	public static final String REMOTE_PC_CONTROL = "Remote PC Control Tray";
 
+    public static final String APP_NAME = "RemoteControlTray";
+
 	public static void main(String[] args) {
 		try {
+            // parse command line arguments (if -h or --help, show usage and exit)
 			CliArguments cliArguments = CliParser.parseCommandLine(args);
-			LogConfigurator.configure(cliArguments.getLogLevel());
+
+            // configure logback system
+			LogbackConfiguration.configure(cliArguments.getLogLevel(), cliArguments.isLogToConsole());
 
 			NetworkChangeListener networkChangeListener = new NetworkChangeListener();
 			new TrayBuilder(networkChangeListener).loadTray();
@@ -32,7 +37,8 @@ public class Main {
 			System.exit(-1);
 		}
 		catch (ParameterException parameterException) {
-			parameterException.getJCommander().usage();
+            System.err.println(parameterException.getMessage()); // NOSONAR
+            parameterException.getJCommander().usage();
 			System.exit(-2);
 		}
 	}
