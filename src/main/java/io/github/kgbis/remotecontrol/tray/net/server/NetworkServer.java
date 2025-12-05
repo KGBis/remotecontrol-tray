@@ -1,11 +1,13 @@
 package io.github.kgbis.remotecontrol.tray.net.server;
 
+import com.google.inject.Inject;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 @Slf4j
 public class NetworkServer {
 
@@ -37,9 +40,10 @@ public class NetworkServer {
 
 	private Thread serverThread;
 
+    @Inject
 	public NetworkServer(NetworkInfoProvider networkInfoProvider) {
 		this.networkInfoProvider = networkInfoProvider;
-		registerNetworkCallback(networkInfoProvider.getCallback());
+        registerNetworkListener(networkInfoProvider.getNetworkChangeListener());
 	}
 
 	public NetworkServer arguments(CliArguments args) {
@@ -177,7 +181,7 @@ public class NetworkServer {
 		}
 	}
 
-	private void registerNetworkCallback(final NetworkChangeListener networkChangeListener) {
+	private void registerNetworkListener(final NetworkChangeListener networkChangeListener) {
 		final NetworkChangeRegistrar listener = new NetworkChangeRegistrar(POLL_INTERVAL_MS);
 		listener.addListener(networkChangeListener);
 

@@ -24,12 +24,12 @@ public class NetworkChangeRegistrar {
 		this.pollIntervalMs = pollIntervalMs;
 	}
 
-	public void addListener(NetworkChangeListener callback) {
-		listeners.add(callback);
+	public void addListener(NetworkChangeListener listener) {
+		listeners.add(listener);
 	}
 
-	public void removeListener(NetworkChangeListener callback) {
-		listeners.remove(callback);
+	public void removeListener(NetworkChangeListener listener) {
+		listeners.remove(listener);
 	}
 
 	public void start() {

@@ -15,7 +15,7 @@ import java.awt.event.FocusListener;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.github.kgbis.remotecontrol.tray.Main.REMOTE_PC_CONTROL;
+import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
 
 @Slf4j
 public class ShowIpFrame implements FocusListener {

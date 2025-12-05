@@ -12,7 +12,7 @@ public class NetworkActionFactory {
 
 	public static NetworkAction createAction(String[] remoteCommand, Socket socket, NetworkInfoProvider provider,
 			boolean isDryRun) {
-		// TODO: See if "ACK" option is worth or better to reuse "INFO"
+		// See if "ACK" option is worth or better to reuse "INFO"
 		if (ArrayUtils.isEmpty(remoteCommand)) {
 			remoteCommand = new String[] { "ACK" };
 		}

@@ -1,19 +1,25 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import com.google.inject.Inject;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
-import lombok.RequiredArgsConstructor;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-import static io.github.kgbis.remotecontrol.tray.Main.REMOTE_PC_CONTROL;
+import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
 
-@RequiredArgsConstructor
+@Singleton
 @Slf4j
 public class TrayBuilder {
 
 	private final NetworkChangeListener networkChangeListener;
+
+	@Inject
+	public TrayBuilder(NetworkChangeListener networkChangeListener) {
+		this.networkChangeListener = networkChangeListener;
+	}
 
 	@SuppressWarnings("UnusedReturnValue")
 	public TrayBuilder loadTray() {
@@ -23,7 +29,7 @@ public class TrayBuilder {
 			SystemTray tray = SystemTray.getSystemTray();
 
 			// to listen for default action executed on the tray icon
-			ActionListener listener = new TrayActionListener(networkChangeListener);
+			ActionListener actionListener = new TrayActionListener(networkChangeListener);
 
 			// create a popup menu
 			PopupMenu popup = new PopupMenu();
@@ -32,7 +38,7 @@ public class TrayBuilder {
 			// create menu item for the default action
 			MenuItem defaultItem = new MenuItem("Show Computer IP");
 			defaultItem.setActionCommand("IP_CMD");
-			defaultItem.addActionListener(listener);
+			defaultItem.addActionListener(actionListener);
 			popup.add(defaultItem);
 
 			popup.addSeparator();
@@ -40,13 +46,13 @@ public class TrayBuilder {
 			// create menu item for the default action
 			MenuItem exitItem = new MenuItem("Exit");
 			exitItem.setActionCommand("EXIT_CMD");
-			exitItem.addActionListener(listener);
+			exitItem.addActionListener(actionListener);
 			popup.add(exitItem);
 
 			// construct a TrayIcon and set properties
 			trayIcon = new TrayIcon(IconImage.getIcon(), REMOTE_PC_CONTROL, popup);
 			trayIcon.setImageAutoSize(true);
-			trayIcon.addActionListener(listener);
+			trayIcon.addActionListener(actionListener);
 
 			// add the tray image
 			try {

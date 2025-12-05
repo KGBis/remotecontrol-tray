@@ -1,5 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import com.google.inject.Inject;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,8 +13,9 @@ public class TrayActionListener implements ActionListener {
 
 	private final ShowIpFrame ipFrame;
 
+    @Inject
 	TrayActionListener(NetworkChangeListener networkChangeListener) {
-		ipFrame = new ShowIpFrame(networkChangeListener);
+        ipFrame = new ShowIpFrame(networkChangeListener);
 	}
 
 	@Override

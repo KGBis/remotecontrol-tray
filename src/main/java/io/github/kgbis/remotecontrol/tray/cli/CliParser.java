@@ -4,7 +4,7 @@ import com.beust.jcommander.JCommander;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import static io.github.kgbis.remotecontrol.tray.Main.APP_NAME;
+import static io.github.kgbis.remotecontrol.tray.RemoteControl.APP_NAME;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CliParser {
