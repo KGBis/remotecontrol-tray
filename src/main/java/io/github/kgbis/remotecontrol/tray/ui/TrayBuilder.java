@@ -1,7 +1,7 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
-import com.google.inject.Inject;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 

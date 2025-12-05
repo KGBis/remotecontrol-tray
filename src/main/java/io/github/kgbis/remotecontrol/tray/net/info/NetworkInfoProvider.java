@@ -1,6 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.net.info;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

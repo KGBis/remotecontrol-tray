@@ -1,18 +1,70 @@
-# Remote Shutdown Tray
+# Remote PC Control Tray
 
-## Acknowledges
-This project is based on the 'RemoteShutdownPCServer' by Isah Rikovic (rikovicisah @ gmail.com)
+This is the 'server' side of an Android App which can be used to wake-on-LAN and shutdown a computer remotely.
 
-Original JAR file found @ https://github.com/rikovicisah
+## How it works?
 
-## Features
-* Runs in the OS' system tray. No ugly cmd/shell window.<br>
-* Tray icon's right click command `Show computer IP(s)` to view all (non-loopback) interfaces' IPs<br>
-* Can be installed easily as a start-up application both in Windows and Linux (probably in iOS too but who knows!)
-* Compiled for Java 8 so runnable from almost any computer
+This program basically opens a server socket on port 6800 and listens to messages sent by the App counterpart.
+The app can send `INFO` requests to gather target computer hostname and MAC address and `SHUTDOWN` requests to turn off
+the computer. That's it.
 
-### Note
+In the target computer where this program is installed a tray icon will be available so you can see the network
+interfaces IPs and their MACs or exit the program. Simple but enough.
+
+Currently __A Java 11+ JRE/JDK is needed to be installed in the target computer to run this program__. The idea is to be
+able to build an
+executable with embedded dependencies and JRE.
+
+## Technically speaking
+
+It is written entirely in Java and compiles for Java 11, so at the moment, a JRE 11+ is needed in the target computer.
+
+### Dependencies
+
+* Google Guice. A DI lightweight container for IoC. No more `new ClassX()` across the code.
+* Google Guava. As it's a Guice dependency why not use it for class scanning!
+* JCommander. A great, small and easy to use command line argument parser.
+* SLF4J and Logback for logging.
+* Apache Commons Lang 3
+* OSHI-core. Operating System and Hardware Information
+  library. [https://github.com/oshi/oshi](https://github.com/oshi/oshi)
+* Lombok.
+  At the moment of writing this, december 2025, it has been only tested under Windows 10 and 11.
+
+### Still pending... The TO DO list
+
+When I have the time, I'll install an Ubuntu distribution with VirtualBox to test if it works on Linux.
+It will also, most likely, work correctly on macOS, but who knows. I don't own any Apple device.
+
+And yes, as you probably have noticed, not a single unit test has been written... yet!
+I'm an old school developer 🤣
+
+### Bugs
+
+if you find a bug or want to contact me just drop me a line to [kike.g.garcia@gmail.com](mailto:kike.g.garcia@gmail.com)
+
+## Acknowledges / Inspiration
+
+This project is based loosely on the 'Remote Shutdown Server' by Isah Rikovic (rikovicisah @ gmail.com) which I
+discovered some years ago while looking for a remote shutdown app for my Android device.
+
+Original JAR file can be
+found @ [https://github.com/rikovicisah/remoteshutdownpc](https://github.com/rikovicisah/remoteshutdownpc)
+
+## License
+
+This software is distributed under the __GNU General Public License version 2 (GPLv2)__
+
+* You may use the application free of charge.
+* You may study and modify the source code.
+* You may redistribute it or publish modified versions under the same GPLv2 license.
+* You may not distribute modified versions as proprietary software or sell the software without complying with GPLv2.
+* You must include credits and the original license notice when publishing modifications.
+
+## Note for developers
+
 Copy/paste this script as `PROJECT_HOME/.git/hooks/pre-commit` to get automated version change when commiting changes
+if you want to keep the project's versioning pattern.
 
 ```bash
 #!/bin/bash

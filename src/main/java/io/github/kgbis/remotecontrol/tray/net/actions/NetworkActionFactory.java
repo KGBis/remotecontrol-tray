@@ -1,17 +1,23 @@
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.net.Socket;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Singleton
 public class NetworkActionFactory {
 
-	public static NetworkAction createAction(String[] remoteCommand, Socket socket, NetworkInfoProvider provider,
-			boolean isDryRun) {
+	private final NetworkInfoProvider networkInfoProvider;
+
+	@Inject
+	public NetworkActionFactory(NetworkInfoProvider networkInfoProvider) {
+		this.networkInfoProvider = networkInfoProvider;
+	}
+
+	public NetworkAction createAction(String[] remoteCommand, Socket socket, boolean isDryRun) {
 		// See if "ACK" option is worth or better to reuse "INFO"
 		if (ArrayUtils.isEmpty(remoteCommand)) {
 			remoteCommand = new String[] { "ACK" };
@@ -19,12 +25,12 @@ public class NetworkActionFactory {
 
 		switch (remoteCommand[0].toUpperCase()) {
 			case "INFO":
-				return new InfoNetworkAction(socket, remoteCommand, provider);
+				return new InfoNetworkAction(socket, remoteCommand, networkInfoProvider);
 			case "SHUTDOWN":
-				return new ShutdownNetworkAction(socket, remoteCommand, provider, isDryRun);
+				return new ShutdownNetworkAction(socket, remoteCommand, networkInfoProvider, isDryRun);
 			case "ACK":
 			default:
-				return new AckNetworkAction(socket, remoteCommand, provider);
+				return new AckNetworkAction(socket, remoteCommand, networkInfoProvider);
 		}
 	}
 

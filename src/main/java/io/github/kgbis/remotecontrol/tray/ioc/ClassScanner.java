@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClassScanner {
 
-    @SuppressWarnings("UnstableApiUsage")
 	public static Set<Class<?>> findSingletonClasses(String packageName) throws IOException {
 		return ClassPath.from(ClassLoader.getSystemClassLoader())
 			.getTopLevelClassesRecursive(packageName)
 			.stream()
 			.map(ClassPath.ClassInfo::load)
 			.filter(clazz -> clazz.isAnnotationPresent(Singleton.class))
+			.peek(aClass -> log.debug("Found jakarta.inject.Singleton class {}", aClass.getName())) // NOSONAR
 			.collect(Collectors.toSet());
 	}
 

@@ -1,12 +1,12 @@
 package io.github.kgbis.remotecontrol.tray.net.server;
 
-import com.google.inject.Inject;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +32,8 @@ public class NetworkServer {
 
 	private final NetworkInfoProvider networkInfoProvider;
 
+	private final NetworkActionFactory networkActionFactory;
+
 	private volatile boolean running = false;
 
 	private Boolean isDryRun;
@@ -40,10 +42,11 @@ public class NetworkServer {
 
 	private Thread serverThread;
 
-    @Inject
-	public NetworkServer(NetworkInfoProvider networkInfoProvider) {
+	@Inject
+	public NetworkServer(NetworkInfoProvider networkInfoProvider, NetworkActionFactory networkActionFactory) {
 		this.networkInfoProvider = networkInfoProvider;
-        registerNetworkListener(networkInfoProvider.getNetworkChangeListener());
+		this.networkActionFactory = networkActionFactory;
+		registerNetworkListener(networkInfoProvider.getNetworkChangeListener());
 	}
 
 	public NetworkServer arguments(CliArguments args) {
@@ -56,7 +59,7 @@ public class NetworkServer {
 
 	public synchronized void start() throws IOException, InterruptedException {
 		// wait until NetworkInfoProvider has initialized
-        networkInfoProvider.awaitInitialization();
+		networkInfoProvider.awaitInitialization();
 
 		// Already running. Don't want to start again
 		if (running) {
@@ -168,7 +171,7 @@ public class NetworkServer {
 				log.info("Received message: {}", message);
 
 				String[] args = StringUtils.split(message, " ");
-				NetworkAction action = NetworkActionFactory.createAction(args, socket, networkInfoProvider, isDryRun);
+				NetworkAction action = networkActionFactory.createAction(args, socket, isDryRun);
 
 				action.execute();
 			}

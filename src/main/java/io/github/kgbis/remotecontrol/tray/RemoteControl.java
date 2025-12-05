@@ -2,7 +2,6 @@ package io.github.kgbis.remotecontrol.tray;
 
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.cli.CliParser;
@@ -10,6 +9,7 @@ import io.github.kgbis.remotecontrol.tray.ioc.RemoteControlModule;
 import io.github.kgbis.remotecontrol.tray.logging.LogbackConfiguration;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
 import io.github.kgbis.remotecontrol.tray.ui.TrayBuilder;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
