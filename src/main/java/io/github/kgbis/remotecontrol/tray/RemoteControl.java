@@ -8,11 +8,12 @@ import io.github.kgbis.remotecontrol.tray.cli.CliParser;
 import io.github.kgbis.remotecontrol.tray.ioc.RemoteControlModule;
 import io.github.kgbis.remotecontrol.tray.logging.LogbackConfiguration;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
-import io.github.kgbis.remotecontrol.tray.ui.TrayBuilder;
+import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.swing.*;
 import java.io.IOException;
 
 @Singleton
@@ -25,20 +26,27 @@ public class RemoteControl {
 
 	private final NetworkServer networkServer;
 
-	private final TrayBuilder trayBuilder;
+	private final TrayManager trayManager;
 
 	@Inject
-	public RemoteControl(NetworkServer networkServer, TrayBuilder trayBuilder) {
+	public RemoteControl(NetworkServer networkServer, TrayManager trayManager) {
 		this.networkServer = networkServer;
-		this.trayBuilder = trayBuilder;
+		this.trayManager = trayManager;
 	}
 
 	public void start(CliArguments cliArgs) throws IOException, InterruptedException {
-		trayBuilder.loadTray();
+		trayManager.initializeTray();
 		networkServer.arguments(cliArgs).start();
 	}
 
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception ignored) {
+			// don't care about
+		}
+
 		try {
 			// parse command line arguments (if -h or --help, show usage and exit)
 			CliArguments cliArguments = CliParser.parseCommandLine(args);

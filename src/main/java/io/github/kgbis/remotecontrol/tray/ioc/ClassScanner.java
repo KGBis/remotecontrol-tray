@@ -20,7 +20,7 @@ public class ClassScanner {
 			.stream()
 			.map(ClassPath.ClassInfo::load)
 			.filter(clazz -> clazz.isAnnotationPresent(Singleton.class))
-			.peek(aClass -> log.debug("Found jakarta.inject.Singleton class {}", aClass.getName())) // NOSONAR
+			.peek(aClass -> log.debug("Found @Singleton class: {}", aClass.getName())) // NOSONAR
 			.collect(Collectors.toSet());
 	}
 

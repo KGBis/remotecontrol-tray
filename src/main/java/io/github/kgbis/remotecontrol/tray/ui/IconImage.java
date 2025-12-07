@@ -1,20 +1,21 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
-import lombok.AccessLevel;
+import jakarta.inject.Singleton;
 import lombok.NoArgsConstructor;
 
 import java.awt.*;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@Singleton
 public class IconImage {
 
-	private static final Image image;
+	private Image image;
 
-	static {
-		image = Toolkit.getDefaultToolkit().getImage(IconImage.class.getResource("/remote-control_16x16.png"));
-	}
-
-	public static Image getIcon() {
+	public Image getIcon() {
+		if (image == null) {
+			image = Toolkit.getDefaultToolkit()
+				.getImage(this.getClass().getClassLoader().getResource("remote-control_16x16.png"));
+		}
 		return image;
 	}
 
