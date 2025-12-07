@@ -1,4 +1,0 @@
-<html>
-<span style="text-align: center;">Version {VERSION} - (c) Enrique García (kike.g.garcia at gmail.com)</span><p/><p/>
-<span><b>Detected non-loopback IPs and MACs:</b><i> (copied to clipboard)</i><p>{IP_TEXT}</span>
-</html>
