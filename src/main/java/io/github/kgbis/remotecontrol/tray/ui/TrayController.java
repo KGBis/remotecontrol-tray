@@ -22,12 +22,4 @@ public class TrayController {
 		}
 	}
 
-	public void showIpWindow() {
-		informationScreen.show();
-	}
-
-	public void exitApplication() {
-		System.exit(0);
-	}
-
 }

@@ -15,17 +15,14 @@ import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL
 @Slf4j
 public class TrayManager {
 
-	private final TrayActionListener listener;
-
 	private final TrayController controller;
 
-	private final IconImage iconImage; // Tu proveedor de la imagen
+	private final ResourcesHelper resourcesHelper;
 
 	@Inject
-	public TrayManager(TrayActionListener listener, TrayController controller, IconImage iconImage) {
-		this.listener = listener;
+	public TrayManager(TrayController controller, ResourcesHelper resourcesHelper) {
 		this.controller = controller;
-		this.iconImage = iconImage;
+		this.resourcesHelper = resourcesHelper;
 	}
 
 	public void initializeTray() {
@@ -35,28 +32,13 @@ public class TrayManager {
 		}
 
 		SystemTray tray = SystemTray.getSystemTray();
-		PopupMenu popup = new PopupMenu();
 
-		MenuItem showIp = new MenuItem("Show Computer IP");
-		showIp.setActionCommand("IP_CMD");
-		showIp.addActionListener(listener);
-		popup.add(showIp);
-
-		popup.addSeparator();
-
-		MenuItem exit = new MenuItem("Exit");
-		exit.setActionCommand("EXIT_CMD");
-		exit.addActionListener(listener);
-		popup.add(exit);
-
-		TrayIcon trayIcon = new TrayIcon(iconImage.getIcon(), REMOTE_PC_CONTROL, popup);
+		TrayIcon trayIcon = new TrayIcon(resourcesHelper.getIcon(), REMOTE_PC_CONTROL);
 		trayIcon.setImageAutoSize(true);
-		trayIcon.addActionListener(listener);
-
-		// single clik as toggle
 		trayIcon.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				// single click as toggle
 				if (e.getClickCount() == 1 && SwingUtilities.isLeftMouseButton(e)) {
 					controller.toggleWindow();
 				}
