@@ -80,12 +80,14 @@ public class InformationScreen {
 	}
 
 	public void show() {
-		loadData();
-		frame.pack();
-		frame.setResizable(false);
-		placeNearTray(frame);
-		frame.setVisible(true);
-		frame.toFront();
+		EventQueue.invokeLater(() -> {
+			loadData();
+			frame.pack();
+			frame.setResizable(false);
+			placeNearTray(frame);
+			frame.setVisible(true);
+			frame.toFront();
+		});
 	}
 
 	public boolean isVisible() {
@@ -93,7 +95,7 @@ public class InformationScreen {
 	}
 
 	public void hide() {
-		frame.setVisible(false);
+		EventQueue.invokeLater(() -> frame.setVisible(false));
 	}
 
 	/* private methods */

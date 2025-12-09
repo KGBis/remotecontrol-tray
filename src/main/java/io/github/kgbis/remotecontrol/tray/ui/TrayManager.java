@@ -24,6 +24,12 @@ public class TrayManager {
 		this.controller = controller;
 	}
 
+	/**
+	 * Inititalize system tray icon depending on OS support. Why? Because in Windows 11
+	 * using dorkbox, the mouse X and Y coordinates returned by the OS are not the real X
+	 * and Y coordinates, but {@link Integer#MAX_VALUE} and dorkbox cannot crashes on
+	 * click.
+	 */
 	public void initializeTray() {
 		EventQueue.invokeLater(() -> {
 			if (java.awt.SystemTray.isSupported()) {
@@ -37,6 +43,9 @@ public class TrayManager {
 		});
 	}
 
+	/**
+	 * Supported by Windows and XFCE
+	 */
 	private void useAwtSystemTray() {
 		final java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
 
@@ -60,9 +69,10 @@ public class TrayManager {
 		}
 	}
 
+	/**
+	 * For Gnome.
+	 */
 	private void useDorkboxSystemTray() {
-		// In Windows, dorkbox seems to not to work properly
-		// In Linux (XFCE, KDE) funciona bien y es necesario para GNOME.
 		final SystemTray systemTray = SystemTray.get();
 		if (systemTray == null) {
 			log.warn("Unable to use AWT or Dorkbox's tray. Application will continue to run without tray icon.");
@@ -70,12 +80,7 @@ public class TrayManager {
 		}
 
 		systemTray.setImage(ResourcesHelper.getIcon());
-
-		// El Menu de dorkbox es diferente al PopupMenu de AWT
-		// dorkbox.systemTray.MenuItem item = new dorkbox.systemTray.MenuItem("Salir", e
-		// -> System.exit(0));
-		// systemTray.getMenu().add(item);
-		systemTray.setTooltip(REMOTE_PC_CONTROL).setCallback(e -> controller.toggleWindow());
+		systemTray.setStatus(REMOTE_PC_CONTROL).setCallback(e -> controller.toggleWindow());
 	}
 
 }
