@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -61,13 +63,20 @@ public class LogbackConfiguration {
 		fileAppender.setEncoder(fileEncoder);
 		fileAppender.start();
 
+		// oshi logger (too much logs on Linux when in DEBUG)
+		Logger oshi = context.getLogger("oshi");
+		if(rootLevel.equals(Level.DEBUG) || rootLevel.equals(Level.TRACE)) {
+			oshi.setLevel(Level.INFO);
+		}
+
+
 		// Root logger
 		Logger root = context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 		if (logToConsole)
 			root.addAppender(consoleAppender(context));
 		root.addAppender(fileAppender);
 		root.setLevel(Level.INFO);
-		log.info("Starting {} v{}", APP_NAME, LogbackConfiguration.class.getPackage().getImplementationVersion());
+		log.info("Starting {} v{}", APP_NAME, getVersion());
 		log.info("Logging initialized. Root level: {}", rootLevel);
 		root.setLevel(rootLevel);
 	}
@@ -112,5 +121,13 @@ public class LogbackConfiguration {
 
 		return logDir;
 	}
+
+	private static String getVersion() {
+		try(InputStream is = LogbackConfiguration.class.getClassLoader().getResourceAsStream("version.txt")) {
+			return new String(is.readAllBytes()).trim();
+		} catch (Exception e) {
+            return "";
+        }
+    }
 
 }
