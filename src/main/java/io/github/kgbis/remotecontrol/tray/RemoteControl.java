@@ -44,7 +44,7 @@ public class RemoteControl {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}
 		catch (Exception ignored) {
-			// don't care about
+			// don't care about any exception here
 		}
 
 		try {
@@ -57,7 +57,6 @@ public class RemoteControl {
 			// Start Guice DI container and entrypoint class (RemoteControl)
 			Injector injector = Guice.createInjector(new RemoteControlModule());
 			injector.getInstance(RemoteControl.class).start(cliArguments);
-
 		}
 		catch (IOException | InterruptedException e) {
 			log.error("Something bad happened. Please report the following error: ", e);

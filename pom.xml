@@ -7,7 +7,7 @@
 
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
-    <version>2025.12.09.5</version> <!-- yyyy.MM.dd.commit-number -->
+    <version>2025.12.09.6</version> <!-- yyyy.MM.dd.commit-number -->
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
@@ -72,17 +72,32 @@
             <version>${logback.version}</version>
         </dependency>
 
-        <!-- Utils -->
+        <!-- Apache Commons Lang 3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons.lang3.version}</version>
         </dependency>
 
+        <!--
+            A JNA-based (native) operating system information library for Java
+            that aims to provide a cross-platform implementation to retrieve
+            system information, such as version, memory, CPU, disk, battery, etc.
+        -->
         <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <version>${oshi.version}</version>
+        </dependency>
+
+        <!--
+            Cross-platform SystemTray support for Swing/AWT,
+            GtkStatusIcon, and AppIndicator on Java 8+
+        -->
+        <dependency>
+            <groupId>com.dorkbox</groupId>
+            <artifactId>SystemTray</artifactId>
+            <version>4.4</version>
         </dependency>
 
         <!-- Lombok -->

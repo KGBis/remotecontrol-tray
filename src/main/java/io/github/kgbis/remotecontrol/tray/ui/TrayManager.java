@@ -1,5 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import dorkbox.systemTray.SystemTray;
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -19,17 +20,25 @@ public class TrayManager {
 	private final TrayController controller;
 
 	@Inject
-	public TrayManager(TrayController controller/* , ResourcesHelper resourcesHelper */) {
+	public TrayManager(TrayController controller) {
 		this.controller = controller;
 	}
 
 	public void initializeTray() {
-		if (!SystemTray.isSupported()) {
-			log.error("System tray is not supported. Running without tray menu.");
-			return;
-		}
+		EventQueue.invokeLater(() -> {
+			if (java.awt.SystemTray.isSupported()) {
+				log.debug("AWT SystemTray supported. Using native implementation.");
+				useAwtSystemTray();
+			}
+			else {
+				log.debug("AWT SystemTray NOT supported. Trying to use dorkbox/SystemTray as fallback.");
+				useDorkboxSystemTray();
+			}
+		});
+	}
 
-		SystemTray tray = SystemTray.getSystemTray();
+	private void useAwtSystemTray() {
+		final java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
 
 		TrayIcon trayIcon = new TrayIcon(ResourcesHelper.getIcon(), REMOTE_PC_CONTROL);
 		trayIcon.setImageAutoSize(true);
@@ -49,6 +58,24 @@ public class TrayManager {
 		catch (AWTException e) {
 			log.warn("Could not add tray icon: {}", e.getMessage());
 		}
+	}
+
+	private void useDorkboxSystemTray() {
+		// In Windows, dorkbox seems to not to work properly
+		// In Linux (XFCE, KDE) funciona bien y es necesario para GNOME.
+		final SystemTray systemTray = SystemTray.get();
+		if (systemTray == null) {
+			log.warn("Unable to use AWT or Dorkbox's tray. Application will continue to run without tray icon.");
+			return;
+		}
+
+		systemTray.setImage(ResourcesHelper.getIcon());
+
+		// El Menu de dorkbox es diferente al PopupMenu de AWT
+		// dorkbox.systemTray.MenuItem item = new dorkbox.systemTray.MenuItem("Salir", e
+		// -> System.exit(0));
+		// systemTray.getMenu().add(item);
+		systemTray.setTooltip(REMOTE_PC_CONTROL).setCallback(e -> controller.toggleWindow());
 	}
 
 }
