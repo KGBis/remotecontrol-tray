@@ -8,6 +8,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
+import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class LogbackConfiguration {
 
 		// Logger context
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        context.reset();
+		context.reset();
 
 		// Rolling file appender
 		String filename = Paths.get(logDir.toString(), LOG_FILE_NAME).toString();
@@ -61,13 +62,19 @@ public class LogbackConfiguration {
 		fileAppender.setEncoder(fileEncoder);
 		fileAppender.start();
 
+		// oshi logger (too much logs on Linux when in DEBUG)
+		Logger oshi = context.getLogger("oshi");
+		if (rootLevel.equals(Level.DEBUG) || rootLevel.equals(Level.TRACE)) {
+			oshi.setLevel(Level.INFO);
+		}
+
 		// Root logger
 		Logger root = context.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 		if (logToConsole)
 			root.addAppender(consoleAppender(context));
 		root.addAppender(fileAppender);
 		root.setLevel(Level.INFO);
-		log.info("Starting {} v{}", APP_NAME, LogbackConfiguration.class.getPackage().getImplementationVersion());
+		log.info("Starting {} v{}", APP_NAME, ResourcesHelper.getVersion());
 		log.info("Logging initialized. Root level: {}", rootLevel);
 		root.setLevel(rootLevel);
 	}

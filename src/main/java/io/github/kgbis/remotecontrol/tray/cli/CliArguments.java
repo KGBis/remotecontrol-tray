@@ -16,8 +16,8 @@ public class CliArguments {
 			validateWith = LogLevelValidator.class)
 	private Level logLevel = Level.INFO;
 
-    @Parameter(names = { "-c", "--logToConsole" }, description = "Log to console. Not to be used for release")
-    private boolean logToConsole = false;
+	@Parameter(names = { "-c", "--console" }, description = "Log to console. Not to be used for release")
+	private boolean logToConsole = false;
 
 	@Parameter(names = { "-h", "--help", "-u", "--usage" }, help = true, description = "Show this usage help")
 	private boolean help;
