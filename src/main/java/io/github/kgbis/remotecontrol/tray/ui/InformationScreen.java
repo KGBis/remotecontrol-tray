@@ -1,5 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -26,11 +27,11 @@ public class InformationScreen {
 	private final NetworkChangeListener networkChangeListener;
 
 	@Inject
-	public InformationScreen(ResourcesHelper resourcesHelper, NetworkChangeListener networkChangeListener) {
+	public InformationScreen(NetworkChangeListener networkChangeListener) {
 		this.networkChangeListener = networkChangeListener;
 
 		frame = new JFrame(REMOTE_PC_CONTROL);
-		frame.setIconImage(resourcesHelper.getIcon());
+		frame.setIconImage(ResourcesHelper.getIcon());
 		frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		frame.setLayout(new BorderLayout(10, 10));
 		frame.setAlwaysOnTop(true); // <--- configurable
@@ -39,7 +40,7 @@ public class InformationScreen {
 		// ---------------------
 		// Header panel (text)
 		// ---------------------
-		JPanel headerPanel = buildHeaderPanel(resourcesHelper);
+		JPanel headerPanel = buildHeaderPanel();
 		frame.add(headerPanel, BorderLayout.NORTH);
 
 		// ---------------
@@ -97,7 +98,7 @@ public class InformationScreen {
 
 	/* private methods */
 
-	private JPanel buildHeaderPanel(ResourcesHelper resourcesHelper) {
+	private JPanel buildHeaderPanel() {
 		JPanel headerPanel = new JPanel();
 		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 		headerPanel.setBorder(new EmptyBorder(5, 5, 5, 5)); // margen abajo
@@ -105,7 +106,7 @@ public class InformationScreen {
 		// Line 1: Title
 		JPanel versionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel versionStr = new JLabel(REMOTE_PC_CONTROL + " - Version:", SwingConstants.LEADING);
-		JLabel versionVal = new JLabel(resourcesHelper.getVersion(), SwingConstants.LEADING);
+		JLabel versionVal = new JLabel(ResourcesHelper.getVersion(), SwingConstants.LEADING);
 		versionVal.setFont(versionVal.getFont().deriveFont(Font.BOLD));
 		versionPanel.add(versionStr);
 		versionPanel.add(versionVal);
@@ -181,7 +182,7 @@ public class InformationScreen {
 
 		StringSelection selection = new StringSelection(toCopy);
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
-		log.debug("Copied to clipboard:\n{}", toCopy);
+		log.debug("Copied all to clipboard:\n{}", toCopy);
 	}
 
 	private void copyRow(int row, JTable table) {
@@ -190,7 +191,7 @@ public class InformationScreen {
 			sb.append(table.getValueAt(row, col)).append('\t');
 		}
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(sb.toString().trim()), null);
-		log.debug("Copied to clipboard:\n{}", sb);
+		log.debug("Copied selected row to clipboard:\n{}", sb);
 	}
 
 }

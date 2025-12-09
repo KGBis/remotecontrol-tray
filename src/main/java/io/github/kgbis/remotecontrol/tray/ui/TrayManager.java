@@ -1,5 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +18,9 @@ public class TrayManager {
 
 	private final TrayController controller;
 
-	private final ResourcesHelper resourcesHelper;
-
 	@Inject
-	public TrayManager(TrayController controller, ResourcesHelper resourcesHelper) {
+	public TrayManager(TrayController controller/* , ResourcesHelper resourcesHelper */) {
 		this.controller = controller;
-		this.resourcesHelper = resourcesHelper;
 	}
 
 	public void initializeTray() {
@@ -33,7 +31,7 @@ public class TrayManager {
 
 		SystemTray tray = SystemTray.getSystemTray();
 
-		TrayIcon trayIcon = new TrayIcon(resourcesHelper.getIcon(), REMOTE_PC_CONTROL);
+		TrayIcon trayIcon = new TrayIcon(ResourcesHelper.getIcon(), REMOTE_PC_CONTROL);
 		trayIcon.setImageAutoSize(true);
 		trayIcon.addMouseListener(new MouseAdapter() {
 			@Override

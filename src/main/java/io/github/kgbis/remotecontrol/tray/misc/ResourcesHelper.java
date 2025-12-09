@@ -1,31 +1,30 @@
-package io.github.kgbis.remotecontrol.tray.ui;
+package io.github.kgbis.remotecontrol.tray.misc;
 
-import jakarta.inject.Singleton;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 
-@NoArgsConstructor
-@Singleton
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResourcesHelper {
 
-	private Image image;
+	private static Image image;
 
-	private String version;
+	private static String version;
 
-	public Image getIcon() {
+	public static Image getIcon() {
 		if (image == null) {
 			image = Toolkit.getDefaultToolkit()
-				.getImage(this.getClass().getClassLoader().getResource("remote-control_16x16.png"));
+				.getImage(ResourcesHelper.class.getClassLoader().getResource("remote-control_16x16.png"));
 		}
 		return image;
 	}
 
-	public String getVersion() {
+	public static String getVersion() {
 		if (version == null) {
-			try (InputStream in = getClass().getClassLoader().getResourceAsStream("version.txt")) {
+			try (InputStream in = ResourcesHelper.class.getClassLoader().getResourceAsStream("version.txt")) {
 				if (in == null) {
 					version = "unknown";
 				}
