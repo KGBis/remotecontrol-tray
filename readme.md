@@ -19,6 +19,45 @@ executable with embedded dependencies and JRE.
 
 It is written entirely in Java and compiles for Java 11, so at the moment, a JRE 11+ is needed in the target computer.
 
+### Fedora 43 Workstation (Gnome + Wayland)
+```log
+Gtk-Message: 21:34:37.718: Failed to load module "canberra-gtk-module"
+Gtk-Message: 21:34:37.718: Failed to load module "pk-gtk-module"
+...
+2025-12-09 21:51:29,939 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Version 4.4
+2025-12-09 21:51:29,939 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - OS: Linux
+2025-12-09 21:51:29,939 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Arch: amd64
+2025-12-09 21:51:29,939 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Oracle Corporation OpenJDK 64-Bit Server VM 21.0.8
+2025-12-09 21:51:29,939 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - JPMS enabled: true
+2025-12-09 21:51:29,939 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Is Auto sizing tray/menu? true
+2025-12-09 21:51:29,940 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Is JavaFX detected? false
+2025-12-09 21:51:29,940 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Is SWT detected? false
+2025-12-09 21:51:29,940 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Java Swing L&F: GTK
+2025-12-09 21:51:29,940 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Auto-detecting tray type
+2025-12-09 21:51:29,940 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Force GTK2: false
+2025-12-09 21:51:29,940 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Prefer GTK3: true
+2025-12-09 21:51:29,967 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Currently using the 'Gnome' desktop environment
+NAME="Freedesktop SDK"
+VERSION="25.08 (Flatpak runtime)"
+VERSION_ID=25.08
+ID=org.freedesktop.platform
+PRETTY_NAME="Freedesktop SDK 25.08 (Flatpak runtime)"
+BUG_REPORT_URL=https://gitlab.com/freedesktop-sdk/freedesktop-sdk/issues
+
+2025-12-09 21:51:29,968 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Currently using the 'gnome' session type
+2025-12-09 21:51:29,976 ERROR [AWT-EventQueue-0]  d.s.SystemTray - GNOME shell detected, but UNDEFINED shell version. This should never happen. Falling back to GtkStatusIcon. Please create an issue with as many details as possible.
+2025-12-09 21:51:29,988 DEBUG [AWT-EventQueue-0]  d.j.l.GtkLoader - GTK: libgtk-3.so.0
+2025-12-09 21:51:29,988 DEBUG [GTK Native Event Loop] d.j.l.GtkEventDispatch - Running GTK Native Event Loop
+2025-12-09 21:51:30,094 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - GTK Version: 3.24.51
+2025-12-09 21:51:30,096 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Is the system already running GTK? false
+2025-12-09 21:51:30,173 WARN  [AWT-EventQueue-0]  d.j.l.GtkTheme - Unable to get tray image size. Using fallback: 24
+2025-12-09 21:51:30,182 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Tray indicator image size: 24
+2025-12-09 21:51:30,182 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Tray menu image size: 16
+2025-12-09 21:51:30,188 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Using Fake CheckMark: false
+2025-12-09 21:51:30,293 INFO  [AWT-EventQueue-0]  d.s.SystemTray - Successfully loaded type: _GtkStatusIconNativeTray
+2025-12-09 21:51:30,319 DEBUG [AWT-EventQueue-0]  d.s.SystemTray - Resizing image to 24
+```
+
 ### Dependencies
 
 * Google Guice. A DI lightweight container for IoC. No more `new ClassX()` across the code.
