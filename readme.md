@@ -20,6 +20,7 @@ executable with embedded dependencies and JRE.
 It is written entirely in Java and compiles for Java 11, so at the moment, a JRE 11+ is needed in the target computer.
 
 ### Fedora 43 Workstation (Gnome + Wayland)
+
 ```log
 Gtk-Message: 21:34:37.718: Failed to load module "canberra-gtk-module"
 Gtk-Message: 21:34:37.718: Failed to load module "pk-gtk-module"
@@ -134,8 +135,14 @@ echo "[Version Hook] New version: $NEW_VERSION"
 mvn -q versions:set -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false
 mvn -q versions:commit
 
+# write version file
+ROOT=$(git rev-parse --show-toplevel)
+VERSION_FILE="$ROOT/src/main/resources/version.txt"
+echo $NEW_VERSION > $VERSION_FILE
+
 # Add modified pom.xml to the commit
 git add pom.xml
+git add $VERSION_FILE
 
 echo "[Version Hook] pom.xml updated. Done."
 ```
