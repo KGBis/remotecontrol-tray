@@ -106,6 +106,9 @@ This software is distributed under the __GNU General Public License version 2 (G
 Copy/paste this script as `PROJECT_HOME/.git/hooks/pre-commit` to get automated version change when commiting changes
 if you want to keep the project's versioning pattern.
 
+On Linux/MAC systems, do not forget to set this file executable with `chmod 775 pre-commit
+`
+
 ```bash
 #!/bin/bash
 
