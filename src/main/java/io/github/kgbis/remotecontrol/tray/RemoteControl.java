@@ -40,6 +40,10 @@ public class RemoteControl {
 	}
 
 	public static void main(String[] args) {
+		// To fix blurry fonts on Linux
+		System.setProperty("awt.useSystemAAFontSettings", "on");
+		System.setProperty("swing.aatext", "true");
+
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}

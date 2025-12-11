@@ -2,7 +2,7 @@
 
 This is the 'server' side of an Android App which can be used to wake-on-LAN and shutdown a computer remotely.
 
-## How it works?
+## How does it works?
 
 This program basically opens a server socket on port 6800 and listens to messages sent by the App counterpart.
 The app can send `INFO` requests to gather target computer hostname and MAC address and `SHUTDOWN` requests to turn off
@@ -19,7 +19,19 @@ executable with embedded dependencies and JRE.
 
 It is written entirely in Java and compiles for Java 11, so at the moment, a JRE 11+ is needed in the target computer.
 
-### Fedora 43 Workstation (Gnome + Wayland)
+### The Tray Icon
+
+- AWT system tray supported in Windows 10/11 and Linux running Xfce and Qt desktop
+- Dorkbox System Tray supported on Linux Gnome and/or Wayland
+
+### Where is working? Tested on...
+
+- Linux Mint Xfce
+- Lubuntu LxQt
+
+### Where is not working?
+
+- Fedora 43 Workstation (Gnome + Wayland). It seems to be fixed but not released. [see issue 🔗](https://github.com/dorkbox/SystemTray/issues/157#issuecomment-1821776132)  
 
 ```log
 Gtk-Message: 21:34:37.718: Failed to load module "canberra-gtk-module"
