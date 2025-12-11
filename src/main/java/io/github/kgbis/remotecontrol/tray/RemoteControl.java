@@ -12,6 +12,7 @@ import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -41,8 +42,10 @@ public class RemoteControl {
 
 	public static void main(String[] args) {
 		// To fix blurry fonts on Linux
-		System.setProperty("awt.useSystemAAFontSettings", "on");
-		System.setProperty("swing.aatext", "true");
+		if (SystemUtils.IS_OS_UNIX) {
+			System.setProperty("awt.useSystemAAFontSettings", "on");
+			System.setProperty("swing.aatext", "true");
+		}
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
