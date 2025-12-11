@@ -13,17 +13,20 @@ interfaces IPs and their MACs or exit the program. Simple but enough.
 
 ### Where is working?
 
-- Windows 10/11
-- Linux Mint Xfce
-- Lubuntu LxQt
+- Windows 7/10/11
+- Lubuntu Xfce 1.4.x & 2.2.x
+- Linux Mint LXQt
+- Manjaro Linux 25.0.10 with Gnome 49 + Wayland
 
 ### Where is not working?
 
-- Fedora 43 Workstation (Gnome + Wayland). It seems to be fixed but not released. [see issue 🔗](https://github.com/dorkbox/SystemTray/issues/157#issuecomment-1821776132)
+- Fedora 43 Workstation (Gnome + Wayland). It seems to be fixed but not
+  released. [see issue 🔗](https://github.com/dorkbox/SystemTray/issues/157#issuecomment-1821776132)
 
 ### Bugs
 
-if you find a bug or want to contact me just drop me a line to [kike.g.garcia@gmail.com](mailto:kike.g.garcia@gmail.com) or [open an issue](https://github.com/KGBis/remotecontrol-tray/issues) in Github.
+if you find a bug or want to contact me just drop me a line to [kike.g.garcia@gmail.com](mailto:kike.g.garcia@gmail.com)
+or [open an issue](https://github.com/KGBis/remotecontrol-tray/issues) in Github.
 
 ## Acknowledges / Inspiration
 
@@ -45,7 +48,8 @@ This software is distributed under the __GNU General Public License version 2 (G
 
 ## Technical Stuff
 
-This program is written entirely in Java and it's compiled for Java 11, so at the moment, a JRE 11+ is needed in the target computer.
+This program is written entirely in Java and it's compiled for Java 11, so at the moment, a JRE 11+ is needed in the
+target computer.
 
 Currently __A Java 11+ JRE/JDK is needed to be installed in the target computer to run this program__. The idea is to be
 able to build an
@@ -65,7 +69,7 @@ executable with embedded dependencies and JRE.
 * Apache Commons Lang 3.
 * OSHI-core. Operating System and Hardware Information
   library. [https://github.com/oshi/oshi](https://github.com/oshi/oshi)
-* Dorkbox SystemTray. 
+* Dorkbox SystemTray.
 * Lombok.
 
 ### Still pending... The TO DO list
