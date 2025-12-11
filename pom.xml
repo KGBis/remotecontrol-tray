@@ -7,7 +7,7 @@
 
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
-    <version>2025.12.09.3</version> <!-- yyyy.MM.dd.commit-number -->
+    <version>2025.12.11.2</version> <!-- yyyy.MM.dd.commit-number -->
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
@@ -16,6 +16,7 @@
         <!-- Java -->
         <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Plugins -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
@@ -72,17 +73,32 @@
             <version>${logback.version}</version>
         </dependency>
 
-        <!-- Utils -->
+        <!-- Apache Commons Lang 3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons.lang3.version}</version>
         </dependency>
 
+        <!--
+            A JNA-based (native) operating system information library for Java
+            that aims to provide a cross-platform implementation to retrieve
+            system information, such as version, memory, CPU, disk, battery, etc.
+        -->
         <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <version>${oshi.version}</version>
+        </dependency>
+
+        <!--
+            Cross-platform SystemTray support for Swing/AWT,
+            GtkStatusIcon, and AppIndicator on Java 8+
+        -->
+        <dependency>
+            <groupId>com.dorkbox</groupId>
+            <artifactId>SystemTray</artifactId>
+            <version>4.4</version>
         </dependency>
 
         <!-- Lombok -->
@@ -104,7 +120,14 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <release>${java.version}</release>
+  		    <release>${java.version}</release>
+		    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>     
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 

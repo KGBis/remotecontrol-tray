@@ -17,7 +17,7 @@ public class ResourcesHelper {
 	public static Image getIcon() {
 		if (image == null) {
 			image = Toolkit.getDefaultToolkit()
-				.getImage(ResourcesHelper.class.getClassLoader().getResource("remote-control_16x16.png"));
+				.getImage(ResourcesHelper.class.getClassLoader().getResource("computer.png"));
 		}
 		return image;
 	}

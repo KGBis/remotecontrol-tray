@@ -12,6 +12,7 @@ import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemUtils;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -40,11 +41,17 @@ public class RemoteControl {
 	}
 
 	public static void main(String[] args) {
+		// To fix blurry fonts on Linux
+		if (SystemUtils.IS_OS_UNIX) {
+			System.setProperty("awt.useSystemAAFontSettings", "on");
+			System.setProperty("swing.aatext", "true");
+		}
+
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		}
 		catch (Exception ignored) {
-			// don't care about
+			// don't care about any exception here
 		}
 
 		try {
@@ -57,7 +64,6 @@ public class RemoteControl {
 			// Start Guice DI container and entrypoint class (RemoteControl)
 			Injector injector = Guice.createInjector(new RemoteControlModule());
 			injector.getInstance(RemoteControl.class).start(cliArguments);
-
 		}
 		catch (IOException | InterruptedException e) {
 			log.error("Something bad happened. Please report the following error: ", e);

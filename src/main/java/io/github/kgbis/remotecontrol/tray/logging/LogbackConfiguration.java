@@ -74,7 +74,7 @@ public class LogbackConfiguration {
 			root.addAppender(consoleAppender(context));
 		root.addAppender(fileAppender);
 		root.setLevel(Level.INFO);
-		log.info("Starting {} v{}", APP_NAME, ResourcesHelper.getVersion());
+		log.info("Starting {} version {}", APP_NAME, ResourcesHelper.getVersion());
 		log.info("Logging initialized. Root level: {}", rootLevel);
 		root.setLevel(rootLevel);
 	}
