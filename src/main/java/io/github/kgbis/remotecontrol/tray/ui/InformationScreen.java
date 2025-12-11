@@ -12,6 +12,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
@@ -34,7 +36,7 @@ public class InformationScreen {
 		frame.setIconImage(ResourcesHelper.getIcon());
 		frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		frame.setLayout(new BorderLayout(10, 10));
-		frame.setAlwaysOnTop(true); // <--- configurable
+		frame.setAlwaysOnTop(false);
 		frame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
 
 		// ---------------------
@@ -76,6 +78,16 @@ public class InformationScreen {
 		frame.getRootPane()
 			.registerKeyboardAction(e -> frame.setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
 					JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+		// Register CLOSE (x) window to exit
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				log.debug("Window close clicked. Exiting");
+				System.exit(0);
+			}
+		});
 
 	}
 
@@ -129,9 +141,13 @@ public class InformationScreen {
 
 		// Left panel with "exit" button
 		JPanel leftPanel = new JPanel();
-		JButton exitBtn = new JButton("Exit Program");
-		exitBtn.addActionListener(e -> System.exit(0));
-		leftPanel.add(exitBtn);
+
+		// do not show if Gnome
+		if(!isGnome()) {
+			JButton exitBtn = new JButton("Exit Program");
+			exitBtn.addActionListener(e -> System.exit(0));
+			leftPanel.add(exitBtn);
+		}
 
 		// Right panel with "copy" and "close" buttons
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -154,6 +170,16 @@ public class InformationScreen {
 		buttonBar.add(leftPanel, BorderLayout.WEST);
 		buttonBar.add(rightPanel, BorderLayout.EAST);
 		return buttonBar;
+	}
+
+	/**
+	 * return if we're in Gnome. Used to hide "exit" button as its mouse event
+	 * is consumed before, hence setting window not visible instead of exiting
+	 * @return true if Gnome is Window Manager
+	 */
+	private boolean isGnome() {
+		String desktop = System.getenv("XDG_CURRENT_DESKTOP");
+		return desktop != null && desktop.toLowerCase().contains("gnome");
 	}
 
 	private void placeNearTray(JFrame frame) {
