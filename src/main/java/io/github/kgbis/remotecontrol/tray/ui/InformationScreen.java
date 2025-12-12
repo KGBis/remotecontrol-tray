@@ -5,6 +5,7 @@ import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -17,6 +18,8 @@ import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
+import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isGnome;
+import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isKde;
 
 @Singleton
 @Slf4j
@@ -34,10 +37,10 @@ public class InformationScreen {
 
 		frame = new JFrame(REMOTE_PC_CONTROL);
 		frame.setIconImage(ResourcesHelper.getIcon());
-		frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		frame.setLayout(new BorderLayout(10, 10));
 		frame.setAlwaysOnTop(false);
 		frame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
+		frame.setExtendedState(isKde() ? Frame.ICONIFIED : Frame.NORMAL);
 
 		// ---------------------
 		// Header panel (text)
@@ -142,7 +145,7 @@ public class InformationScreen {
 		// Left panel with "exit" button
 		JPanel leftPanel = new JPanel();
 
-		// do not show if Gnome
+		// do not show exit button with Gnome
 		if(!isGnome()) {
 			JButton exitBtn = new JButton("Exit Program");
 			exitBtn.addActionListener(e -> System.exit(0));
@@ -150,6 +153,15 @@ public class InformationScreen {
 		}
 
 		// Right panel with "copy" and "close" buttons
+		JPanel rightPanel = buildBottomRightPanel(table);
+
+		// add left and right panel to button bar
+		buttonBar.add(leftPanel, BorderLayout.WEST);
+		buttonBar.add(rightPanel, BorderLayout.EAST);
+		return buttonBar;
+	}
+
+	private @NonNull JPanel buildBottomRightPanel(JTable table) {
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		JButton copyBtn = new JButton("Copy All");
 		copyBtn.addActionListener(e -> {
@@ -161,25 +173,15 @@ public class InformationScreen {
 				copyAll();
 			}
 		});
-
-		JButton closeBtn = new JButton("Close this window");
-		closeBtn.addActionListener(e -> frame.setVisible(false));
 		rightPanel.add(copyBtn);
-		rightPanel.add(closeBtn);
 
-		buttonBar.add(leftPanel, BorderLayout.WEST);
-		buttonBar.add(rightPanel, BorderLayout.EAST);
-		return buttonBar;
-	}
-
-	/**
-	 * return if we're in Gnome. Used to hide "exit" button as its mouse event
-	 * is consumed before, hence setting window not visible instead of exiting
-	 * @return true if Gnome is Window Manager
-	 */
-	private boolean isGnome() {
-		String desktop = System.getenv("XDG_CURRENT_DESKTOP");
-		return desktop != null && desktop.toLowerCase().contains("gnome");
+		// Close button not available with KDE
+		if(!isKde()) {
+			JButton closeBtn = new JButton("Close this window");
+			closeBtn.addActionListener(e -> frame.setVisible(false));
+			rightPanel.add(closeBtn);
+		}
+		return rightPanel;
 	}
 
 	private void placeNearTray(JFrame frame) {
