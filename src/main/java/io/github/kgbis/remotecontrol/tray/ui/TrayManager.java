@@ -31,8 +31,8 @@ public class TrayManager {
      */
     public void initializeTray() {
         EventQueue.invokeLater(() -> {
-            if(isKde()) {
-                log.info("KDE detected. No System Tray. KDE does not support it correctly.");
+            if (isKde() || isFedoraPatchedGnome()) {
+                log.info("{} detected. No System Tray. It does not support it correctly.", isKde() ? "KDE" : "Fedora");
                 controller.toggleWindow();
                 return;
             }
@@ -50,6 +50,7 @@ public class TrayManager {
     /**
      * Detect if we're in Gnome. Used to hide "exit" button as its mouse event
      * is consumed before, hence setting window not visible instead of exiting
+     *
      * @return true if Gnome is Window Manager
      */
     public static boolean isKde() {
@@ -60,17 +61,22 @@ public class TrayManager {
      * Detect if we're in KDE. KDE does return it supports AWT System Tray but
      * even if show the tray icon, it does not fire the listeners' events, so
      * it's completely useless.
+     *
      * @return true if KDE  is Window Manager
      */
-    public static  boolean isGnome() {
+    public static boolean isGnome() {
         return desktopEnv().contains("gnome");
+    }
+
+    public static boolean isFedoraPatchedGnome() {
+        return System.getenv("PTYXIS_VERSION") != null;
     }
 
     // get a lowercase string for desktop enviroment
     private static String desktopEnv() {
         String desktop = System.getenv("XDG_CURRENT_DESKTOP");
         // Fallback to DESKTOP_SESSION
-        if(StringUtils.isBlank(desktop)) {
+        if (StringUtils.isBlank(desktop)) {
             desktop = System.getenv("DESKTOP_SESSION");
         }
 

@@ -18,8 +18,7 @@ import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
-import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isGnome;
-import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isKde;
+import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.*;
 
 @Singleton
 @Slf4j
@@ -146,7 +145,7 @@ public class InformationScreen {
 		JPanel leftPanel = new JPanel();
 
 		// do not show exit button with Gnome
-		if(!isGnome()) {
+		if(!isGnome() || isFedoraPatchedGnome()) {
 			JButton exitBtn = new JButton("Exit Program");
 			exitBtn.addActionListener(e -> System.exit(0));
 			leftPanel.add(exitBtn);
@@ -176,7 +175,7 @@ public class InformationScreen {
 		rightPanel.add(copyBtn);
 
 		// Close button not available with KDE
-		if(!isKde()) {
+		if(!isKde() && !isFedoraPatchedGnome()) {
 			JButton closeBtn = new JButton("Close this window");
 			closeBtn.addActionListener(e -> frame.setVisible(false));
 			rightPanel.add(closeBtn);
