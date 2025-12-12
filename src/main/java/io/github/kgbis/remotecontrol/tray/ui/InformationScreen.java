@@ -7,10 +7,30 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -18,7 +38,9 @@ import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
-import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.*;
+import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isFedoraPatchedGnome;
+import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isGnome;
+import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isKde;
 
 @Singleton
 @Slf4j
@@ -145,7 +167,7 @@ public class InformationScreen {
 		JPanel leftPanel = new JPanel();
 
 		// do not show exit button with Gnome
-		if(!isGnome() || isFedoraPatchedGnome()) {
+		if (!isGnome() || isFedoraPatchedGnome()) {
 			JButton exitBtn = new JButton("Exit Program");
 			exitBtn.addActionListener(e -> System.exit(0));
 			leftPanel.add(exitBtn);
@@ -174,8 +196,8 @@ public class InformationScreen {
 		});
 		rightPanel.add(copyBtn);
 
-		// Close button not available with KDE
-		if(!isKde() && !isFedoraPatchedGnome()) {
+		// Close button not available with KDE o Fedora Gnome
+		if (!isKde() && !isFedoraPatchedGnome()) {
 			JButton closeBtn = new JButton("Close this window");
 			closeBtn.addActionListener(e -> frame.setVisible(false));
 			rightPanel.add(closeBtn);

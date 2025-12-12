@@ -14,7 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.*;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -166,7 +170,7 @@ public class NetworkServer {
 
 	private void handleClient(Socket socket) {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-			try {
+			try (socket) {
 				String message = br.readLine();
 				log.info("Received message: {}", message);
 
@@ -174,9 +178,6 @@ public class NetworkServer {
 				NetworkAction action = networkActionFactory.createAction(args, socket, isDryRun);
 
 				action.execute();
-			}
-			finally {
-				socket.close();
 			}
 		}
 		catch (Exception e) {

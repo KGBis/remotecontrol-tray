@@ -3,7 +3,8 @@ package io.github.kgbis.remotecontrol.tray.misc;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.awt.*;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.io.InputStream;
 

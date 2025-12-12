@@ -14,7 +14,7 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SystemUtils;
 
-import javax.swing.*;
+import javax.swing.UIManager;
 import java.io.IOException;
 
 @Singleton

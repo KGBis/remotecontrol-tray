@@ -3,7 +3,11 @@ package io.github.kgbis.remotecontrol.tray.net.info;
 import oshi.SystemInfo;
 import oshi.hardware.NetworkIF;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class NetworkChangeRegistrar {

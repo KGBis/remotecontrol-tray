@@ -11,17 +11,19 @@ the computer. That's it.
 In the target computer where this program is installed a tray icon will be available so you can see the network
 interfaces IPs and their MACs or exit the program. Simple but enough.
 
-### Where is working?
+### Where has been tested and results
 
 - Windows 7/10/11
 - Lubuntu Xfce 1.4.x & 2.2.x
 - Linux Mint LXQt
-- Manjaro Linux 25.0.10 with Gnome 49 + Wayland
 
-### Where is not working?
+- Manjaro Linux 25.0.10 with Gnome 49 <sup>1</sup>
+- Manjaro Linux 25.0.10 with KDE Plasma <sup>2</sup>
+- Fedora 43 Workstation with Gnome 49 <sup>3</sup>
 
-- Fedora 43 Workstation (Gnome + Wayland). It seems to be fixed but not
-  released. [see issue 🔗](https://github.com/dorkbox/SystemTray/issues/157#issuecomment-1821776132)
+<sup>1</sup> System tray is shown but `exit` button event is ignored or not received. Button removed.<br>
+<sup>2</sup> System tray is shown but it receives no events from mouse, so just information screen available.
+<sup>3</sup> System tray not supported at all, so just information screen available.
 
 ### Bugs
 
