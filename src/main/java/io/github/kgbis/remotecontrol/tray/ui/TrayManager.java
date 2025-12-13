@@ -16,9 +16,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
-import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.NONE;
-import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.detect;
-import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.getDesktop;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupport.NONE;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.*;
 
 @Singleton
 @Slf4j
@@ -36,45 +35,11 @@ public class TrayManager {
 	}
 
 	/**
-	 * Detect if we're in Gnome. Used to hide "exit" button as its mouse event is consumed
-	 * before, hence setting window not visible instead of exiting
-	 * @return true if Gnome is Window Manager
-	 */
-	public static boolean isKde() {
-		return desktopEnv().contains("kde");
-	}
-
-	/**
-	 * Detect if we're in KDE. KDE does return it supports AWT System Tray but even if
-	 * show the tray icon, it does not fire the listeners' events, so it's completely
-	 * useless.
-	 * @return true if KDE is Window Manager
-	 */
-	public static boolean isGnome() {
-		return desktopEnv().contains("gnome");
-	}
-
-	public static boolean isFedoraPatchedGnome() {
-		return System.getenv("PTYXIS_VERSION") != null;
-	}
-
-	// get a lowercase string for desktop enviroment
-	private static String desktopEnv() {
-		String desktop = System.getenv("XDG_CURRENT_DESKTOP");
-		// Fallback to DESKTOP_SESSION
-		if (StringUtils.isBlank(desktop)) {
-			desktop = System.getenv("DESKTOP_SESSION");
-		}
-
-		return StringUtils.isBlank(desktop) ? "" : desktop.toLowerCase();
-	}
-
-	/**
 	 * Inititalize system tray icon depending on OS support
 	 */
 	public void initializeTray() {
 		EventQueue.invokeLater(() -> {
-			if (detect().equals(NONE)) {
+			if (isNoneTraySupport()) {
 				log.info("{} detected. No System Tray. It does not support it correctly.", StringUtils.capitalize(getDesktop()));
 				controller.toggleWindow();
 				return;

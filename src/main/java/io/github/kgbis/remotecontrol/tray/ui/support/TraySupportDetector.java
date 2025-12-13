@@ -1,21 +1,43 @@
-package io.github.kgbis.remotecontrol.tray.ui;
+package io.github.kgbis.remotecontrol.tray.ui.support;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TraySupportDetector {
 
-	public enum TraySupport {
+	private static TraySupport traySupport;
 
-		FULL, // Tray + reliable events
-		PARTIAL, // Visible Tray, partial/broken events
-		NONE // No tray
-
+	public static boolean isFullTraySupport() {
+		return getTraySupport().equals(TraySupport.FULL);
 	}
 
-	private TraySupportDetector() {
+	public static boolean isPartialTraySupport() {
+		return getTraySupport().equals(TraySupport.PARTIAL);
 	}
 
-	public static TraySupport detect() {
+	public static boolean isNoneTraySupport() {
+		return getTraySupport().equals(TraySupport.NONE);
+	}
+
+	public static String getDesktop() {
+		String desktop = System.getenv("XDG_CURRENT_DESKTOP");
+		if (StringUtils.isBlank(desktop)) {
+			desktop = System.getenv("DESKTOP_SESSION");
+		}
+		return StringUtils.isBlank(desktop) ? "" : desktop.toLowerCase();
+	}
+
+	private static TraySupport getTraySupport() {
+		if(traySupport == null) {
+			traySupport = detect();
+		}
+
+		return traySupport;
+	}
+
+	private static TraySupport detect() {
 		// Windows y macOS: always reliable
 		if (isWindows() || isMac()) {
 			return TraySupport.FULL;
@@ -63,14 +85,6 @@ public final class TraySupportDetector {
 
 		// Fallback to nnne
 		return TraySupport.NONE;
-	}
-
-	public static String getDesktop() {
-		String desktop = System.getenv("XDG_CURRENT_DESKTOP");
-		if (StringUtils.isBlank(desktop)) {
-			desktop = System.getenv("DESKTOP_SESSION");
-		}
-		return StringUtils.isBlank(desktop) ? "" : desktop.toLowerCase();
 	}
 
 	/* ================= helpers ================= */

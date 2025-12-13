@@ -2,6 +2,7 @@ package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
+import io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +39,8 @@ import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
-import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isKde;
-import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.FULL;
-import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.NONE;
-import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.PARTIAL;
-import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.detect;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupport.*;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.*;
 
 @Singleton
 @Slf4j
@@ -63,7 +61,7 @@ public class InformationScreen {
 		frame.setLayout(new BorderLayout(10, 10));
 		frame.setAlwaysOnTop(false);
 		frame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
-		frame.setExtendedState(isKde() ? Frame.ICONIFIED : Frame.NORMAL);
+		frame.setExtendedState(/*isPartialTraySupport() ? Frame.ICONIFIED :*/ Frame.NORMAL);
 
 		// ---------------------
 		// Header panel (text)
@@ -168,10 +166,10 @@ public class InformationScreen {
 		// Left panel with "exit" button
 		JPanel leftPanel = new JPanel();
 
-		// do not show exit button with Gnome
-		// if (!isGnome() || isFedoraPatchedGnome()) {
-		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK
-		if (detect().equals(FULL) || detect().equals(NONE)) {
+		// do not show exit button with Partial Support
+		// if (getTraySupport().equals(FULL) || getTraySupport().equals(NONE)) {
+		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK, Gnome OK
+		if (!isPartialTraySupport()) {
 			JButton exitBtn = new JButton("Exit Program");
 			exitBtn.addActionListener(e -> System.exit(0));
 			leftPanel.add(exitBtn);
@@ -188,24 +186,22 @@ public class InformationScreen {
 
 	private @NonNull JPanel buildBottomRightPanel(JTable table) {
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		if (!detect().equals(PARTIAL)) {
-			JButton copyBtn = new JButton("Copy All"); // !! REMOVE FOR PARTIAL !!
+		if (!isPartialTraySupport()) {
+			JButton copyBtn = new JButton("Copy All");
 			copyBtn.addActionListener(e -> {
 				int row = table.getSelectedRow();
 				if (row >= 0) {
 					copyRow(row, table);
-				}
-				else {
+				} else {
 					copyAll();
 				}
 			});
 			rightPanel.add(copyBtn);
 		}
 
-		// Close button not available with KDE o Fedora Gnome
-		// if (!isKde() && !isFedoraPatchedGnome()) {
-		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK
-		if (detect().equals(FULL)) {
+		// Close button only available with full Tray support
+		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK, Gnome OK
+		if (isFullTraySupport()) {
 			JButton closeBtn = new JButton("Close this window");
 			closeBtn.addActionListener(e -> frame.setVisible(false));
 			rightPanel.add(closeBtn);
