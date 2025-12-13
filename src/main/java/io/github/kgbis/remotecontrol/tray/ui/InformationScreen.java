@@ -38,11 +38,10 @@ import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
-import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isFedoraPatchedGnome;
-import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isGnome;
 import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isKde;
 import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.FULL;
 import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.NONE;
+import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.PARTIAL;
 import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.detect;
 
 @Singleton
@@ -170,8 +169,8 @@ public class InformationScreen {
 		JPanel leftPanel = new JPanel();
 
 		// do not show exit button with Gnome
-		//if (!isGnome() || isFedoraPatchedGnome()) {
-		// Cinnamon OK
+		// if (!isGnome() || isFedoraPatchedGnome()) {
+		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK
 		if (detect().equals(FULL) || detect().equals(NONE)) {
 			JButton exitBtn = new JButton("Exit Program");
 			exitBtn.addActionListener(e -> System.exit(0));
@@ -189,21 +188,23 @@ public class InformationScreen {
 
 	private @NonNull JPanel buildBottomRightPanel(JTable table) {
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		JButton copyBtn = new JButton("Copy All");
-		copyBtn.addActionListener(e -> {
-			int row = table.getSelectedRow();
-			if (row >= 0) {
-				copyRow(row, table);
-			}
-			else {
-				copyAll();
-			}
-		});
-		rightPanel.add(copyBtn);
+		if (!detect().equals(PARTIAL)) {
+			JButton copyBtn = new JButton("Copy All"); // !! REMOVE FOR PARTIAL !!
+			copyBtn.addActionListener(e -> {
+				int row = table.getSelectedRow();
+				if (row >= 0) {
+					copyRow(row, table);
+				}
+				else {
+					copyAll();
+				}
+			});
+			rightPanel.add(copyBtn);
+		}
 
 		// Close button not available with KDE o Fedora Gnome
-		//if (!isKde() && !isFedoraPatchedGnome()) {
-		// Cinnamon OK
+		// if (!isKde() && !isFedoraPatchedGnome()) {
+		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK
 		if (detect().equals(FULL)) {
 			JButton closeBtn = new JButton("Close this window");
 			closeBtn.addActionListener(e -> frame.setVisible(false));
