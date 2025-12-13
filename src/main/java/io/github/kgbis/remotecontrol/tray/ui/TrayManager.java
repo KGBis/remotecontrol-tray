@@ -16,6 +16,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
+import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.NONE;
+import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.detect;
+import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.getDesktop;
 
 @Singleton
 @Slf4j
@@ -71,8 +74,8 @@ public class TrayManager {
 	 */
 	public void initializeTray() {
 		EventQueue.invokeLater(() -> {
-			if (isKde() || isFedoraPatchedGnome()) {
-				log.info("{} detected. No System Tray. It does not support it correctly.", isKde() ? "KDE" : "Fedora");
+			if (detect().equals(NONE)) {
+				log.info("{} detected. No System Tray. It does not support it correctly.", StringUtils.capitalize(getDesktop()));
 				controller.toggleWindow();
 				return;
 			}

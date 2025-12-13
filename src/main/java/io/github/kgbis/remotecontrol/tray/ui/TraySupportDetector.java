@@ -1,5 +1,7 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import org.apache.commons.lang3.StringUtils;
+
 public final class TraySupportDetector {
 
 	public enum TraySupport {
@@ -34,7 +36,7 @@ public final class TraySupportDetector {
 
 		// --- KDE Plasma ---
 		if (desktop.contains("kde") || desktop.contains("plasma")) {
-			// Icono can appear, events dead
+			// Icono can appear, broken events
 			return TraySupport.NONE;
 		}
 
@@ -59,16 +61,16 @@ public final class TraySupportDetector {
 			return TraySupport.FULL;
 		}
 
-		// Fallback conservador
+		// Fallback to nnne
 		return TraySupport.NONE;
 	}
 
 	public static String getDesktop() {
 		String desktop = System.getenv("XDG_CURRENT_DESKTOP");
-		if (desktop == null || desktop.isBlank()) {
+		if (StringUtils.isBlank(desktop)) {
 			desktop = System.getenv("DESKTOP_SESSION");
 		}
-		return desktop == null ? "" : desktop;
+		return StringUtils.isBlank(desktop) ? "" : desktop.toLowerCase();
 	}
 
 	/* ================= helpers ================= */

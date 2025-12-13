@@ -41,6 +41,9 @@ import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL
 import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isFedoraPatchedGnome;
 import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isGnome;
 import static io.github.kgbis.remotecontrol.tray.ui.TrayManager.isKde;
+import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.FULL;
+import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.TraySupport.NONE;
+import static io.github.kgbis.remotecontrol.tray.ui.TraySupportDetector.detect;
 
 @Singleton
 @Slf4j
@@ -167,7 +170,9 @@ public class InformationScreen {
 		JPanel leftPanel = new JPanel();
 
 		// do not show exit button with Gnome
-		if (!isGnome() || isFedoraPatchedGnome()) {
+		//if (!isGnome() || isFedoraPatchedGnome()) {
+		// Cinnamon OK
+		if (detect().equals(FULL) || detect().equals(NONE)) {
 			JButton exitBtn = new JButton("Exit Program");
 			exitBtn.addActionListener(e -> System.exit(0));
 			leftPanel.add(exitBtn);
@@ -197,7 +202,9 @@ public class InformationScreen {
 		rightPanel.add(copyBtn);
 
 		// Close button not available with KDE o Fedora Gnome
-		if (!isKde() && !isFedoraPatchedGnome()) {
+		//if (!isKde() && !isFedoraPatchedGnome()) {
+		// Cinnamon OK
+		if (detect().equals(FULL)) {
 			JButton closeBtn = new JButton("Close this window");
 			closeBtn.addActionListener(e -> frame.setVisible(false));
 			rightPanel.add(closeBtn);
