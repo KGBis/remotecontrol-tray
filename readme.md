@@ -16,11 +16,14 @@ interfaces IPs and their MACs or exit the program. Simple but enough.
 - Windows 7/10/11 ️✅
 - Lubuntu Xfce 1.4.x & 2.2.x ✅
 - Linux Mint LXQt ✅
+- Linux Mint MATE ✅
 - Ubuntu MATE ✅
 
 - Manjaro Linux 25.0.10 with Gnome 49 ⚠️<sup>1</sup>
 - Manjaro Linux 25.0.10 with KDE Plasma ⚠️<sup>2</sup>
 - Fedora 43 Workstation with Gnome 49 ⚠️<sup>3</sup>
+-
+    - Linux Mint Cinnamon ⚠️
 
 <sup>1</sup> System tray is shown but `exit` button event is ignored or not received. Button removed.<br>
 <sup>2</sup> System tray is shown but it receives no events from mouse, so just information screen available.<br>
