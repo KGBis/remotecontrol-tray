@@ -30,7 +30,7 @@ public final class TraySupportDetector {
 	}
 
 	private static TraySupport getTraySupport() {
-		if(traySupport == null) {
+		if (traySupport == null) {
 			traySupport = detect();
 		}
 

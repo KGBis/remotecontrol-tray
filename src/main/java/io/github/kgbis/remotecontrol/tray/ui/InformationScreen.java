@@ -2,7 +2,6 @@ package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
-import io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +38,8 @@ import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
-import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupport.*;
-import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.*;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isFullTraySupport;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isPartialTraySupport;
 
 @Singleton
 @Slf4j
@@ -61,7 +60,7 @@ public class InformationScreen {
 		frame.setLayout(new BorderLayout(10, 10));
 		frame.setAlwaysOnTop(false);
 		frame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
-		frame.setExtendedState(/*isPartialTraySupport() ? Frame.ICONIFIED :*/ Frame.NORMAL);
+		frame.setExtendedState(/* isPartialTraySupport() ? Frame.ICONIFIED : */ Frame.NORMAL);
 
 		// ---------------------
 		// Header panel (text)
@@ -167,8 +166,6 @@ public class InformationScreen {
 		JPanel leftPanel = new JPanel();
 
 		// do not show exit button with Partial Support
-		// if (getTraySupport().equals(FULL) || getTraySupport().equals(NONE)) {
-		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK, Gnome OK
 		if (!isPartialTraySupport()) {
 			JButton exitBtn = new JButton("Exit Program");
 			exitBtn.addActionListener(e -> System.exit(0));
@@ -186,13 +183,15 @@ public class InformationScreen {
 
 	private @NonNull JPanel buildBottomRightPanel(JTable table) {
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		// Copy only if not partial tray support
 		if (!isPartialTraySupport()) {
-			JButton copyBtn = new JButton("Copy All");
+			JButton copyBtn = new JButton("Copy All/Selected");
 			copyBtn.addActionListener(e -> {
 				int row = table.getSelectedRow();
 				if (row >= 0) {
 					copyRow(row, table);
-				} else {
+				}
+				else {
 					copyAll();
 				}
 			});
@@ -214,7 +213,7 @@ public class InformationScreen {
 		GraphicsDevice gd = ge.getDefaultScreenDevice();
 		Rectangle screen = gd.getDefaultConfiguration().getBounds();
 
-		int margin = 30;
+		int margin = 40;
 		int x = screen.x + screen.width - frame.getWidth() - margin;
 		int y = screen.y + screen.height - frame.getHeight() - margin;
 
