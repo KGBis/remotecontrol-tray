@@ -33,14 +33,6 @@ interfaces IPs and their MACs or exit the program. Simple but enough.
 if you find a bug or want to contact me just drop me a line to [kike.g.garcia@gmail.com](mailto:kike.g.garcia@gmail.com)
 or [open an issue](https://github.com/KGBis/remotecontrol-tray/issues) in Github.
 
-## Acknowledges / Inspiration
-
-This project is based loosely on the 'Remote Shutdown Server' by Isah Rikovic (rikovicisah @ gmail.com) which I
-discovered some years ago while looking for a remote shutdown app for my Android device.
-
-Original JAR file can be
-found @ [https://github.com/rikovicisah/remoteshutdownpc](https://github.com/rikovicisah/remoteshutdownpc)
-
 ## License
 
 This software is distributed under the __GNU General Public License version 2 (GPLv2)__
@@ -60,14 +52,9 @@ Currently __A Java 11+ JRE/JDK is needed to be installed in the target computer 
 able to build an
 executable with embedded dependencies and JRE.
 
-### The Tray Icon
-
-- AWT system tray supported in Windows 10/11 and Linux running Xfce and Qt desktop
-- Dorkbox System Tray supported on Linux Gnome and/or Wayland
-
 ### Dependencies
 
-* Google Guice. A DI lightweight container for IoC. No more `new ClassX()` across the code.
+* Google Guice. A DI lightweight container for IoC. (Almost) No more `new ClassX()` across the code.
 * Google Guava. As it's a Guice dependency why not use it for class scanning!
 * JCommander. A great, small and easy to use command line argument parser.
 * SLF4J and Logback for logging.
@@ -76,14 +63,6 @@ executable with embedded dependencies and JRE.
   library. [https://github.com/oshi/oshi](https://github.com/oshi/oshi)
 * Dorkbox SystemTray.
 * Lombok.
-
-### Still pending... The TO DO list
-
-When I have the time, I'll install an Ubuntu distribution with VirtualBox to test if it works on Linux.
-It will also, most likely, work correctly on macOS, but who knows. I don't own any Apple device.
-
-And yes, as you probably have noticed, not a single unit test has been written... yet!
-I'm an old school developer 🤣
 
 ### Note for developers
 
