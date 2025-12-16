@@ -1,5 +1,9 @@
 package io.github.kgbis.remotecontrol.tray.net.info;
 
+import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import lombok.Setter;
 import oshi.SystemInfo;
 import oshi.hardware.NetworkIF;
 
@@ -10,7 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static io.github.kgbis.remotecontrol.tray.net.server.NetworkServer.POLL_INTERVAL_MS;
+
+@Singleton
 public class NetworkChangeRegistrar {
+
+	private final ServiceRegistar serviceRegistar;
 
 	private final SystemInfo systemInfo = new SystemInfo();
 
@@ -18,17 +27,19 @@ public class NetworkChangeRegistrar {
 
 	private Map<String, String> lastIpMacMap = new HashMap<>();
 
-	private final int pollIntervalMs;
+	@Setter
+	private int pollIntervalMs = POLL_INTERVAL_MS;
 
 	private Thread monitorThread;
 
 	private volatile boolean running = false;
 
-	public NetworkChangeRegistrar(int pollIntervalMs) {
-		this.pollIntervalMs = pollIntervalMs;
-	}
+	@Inject
+    public NetworkChangeRegistrar(ServiceRegistar serviceRegistar) {
+        this.serviceRegistar = serviceRegistar;
+    }
 
-	public void addListener(NetworkChangeListener listener) {
+    public void addListener(NetworkChangeListener listener) {
 		listeners.add(listener);
 	}
 
@@ -64,10 +75,13 @@ public class NetworkChangeRegistrar {
 				}
 
 				if (!currentIpMacMap.equals(lastIpMacMap)) {
+					// changes occurred
 					lastIpMacMap = currentIpMacMap;
 					for (NetworkChangeListener listener : listeners) {
 						listener.onNetworkChange(activeInterfaces);
 					}
+					serviceRegistar.restartIfNeeded();
+
 				}
 
 				Thread.sleep(pollIntervalMs);

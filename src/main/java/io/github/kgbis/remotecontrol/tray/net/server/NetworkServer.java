@@ -6,6 +6,7 @@ import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -42,22 +43,27 @@ public class NetworkServer {
 
 	private final NetworkActionFactory networkActionFactory;
 
+	private final ServiceRegistar serviceRegistar;
+
 	private volatile boolean running = false;
 
 	private boolean isDryRun = false;
 
 	private ServerSocket serverSocket;
 
-	private NetworkChangeRegistrar listener;
+	private final NetworkChangeRegistrar networkChangeRegistrar;
 
 	@Inject
 	public NetworkServer(ServerSocketFactory socketFactory, ServerLoopRunner loopRunner,
-			NetworkInfoProvider networkInfoProvider, NetworkActionFactory networkActionFactory) {
+                         NetworkInfoProvider networkInfoProvider, NetworkActionFactory networkActionFactory,
+                         ServiceRegistar serviceRegistar, NetworkChangeRegistrar networkChangeRegistrar) {
 		this.socketFactory = socketFactory;
 		this.loopRunner = loopRunner;
 		this.networkInfoProvider = networkInfoProvider;
 		this.networkActionFactory = networkActionFactory;
-	}
+		this.serviceRegistar = serviceRegistar;
+        this.networkChangeRegistrar = networkChangeRegistrar;
+    }
 
 	public NetworkServer arguments(CliArguments args) {
 		isDryRun = args.isDryRun();
@@ -105,9 +111,9 @@ public class NetworkServer {
 		log.info("Stopping NetworkServer...");
 
 		// Stop listener
-		if (listener != null) {
-			listener.removeListener(networkInfoProvider.getNetworkChangeListener());
-			listener.stop();
+		if (networkChangeRegistrar != null) {
+			networkChangeRegistrar.removeListener(networkInfoProvider.getNetworkChangeListener());
+			networkChangeRegistrar.stop();
 		}
 
 		closeSocket();
@@ -133,6 +139,9 @@ public class NetworkServer {
 			executor.shutdownNow();
 			Thread.currentThread().interrupt();
 		}
+
+		// mDNS service shutdown
+		serviceRegistar.unregister();
 
 		log.info("NetworkServer stopped.");
 	}
@@ -214,11 +223,10 @@ public class NetworkServer {
 	}
 
 	private void registerNetworkListener(final NetworkChangeListener networkChangeListener) {
-		listener = new NetworkChangeRegistrar(POLL_INTERVAL_MS);
-		listener.addListener(networkChangeListener);
+		networkChangeRegistrar.addListener(networkChangeListener);
 
 		log.info("Listening for network interfaces changes");
-		listener.start();
+		networkChangeRegistrar.start();
 	}
 
 }

@@ -2,7 +2,9 @@ package io.github.kgbis.remotecontrol.tray.net.server;
 
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,6 +46,13 @@ class NetworkServerTest {
 	@Mock
 	ServerLoopRunner loopRunner;
 
+	@Mock
+	ServiceRegistar serviceRegistar;
+
+	@SuppressWarnings("unused")
+    @Mock
+	NetworkChangeRegistrar networkChangeRegistrar;
+
 	@InjectMocks
 	NetworkServer networkServer;
 
@@ -80,6 +89,7 @@ class NetworkServerTest {
 
 		verify(loopRunner).start(any());
 		verify(loopRunner).stop();
+		verify(serviceRegistar).unregister();
 	}
 
 	@Test

@@ -62,10 +62,12 @@ public class LogbackConfiguration {
 		fileAppender.setEncoder(fileEncoder);
 		fileAppender.start();
 
-		// oshi logger (too much logs on Linux when in DEBUG)
+		// oshi logger and mDNS (too much logs when in DEBUG)
 		Logger oshi = context.getLogger("oshi");
+		Logger mDns = context.getLogger("javax.jmdns");
 		if (rootLevel.equals(Level.DEBUG) || rootLevel.equals(Level.TRACE)) {
 			oshi.setLevel(Level.INFO);
+			mDns.setLevel(Level.INFO);
 		}
 
 		// Root logger
