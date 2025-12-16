@@ -4,12 +4,14 @@ import com.beust.jcommander.JCommander;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.function.Consumer;
+
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.APP_NAME;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CliParser {
 
-	public static CliArguments parseCommandLine(String[] args) {
+	public static CliArguments parseCommandLine(String[] args, Consumer<JCommander> onHelp) {
 		CliArguments cliArguments = new CliArguments();
 		JCommander jCommander = JCommander.newBuilder()
 			.programName(APP_NAME)
@@ -20,8 +22,7 @@ public class CliParser {
 		jCommander.parse(args);
 
 		if (cliArguments.isHelp()) {
-			jCommander.usage();
-			System.exit(0);
+			onHelp.accept(jCommander);
 		}
 
 		return cliArguments;

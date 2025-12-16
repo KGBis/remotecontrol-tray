@@ -1,39 +1,68 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import dorkbox.systemTray.Menu;
+import dorkbox.systemTray.SystemTray;
+import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.SwingUtilities;
+import java.awt.AWTException;
+import java.awt.EventQueue;
+import java.awt.TrayIcon;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupport.NONE;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.*;
 
 @Singleton
 @Slf4j
 public class TrayManager {
 
-	private final TrayController controller;
-
-	private final ResourcesHelper resourcesHelper;
-
-	@Inject
-	public TrayManager(TrayController controller, ResourcesHelper resourcesHelper) {
-		this.controller = controller;
-		this.resourcesHelper = resourcesHelper;
+	static {
+		SystemTray.DEBUG = true;
 	}
 
+	private final TrayController controller;
+
+	@Inject
+	public TrayManager(TrayController controller) {
+		this.controller = controller;
+	}
+
+	/**
+	 * Inititalize system tray icon depending on OS support
+	 */
 	public void initializeTray() {
-		if (!SystemTray.isSupported()) {
-			log.error("System tray is not supported. Running without tray menu.");
-			return;
-		}
+		EventQueue.invokeLater(() -> {
+			if (isNoneTraySupport()) {
+				log.info("{} detected. No System Tray. It does not support it correctly.", StringUtils.capitalize(getDesktop()));
+				controller.toggleWindow();
+				return;
+			}
 
-		SystemTray tray = SystemTray.getSystemTray();
+			if (java.awt.SystemTray.isSupported()) {
+				log.info("AWT SystemTray supported. Using native implementation.");
+				useAwtSystemTray();
+			}
+			else {
+				log.info("AWT SystemTray NOT supported. Trying to use dorkbox/SystemTray as fallback.");
+				useDorkboxSystemTray();
+			}
+		});
+	}
 
-		TrayIcon trayIcon = new TrayIcon(resourcesHelper.getIcon(), REMOTE_PC_CONTROL);
+	/**
+	 * Supported by Windows and XFCE
+	 */
+	private void useAwtSystemTray() {
+		final java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
+
+		TrayIcon trayIcon = new TrayIcon(ResourcesHelper.getIcon(), REMOTE_PC_CONTROL);
 		trayIcon.setImageAutoSize(true);
 		trayIcon.addMouseListener(new MouseAdapter() {
 			@Override
@@ -51,6 +80,28 @@ public class TrayManager {
 		catch (AWTException e) {
 			log.warn("Could not add tray icon: {}", e.getMessage());
 		}
+	}
+
+	/**
+	 * For Gnome.
+	 */
+	private void useDorkboxSystemTray() {
+		final SystemTray systemTray = SystemTray.get();
+		if (systemTray == null) {
+			log.warn("Unable to use AWT or Dorkbox's tray. Application will continue to run without tray icon.");
+			return;
+		}
+
+		systemTray.setImage(ResourcesHelper.getIcon());
+		Menu menu;
+		try {
+			menu = systemTray.setStatus(REMOTE_PC_CONTROL);
+		}
+		catch (Exception e) {
+			log.warn("Error in Dorkbox System Tray: {}", e.getMessage());
+			menu = systemTray.setTooltip(REMOTE_PC_CONTROL);
+		}
+		menu.setCallback(e -> controller.toggleWindow());
 	}
 
 }

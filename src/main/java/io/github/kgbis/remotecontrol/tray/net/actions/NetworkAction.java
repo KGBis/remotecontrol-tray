@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.*;
+import java.net.Socket;
 
 @Slf4j
 public abstract class NetworkAction {

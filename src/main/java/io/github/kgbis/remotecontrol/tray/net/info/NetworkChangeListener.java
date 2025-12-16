@@ -39,11 +39,12 @@ public class NetworkChangeListener {
 	}
 
 	public void awaitInitialization(long timeoutMs) throws InterruptedException {
+		log.info("Discovering network interfaces");
 		if (!initialized.await(timeoutMs, TimeUnit.MILLISECONDS)) {
-			log.warn("No network interfaces discovered within {} ms. Continuing anyway.", timeoutMs);
+			log.debug("No network interfaces discovered within {} ms. Continuing anyway.", timeoutMs);
 		}
 		else {
-			log.debug("Network interfaces discovered");
+			log.debug("Network interfaces discovered in less than {} ms.", timeoutMs);
 		}
 	}
 
