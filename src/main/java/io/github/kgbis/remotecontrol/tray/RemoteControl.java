@@ -7,7 +7,6 @@ import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.cli.CliParser;
 import io.github.kgbis.remotecontrol.tray.ioc.RemoteControlModule;
 import io.github.kgbis.remotecontrol.tray.logging.LogbackConfiguration;
-import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
 import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
 import jakarta.inject.Inject;
@@ -33,19 +32,15 @@ public class RemoteControl {
 
 	private final TrayManager trayManager;
 
-	private final ServiceRegistar serviceRegistar;
-
 	@Inject
-	public RemoteControl(NetworkServer networkServer, TrayManager trayManager, ServiceRegistar serviceRegistar) {
+	public RemoteControl(NetworkServer networkServer, TrayManager trayManager) {
 		this.networkServer = networkServer;
 		this.trayManager = trayManager;
-        this.serviceRegistar = serviceRegistar;
-    }
+	}
 
 	public void start(CliArguments cliArgs) throws IOException, InterruptedException {
 		trayManager.initializeTray();
 		networkServer.arguments(cliArgs).start();
-		serviceRegistar.register();
 	}
 
 	public static void main(String[] args) {

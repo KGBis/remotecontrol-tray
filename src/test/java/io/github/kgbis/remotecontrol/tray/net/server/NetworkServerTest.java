@@ -4,7 +4,7 @@ import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
-import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
+import io.github.kgbis.remotecontrol.tray.net.mdns.MulticastServiceRegistar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,10 +47,10 @@ class NetworkServerTest {
 	ServerLoopRunner loopRunner;
 
 	@Mock
-	ServiceRegistar serviceRegistar;
+	MulticastServiceRegistar multicastServiceRegistar;
 
 	@SuppressWarnings("unused")
-    @Mock
+	@Mock
 	NetworkChangeRegistrar networkChangeRegistrar;
 
 	@InjectMocks
@@ -89,7 +89,7 @@ class NetworkServerTest {
 
 		verify(loopRunner).start(any());
 		verify(loopRunner).stop();
-		verify(serviceRegistar).unregister();
+		verify(multicastServiceRegistar).unregister();
 	}
 
 	@Test

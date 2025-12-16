@@ -6,7 +6,7 @@ import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
-import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
+import io.github.kgbis.remotecontrol.tray.net.mdns.MulticastServiceRegistar;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class NetworkServer {
 
 	private final NetworkActionFactory networkActionFactory;
 
-	private final ServiceRegistar serviceRegistar;
+	private final MulticastServiceRegistar multicastServiceRegistar;
 
 	private volatile boolean running = false;
 
@@ -55,15 +55,15 @@ public class NetworkServer {
 
 	@Inject
 	public NetworkServer(ServerSocketFactory socketFactory, ServerLoopRunner loopRunner,
-                         NetworkInfoProvider networkInfoProvider, NetworkActionFactory networkActionFactory,
-                         ServiceRegistar serviceRegistar, NetworkChangeRegistrar networkChangeRegistrar) {
+			NetworkInfoProvider networkInfoProvider, NetworkActionFactory networkActionFactory,
+			MulticastServiceRegistar multicastServiceRegistar, NetworkChangeRegistrar networkChangeRegistrar) {
 		this.socketFactory = socketFactory;
 		this.loopRunner = loopRunner;
 		this.networkInfoProvider = networkInfoProvider;
 		this.networkActionFactory = networkActionFactory;
-		this.serviceRegistar = serviceRegistar;
-        this.networkChangeRegistrar = networkChangeRegistrar;
-    }
+		this.multicastServiceRegistar = multicastServiceRegistar;
+		this.networkChangeRegistrar = networkChangeRegistrar;
+	}
 
 	public NetworkServer arguments(CliArguments args) {
 		isDryRun = args.isDryRun();
@@ -74,11 +74,11 @@ public class NetworkServer {
 	}
 
 	public synchronized void start() throws IOException, InterruptedException {
-		// wait until NetworkInfoProvider has initialized
-		networkInfoProvider.awaitInitialization();
-
 		// register network interfaces listener
 		registerNetworkListener(networkInfoProvider.getNetworkChangeListener());
+
+		// wait until NetworkInfoProvider has initialized
+		networkInfoProvider.awaitInitialization();
 
 		// register shutdown hook
 		registerShutdownHook();
@@ -141,7 +141,7 @@ public class NetworkServer {
 		}
 
 		// mDNS service shutdown
-		serviceRegistar.unregister();
+		multicastServiceRegistar.unregister();
 
 		log.info("NetworkServer stopped.");
 	}

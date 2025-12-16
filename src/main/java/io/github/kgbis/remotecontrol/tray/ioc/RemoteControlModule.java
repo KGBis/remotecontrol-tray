@@ -6,7 +6,7 @@ import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
-import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
+import io.github.kgbis.remotecontrol.tray.net.mdns.MulticastServiceRegistar;
 import io.github.kgbis.remotecontrol.tray.net.server.DefaultServerLoopRunner;
 import io.github.kgbis.remotecontrol.tray.net.server.DefaultServerSocketFactory;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
@@ -32,7 +32,7 @@ public class RemoteControlModule extends AbstractModule {
 		bind(NetworkInfoProvider.class).in(Singleton.class);
 		bind(NetworkServer.class).in(Singleton.class);
 		bind(RemoteControl.class).in(Singleton.class);
-		bind(ServiceRegistar.class).in(Singleton.class);
+		bind(MulticastServiceRegistar.class).in(Singleton.class);
 		bind(TrayController.class).in(Singleton.class);
 		bind(TrayManager.class).in(Singleton.class);
 	}

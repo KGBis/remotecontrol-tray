@@ -1,6 +1,6 @@
 package io.github.kgbis.remotecontrol.tray.net.info;
 
-import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
+import io.github.kgbis.remotecontrol.tray.net.mdns.MulticastServiceRegistar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ class NetworkChangeRegistrarTest {
 	NetworkChangeListener listener;
 
 	@Mock
-	ServiceRegistar serviceRegistar;
+	MulticastServiceRegistar multicastServiceRegistar;
 
 	@InjectMocks
 	NetworkChangeRegistrar registrar;
@@ -49,17 +49,17 @@ class NetworkChangeRegistrarTest {
 		// First call -> should notify
 		processInterfaces(List.of(net1));
 		verify(listener, times(1)).onNetworkChange(any());
-		verify(serviceRegistar, times(1)).restartIfNeeded();
+		verify(multicastServiceRegistar, times(1)).restartIfNeeded();
 
 		// Second call with same map -> shouldn't notify
 		processInterfaces(List.of(net1));
 		verify(listener, times(1)).onNetworkChange(any());
-		verify(serviceRegistar, times(1)).restartIfNeeded();
+		verify(multicastServiceRegistar, times(1)).restartIfNeeded();
 
 		// Changes in interfaces -> should notify
 		processInterfaces(List.of(net1, net2));
 		verify(listener, times(2)).onNetworkChange(any());
-		verify(serviceRegistar, times(2)).restartIfNeeded();
+		verify(multicastServiceRegistar, times(2)).restartIfNeeded();
 	}
 
 	/**
@@ -79,7 +79,7 @@ class NetworkChangeRegistrarTest {
 			// changes occurred
 			lastIpMacMap = currentIpMacMap;
 			listener.onNetworkChange(activeInterfaces);
-			serviceRegistar.restartIfNeeded();
+			multicastServiceRegistar.restartIfNeeded();
 		}
 	}
 

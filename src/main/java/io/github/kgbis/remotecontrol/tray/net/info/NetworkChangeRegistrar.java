@@ -1,27 +1,23 @@
 package io.github.kgbis.remotecontrol.tray.net.info;
 
-import io.github.kgbis.remotecontrol.tray.net.mdns.ServiceRegistar;
+import io.github.kgbis.remotecontrol.tray.net.mdns.MulticastServiceRegistar;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Setter;
-import oshi.SystemInfo;
 import oshi.hardware.NetworkIF;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static io.github.kgbis.remotecontrol.tray.net.NetworkInterfacesHelper.getActiveInterfaces;
 import static io.github.kgbis.remotecontrol.tray.net.server.NetworkServer.POLL_INTERVAL_MS;
 
 @Singleton
 public class NetworkChangeRegistrar {
 
-	private final ServiceRegistar serviceRegistar;
-
-	private final SystemInfo systemInfo = new SystemInfo();
+	private final MulticastServiceRegistar multicastServiceRegistar;
 
 	private final List<NetworkChangeListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -35,11 +31,11 @@ public class NetworkChangeRegistrar {
 	private volatile boolean running = false;
 
 	@Inject
-    public NetworkChangeRegistrar(ServiceRegistar serviceRegistar) {
-        this.serviceRegistar = serviceRegistar;
-    }
+	public NetworkChangeRegistrar(MulticastServiceRegistar multicastServiceRegistar) {
+		this.multicastServiceRegistar = multicastServiceRegistar;
+	}
 
-    public void addListener(NetworkChangeListener listener) {
+	public void addListener(NetworkChangeListener listener) {
 		listeners.add(listener);
 	}
 
@@ -80,7 +76,8 @@ public class NetworkChangeRegistrar {
 					for (NetworkChangeListener listener : listeners) {
 						listener.onNetworkChange(activeInterfaces);
 					}
-					serviceRegistar.restartIfNeeded();
+					if (!lastIpMacMap.isEmpty())
+						multicastServiceRegistar.restartIfNeeded();
 
 				}
 
@@ -90,16 +87,6 @@ public class NetworkChangeRegistrar {
 				Thread.currentThread().interrupt();
 			}
 		}
-	}
-
-	private List<NetworkIF> getActiveInterfaces() {
-		List<NetworkIF> result = new ArrayList<>();
-		for (NetworkIF net : systemInfo.getHardware().getNetworkIFs()) {
-			boolean hasIPv4 = Arrays.stream(net.getIPv4addr()).anyMatch(ip -> !ip.isEmpty());
-			if (hasIPv4)
-				result.add(net);
-		}
-		return result;
 	}
 
 }
