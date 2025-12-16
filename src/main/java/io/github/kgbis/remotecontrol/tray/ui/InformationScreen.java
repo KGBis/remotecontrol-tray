@@ -5,16 +5,41 @@ import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isFullTraySupport;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isPartialTraySupport;
 
 @Singleton
 @Slf4j
@@ -32,10 +57,10 @@ public class InformationScreen {
 
 		frame = new JFrame(REMOTE_PC_CONTROL);
 		frame.setIconImage(ResourcesHelper.getIcon());
-		frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		frame.setLayout(new BorderLayout(10, 10));
-		frame.setAlwaysOnTop(true); // <--- configurable
+		frame.setAlwaysOnTop(false);
 		frame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
+		frame.setExtendedState(/* isPartialTraySupport() ? Frame.ICONIFIED : */ Frame.NORMAL);
 
 		// ---------------------
 		// Header panel (text)
@@ -76,6 +101,16 @@ public class InformationScreen {
 		frame.getRootPane()
 			.registerKeyboardAction(e -> frame.setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
 					JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+		// Register CLOSE (x) window to exit
+		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				log.debug("Window close clicked. Exiting");
+				System.exit(0);
+			}
+		});
 
 	}
 
@@ -129,31 +164,48 @@ public class InformationScreen {
 
 		// Left panel with "exit" button
 		JPanel leftPanel = new JPanel();
-		JButton exitBtn = new JButton("Exit Program");
-		exitBtn.addActionListener(e -> System.exit(0));
-		leftPanel.add(exitBtn);
+
+		// do not show exit button with Partial Support
+		if (!isPartialTraySupport()) {
+			JButton exitBtn = new JButton("Exit Program");
+			exitBtn.addActionListener(e -> System.exit(0));
+			leftPanel.add(exitBtn);
+		}
 
 		// Right panel with "copy" and "close" buttons
-		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		JButton copyBtn = new JButton("Copy All");
-		copyBtn.addActionListener(e -> {
-			int row = table.getSelectedRow();
-			if (row >= 0) {
-				copyRow(row, table);
-			}
-			else {
-				copyAll();
-			}
-		});
+		JPanel rightPanel = buildBottomRightPanel(table);
 
-		JButton closeBtn = new JButton("Close this window");
-		closeBtn.addActionListener(e -> frame.setVisible(false));
-		rightPanel.add(copyBtn);
-		rightPanel.add(closeBtn);
-
+		// add left and right panel to button bar
 		buttonBar.add(leftPanel, BorderLayout.WEST);
 		buttonBar.add(rightPanel, BorderLayout.EAST);
 		return buttonBar;
+	}
+
+	private @NonNull JPanel buildBottomRightPanel(JTable table) {
+		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		// Copy only if not partial tray support
+		if (!isPartialTraySupport()) {
+			JButton copyBtn = new JButton("Copy All/Selected");
+			copyBtn.addActionListener(e -> {
+				int row = table.getSelectedRow();
+				if (row >= 0) {
+					copyRow(row, table);
+				}
+				else {
+					copyAll();
+				}
+			});
+			rightPanel.add(copyBtn);
+		}
+
+		// Close button only available with full Tray support
+		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK, Gnome OK
+		if (isFullTraySupport()) {
+			JButton closeBtn = new JButton("Close this window");
+			closeBtn.addActionListener(e -> frame.setVisible(false));
+			rightPanel.add(closeBtn);
+		}
+		return rightPanel;
 	}
 
 	private void placeNearTray(JFrame frame) {
@@ -161,7 +213,7 @@ public class InformationScreen {
 		GraphicsDevice gd = ge.getDefaultScreenDevice();
 		Rectangle screen = gd.getDefaultConfiguration().getBounds();
 
-		int margin = 30;
+		int margin = 40;
 		int x = screen.x + screen.width - frame.getWidth() - margin;
 		int y = screen.y + screen.height - frame.getHeight() - margin;
 

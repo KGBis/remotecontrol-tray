@@ -14,7 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.*;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -30,23 +34,29 @@ public class NetworkServer {
 	// Fixed pool to avoid thread destruction/creation
 	private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
+	private final ServerSocketFactory socketFactory;
+
+	private final ServerLoopRunner loopRunner;
+
 	private final NetworkInfoProvider networkInfoProvider;
 
 	private final NetworkActionFactory networkActionFactory;
 
 	private volatile boolean running = false;
 
-	private Boolean isDryRun;
+	private boolean isDryRun = false;
 
 	private ServerSocket serverSocket;
 
-	private Thread serverThread;
+	private NetworkChangeRegistrar listener;
 
 	@Inject
-	public NetworkServer(NetworkInfoProvider networkInfoProvider, NetworkActionFactory networkActionFactory) {
+	public NetworkServer(ServerSocketFactory socketFactory, ServerLoopRunner loopRunner,
+			NetworkInfoProvider networkInfoProvider, NetworkActionFactory networkActionFactory) {
+		this.socketFactory = socketFactory;
+		this.loopRunner = loopRunner;
 		this.networkInfoProvider = networkInfoProvider;
 		this.networkActionFactory = networkActionFactory;
-		registerNetworkListener(networkInfoProvider.getNetworkChangeListener());
 	}
 
 	public NetworkServer arguments(CliArguments args) {
@@ -61,6 +71,12 @@ public class NetworkServer {
 		// wait until NetworkInfoProvider has initialized
 		networkInfoProvider.awaitInitialization();
 
+		// register network interfaces listener
+		registerNetworkListener(networkInfoProvider.getNetworkChangeListener());
+
+		// register shutdown hook
+		registerShutdownHook();
+
 		// Already running. Don't want to start again
 		if (running) {
 			return;
@@ -68,7 +84,7 @@ public class NetworkServer {
 
 		running = true;
 
-		serverSocket = new ServerSocket();
+		serverSocket = socketFactory.create();
 		// Enable SO_REUSEADDR socket option (important for Windows)
 		serverSocket.setReuseAddress(true);
 		serverSocket.bind(new InetSocketAddress(PORT));
@@ -76,8 +92,8 @@ public class NetworkServer {
 
 		log.info("NetworkServer listening on port {}", PORT);
 
-		serverThread = new Thread(this::socketLoop, "socket-thread");
-		serverThread.start();
+		// Start main socket loop
+		loopRunner.start(this::socketLoop);
 	}
 
 	public synchronized void stop() {
@@ -88,24 +104,27 @@ public class NetworkServer {
 		running = false;
 		log.info("Stopping NetworkServer...");
 
-		// 1) Close socket to wake up accept()
-		closeSocket();
-
-		// 2) Wait for server thread
-		if (serverThread != null) {
-			try {
-				serverThread.join(2000);
-			}
-			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				log.warn("Interrupted while joining serverThread");
-			}
+		// Stop listener
+		if (listener != null) {
+			listener.removeListener(networkInfoProvider.getNetworkChangeListener());
+			listener.stop();
 		}
 
-		// 3) Executor shutdown
+		closeSocket();
+
+		// Wait for server loop thread to stop
+		try {
+			loopRunner.stop();
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.warn("Interrupted while terminating socket-thread");
+		}
+
+		// Executor shutdown
 		executor.shutdown();
 		try {
-			if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+			if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
 				log.warn("Executor did not terminate, forcing shutdownNow()");
 				executor.shutdownNow();
 			}
@@ -157,6 +176,7 @@ public class NetworkServer {
 		try {
 			if (serverSocket != null && !serverSocket.isClosed()) {
 				serverSocket.close();
+				log.debug("Server socket closed");
 			}
 		}
 		catch (IOException e) {
@@ -164,9 +184,9 @@ public class NetworkServer {
 		}
 	}
 
-	private void handleClient(Socket socket) {
+	void handleClient(Socket socket) {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-			try {
+			try (socket) {
 				String message = br.readLine();
 				log.info("Received message: {}", message);
 
@@ -175,34 +195,30 @@ public class NetworkServer {
 
 				action.execute();
 			}
-			finally {
-				socket.close();
-			}
 		}
 		catch (Exception e) {
 			log.error("Error handling client", e);
 		}
 	}
 
-	private void registerNetworkListener(final NetworkChangeListener networkChangeListener) {
-		final NetworkChangeRegistrar listener = new NetworkChangeRegistrar(POLL_INTERVAL_MS);
-		listener.addListener(networkChangeListener);
-
-		log.info("Listening for network interfaces changes");
-		listener.start();
-
+	private void registerShutdownHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			log.debug("Stopping listener and server");
-			listener.removeListener(networkChangeListener);
-			listener.stop();
-
+			log.debug("Shutdown hook triggered");
 			try {
 				NetworkServer.this.stop();
 			}
 			catch (Exception e) {
-				log.warn("Error stopping from ShutdownHook. Nothing to worry about: {}", e.getMessage());
+				log.warn("Error stopping server from ShutdownHook. Nothing to worry about", e);
 			}
 		}, "shutdown-hook"));
+	}
+
+	private void registerNetworkListener(final NetworkChangeListener networkChangeListener) {
+		listener = new NetworkChangeRegistrar(POLL_INTERVAL_MS);
+		listener.addListener(networkChangeListener);
+
+		log.info("Listening for network interfaces changes");
+		listener.start();
 	}
 
 }

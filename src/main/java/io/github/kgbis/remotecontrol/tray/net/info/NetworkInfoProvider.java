@@ -35,7 +35,7 @@ public class NetworkInfoProvider {
 	}
 
 	public void awaitInitialization() throws InterruptedException {
-		networkChangeListener.awaitInitialization(10000);
+		networkChangeListener.awaitInitialization(7500);
 	}
 
 	public List<String> getIPv4Addresses() {

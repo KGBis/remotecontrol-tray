@@ -14,8 +14,11 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SystemUtils;
 
-import javax.swing.*;
+import javax.swing.UIManager;
 import java.io.IOException;
+import java.net.BindException;
+
+import static io.github.kgbis.remotecontrol.tray.net.server.NetworkServer.PORT;
 
 @Singleton
 @Slf4j
@@ -56,7 +59,10 @@ public class RemoteControl {
 
 		try {
 			// parse command line arguments (if -h or --help, show usage and exit)
-			CliArguments cliArguments = CliParser.parseCommandLine(args);
+			CliArguments cliArguments = CliParser.parseCommandLine(args, jc -> {
+				jc.usage();
+				System.exit(0);
+			});
 
 			// configure logback system
 			LogbackConfiguration.configure(cliArguments.getLogLevel(), cliArguments.isLogToConsole());
@@ -64,6 +70,10 @@ public class RemoteControl {
 			// Start Guice DI container and entrypoint class (RemoteControl)
 			Injector injector = Guice.createInjector(new RemoteControlModule());
 			injector.getInstance(RemoteControl.class).start(cliArguments);
+		}
+		catch (BindException be) {
+			log.error("Error while binding port to " + PORT + ". Check if already in use!");
+			System.exit(1);
 		}
 		catch (IOException | InterruptedException e) {
 			log.error("Something bad happened. Please report the following error: ", e);
