@@ -1,7 +1,7 @@
-package io.github.kgbis.remotecontrol.tray.net;
+package io.github.kgbis.remotecontrol.tray.net.internal;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.Strings;
@@ -17,16 +17,21 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
-public class NetworkInterfacesHelper {
+@Singleton
+public class NetworkInterfaces {
 
-	private static final SystemInfo systemInfo = new SystemInfo();
+	private final SystemInfo systemInfo;
 
-	private static final String[] virtualPlaceholders = new String[] { "virtual", "docker", "br-", "virbr", "vbox",
+	final String[] virtualPlaceholders = new String[] { "virtual", "docker", "br-", "virbr", "vbox",
 			"hyper" };
 
-	public static List<NetworkIF> getActiveInterfaces() {
+	@Inject
+    public NetworkInterfaces(SystemInfo systemInfo) {
+        this.systemInfo = systemInfo;
+    }
+
+    public List<NetworkIF> getActiveInterfaces() {
 		List<NetworkIF> result = new ArrayList<>();
 		for (NetworkIF net : systemInfo.getHardware().getNetworkIFs()) {
 			boolean hasIPv4 = Arrays.stream(net.getIPv4addr()).anyMatch(ip -> !ip.isEmpty());
@@ -36,22 +41,22 @@ public class NetworkInterfacesHelper {
 		return result;
 	}
 
-	public static Optional<InetAddress> selectMdnsAddress() {
+	public Optional<InetAddress> selectMdnsAddress() {
 		return getActiveInterfaces().stream()
-			.filter(NetworkInterfacesHelper::isUsable)
+			.filter(this::isUsable)
 			.filter(net -> !isVirtualLike(net))
-			.sorted(Comparator.comparingInt(NetworkInterfacesHelper::priority))
+			.sorted(Comparator.comparingInt(this::priority))
 			.flatMap(net -> Arrays.stream(net.getIPv4addr()))
-			.map(NetworkInterfacesHelper::toInetAddress)
+			.map(this::toInetAddress)
 			.flatMap(Optional::stream)
 			.findFirst();
 	}
 
-	private static boolean isVirtualLike(NetworkIF networkIF) {
+	boolean isVirtualLike(NetworkIF networkIF) {
 		return Strings.CI.containsAny(networkIF.getName(), virtualPlaceholders);
 	}
 
-	private static int priority(NetworkIF networkIF) {
+	int priority(NetworkIF networkIF) {
 		String name = networkIF.getName().toLowerCase();
 		if (name.startsWith("eth") || name.startsWith("en")) { // "en" for macOS
 			return 0;
@@ -64,7 +69,7 @@ public class NetworkInterfacesHelper {
 		return 10;
 	}
 
-	private static boolean isLoopback(NetworkIF networkIF) {
+	boolean isLoopback(NetworkIF networkIF) {
 		try {
 			NetworkInterface ni = networkIF.queryNetworkInterface();
 			return ni != null && ni.isLoopback();
@@ -74,7 +79,7 @@ public class NetworkInterfacesHelper {
 		}
 	}
 
-	private static boolean isUsable(NetworkIF networkIF) {
+	boolean isUsable(NetworkIF networkIF) {
 		if (!networkIF.isConnectorPresent()) {
 			return false;
 		}
@@ -85,7 +90,7 @@ public class NetworkInterfacesHelper {
 		return ArrayUtils.isNotEmpty(networkIF.getIPv4addr());
 	}
 
-	private static Optional<InetAddress> toInetAddress(String ip) {
+	Optional<InetAddress> toInetAddress(String ip) {
 		try {
 			return Optional.of(InetAddress.getByName(ip));
 		}

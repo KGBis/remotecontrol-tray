@@ -2,8 +2,10 @@ package io.github.kgbis.remotecontrol.tray.net.mdns;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,47 +17,51 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.kgbis.remotecontrol.tray.net.NetworkInterfacesHelper.selectMdnsAddress;
 import static io.github.kgbis.remotecontrol.tray.net.server.NetworkServer.PORT;
 
 @Slf4j
-@Getter
 @Singleton
 public class MulticastServiceRegistar {
 
 	private JmDNS jmdns;
 
-	private ServiceInfo service;
-
+	@Getter(AccessLevel.PACKAGE)
 	private final AtomicReference<InetAddress> currentAddress = new AtomicReference<>();
 
 	private final Object lock = new Object();
 
 	private final NetworkInfoProvider networkInfoProvider;
 
+	private final NetworkInterfaces interfaces;
+
+	private final JmDNSFactory jmDNSFactory;
+
 	@Inject
-	public MulticastServiceRegistar(NetworkInfoProvider networkInfoProvider) {
+	public MulticastServiceRegistar(NetworkInfoProvider networkInfoProvider, NetworkInterfaces interfaces,
+			JmDNSFactory jmDNSFactory) {
 		this.networkInfoProvider = networkInfoProvider;
+		this.interfaces = interfaces;
+		this.jmDNSFactory = jmDNSFactory;
 	}
 
 	public void register() {
 		synchronized (lock) {
 			if (jmdns == null) {
 				try {
-					InetAddress inetAddress = selectMdnsAddress().orElse(null);
+					InetAddress inetAddress = interfaces.selectMdnsAddress().orElse(null);
 					if (inetAddress == null) {
 						log.error("Unable to find a suitable mDNS address. No mDNS will be registered.");
 						return;
 					}
 					currentAddress.set(inetAddress);
 					Map<String, String> props = setProperties(inetAddress.getHostAddress());
-					service = ServiceInfo.create("_rpcctl._tcp.local", "rpcct", PORT, 0, 0, true, props);
+					ServiceInfo service = ServiceInfo.create("_rpcctl._tcp.local", "rpcct", PORT, 0, 0, true, props);
 
 					// create and register mDNS
-					jmdns = JmDNS.create(currentAddress.get());
+					jmdns = jmDNSFactory.create(currentAddress.get());
 					jmdns.registerService(service);
 
-					log.info("mDNS service registered as {}.", service.getNiceTextString());
+					log.info("mDNS service registered as '{}' with type '{}'", service.getName(), service.getType());
 				}
 				catch (IOException e) {
 					log.warn("Service could not be registered: {}", e.getMessage());
@@ -68,22 +74,22 @@ public class MulticastServiceRegistar {
 	public void restartIfNeeded() {
 		synchronized (lock) {
 			try {
-				InetAddress newAddr = selectMdnsAddress().orElse(null);
+				InetAddress newAddr = interfaces.selectMdnsAddress().orElse(null);
 
 				// in case of no new address, unregister and exit
 				if (newAddr == null) {
+					log.debug("No suitable mDNS address. No mDNS will be registered.");
 					unregisterInternal();
 					return;
 				}
 
 				if (newAddr.equals(currentAddress.get())) {
+					log.debug("No changes in address.");
 					return; // nothing changed
 				}
 
-				// only log if network actually changed
-				if (currentAddress.get() == null) {
-					log.info("Network change detected from {} to {}, restarting mDNS", currentAddress, newAddr);
-				}
+				log.info("Network change detected from {} to {}, {}starting mDNS", currentAddress.get(), newAddr,
+						currentAddress.get() == null ? "" : "re");
 
 				unregisterInternal();
 				currentAddress.set(newAddr);

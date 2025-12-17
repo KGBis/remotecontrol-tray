@@ -8,16 +8,16 @@ import oshi.hardware.NetworkIF;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Singleton
 @Slf4j
 public class NetworkChangeListener {
 
 	@Getter
-	private final Map<String, String> ipMacMap = new ConcurrentHashMap<>();
+	private final AtomicReference<Map<String, String>> atomicIpMacMap = new AtomicReference<>(Map.of());
 
 	private final CountDownLatch initialized = new CountDownLatch(1);
 
@@ -28,12 +28,12 @@ public class NetworkChangeListener {
 				newMap.put(ip, net.getMacaddr());
 			}
 		});
-		ipMacMap.clear();
-		ipMacMap.putAll(newMap);
 
-		ipMacMap.forEach((ip, mac) -> log.info("Detected IP {} bound to MAC address {}", ip, mac));
+		atomicIpMacMap.set(Map.copyOf(newMap));
+		atomicIpMacMap.get().forEach((ip, mac) -> log.info("Detected IP {} bound to MAC address {}", ip, mac));
 
-		if (!ipMacMap.isEmpty()) {
+		// Only for inialization
+		if (!atomicIpMacMap.get().isEmpty()) {
 			initialized.countDown();
 		}
 	}

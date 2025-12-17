@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 @Singleton
-public class DefaultServerSocketFactory implements ServerSocketFactory {
+public class ServerSocketFactoryDefaultImpl implements ServerSocketFactory {
 
 	@Override
 	public ServerSocket create() throws IOException {

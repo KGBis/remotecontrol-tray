@@ -1,9 +1,11 @@
 package io.github.kgbis.remotecontrol.tray.net.info;
 
+import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import io.github.kgbis.remotecontrol.tray.net.mdns.MulticastServiceRegistar;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Setter;
+import org.jspecify.annotations.NonNull;
 import oshi.hardware.NetworkIF;
 
 import java.util.HashMap;
@@ -11,13 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static io.github.kgbis.remotecontrol.tray.net.NetworkInterfacesHelper.getActiveInterfaces;
 import static io.github.kgbis.remotecontrol.tray.net.server.NetworkServer.POLL_INTERVAL_MS;
 
 @Singleton
 public class NetworkChangeRegistrar {
 
 	private final MulticastServiceRegistar multicastServiceRegistar;
+
+	private final NetworkInterfaces interfaces;
 
 	private final List<NetworkChangeListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -31,9 +34,10 @@ public class NetworkChangeRegistrar {
 	private volatile boolean running = false;
 
 	@Inject
-	public NetworkChangeRegistrar(MulticastServiceRegistar multicastServiceRegistar) {
+	public NetworkChangeRegistrar(MulticastServiceRegistar multicastServiceRegistar, NetworkInterfaces interfaces) {
 		this.multicastServiceRegistar = multicastServiceRegistar;
-	}
+        this.interfaces = interfaces;
+    }
 
 	public void addListener(NetworkChangeListener listener) {
 		listeners.add(listener);
@@ -62,13 +66,8 @@ public class NetworkChangeRegistrar {
 	private void monitorLoop() {
 		while (running) {
 			try {
-				List<NetworkIF> activeInterfaces = getActiveInterfaces();
-				Map<String, String> currentIpMacMap = new HashMap<>();
-				for (NetworkIF net : activeInterfaces) {
-					for (String ip : net.getIPv4addr()) {
-						currentIpMacMap.put(ip, net.getMacaddr());
-					}
-				}
+				List<NetworkIF> activeInterfaces = interfaces.getActiveInterfaces();
+				Map<String, String> currentIpMacMap = getCurrentIpMacMap(activeInterfaces);
 
 				if (!currentIpMacMap.equals(lastIpMacMap)) {
 					// changes occurred
@@ -87,6 +86,16 @@ public class NetworkChangeRegistrar {
 				Thread.currentThread().interrupt();
 			}
 		}
+	}
+
+	private @NonNull Map<String, String> getCurrentIpMacMap(List<NetworkIF> activeInterfaces) {
+		Map<String, String> currentIpMacMap = new HashMap<>();
+		for (NetworkIF net : activeInterfaces) {
+			for (String ip : net.getIPv4addr()) {
+				currentIpMacMap.put(ip, net.getMacaddr());
+			}
+		}
+		return currentIpMacMap;
 	}
 
 }

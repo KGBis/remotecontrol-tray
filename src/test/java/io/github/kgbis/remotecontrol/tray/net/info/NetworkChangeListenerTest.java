@@ -29,8 +29,8 @@ class NetworkChangeListenerTest {
 
 		listener.onNetworkChange(List.of(networkIF));
 
-		assertEquals(1, listener.getIpMacMap().size());
-		assertEquals("AA:BB:CC:DD:EE:FF", listener.getIpMacMap().get("192.168.0.1"));
+		assertEquals(1, listener.getAtomicIpMacMap().get().size());
+		assertEquals("AA:BB:CC:DD:EE:FF", listener.getAtomicIpMacMap().get().get("192.168.0.1"));
 	}
 
 	@Test

@@ -22,7 +22,7 @@ public class NetworkInfoProvider {
 	}
 
 	public String getMac(String ip) {
-		return networkChangeListener.getIpMacMap().getOrDefault(ip, "");
+		return networkChangeListener.getAtomicIpMacMap().get().getOrDefault(ip, "");
 	}
 
 	public String getHostName(String ip) {
@@ -39,7 +39,7 @@ public class NetworkInfoProvider {
 	}
 
 	public List<String> getIPv4Addresses() {
-		return new ArrayList<>(networkChangeListener.getIpMacMap().keySet());
+		return new ArrayList<>(networkChangeListener.getAtomicIpMacMap().get().keySet());
 	}
 
 }

@@ -223,12 +223,12 @@ public class InformationScreen {
 	// Load IPs and MACs to table
 	private void loadData() {
 		model.setRowCount(0);
-		networkChangeListener.getIpMacMap().forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
+		networkChangeListener.getAtomicIpMacMap().get().forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
 	}
 
 	// Copy all to clipboard
 	private void copyAll() {
-		String toCopy = networkChangeListener.getIpMacMap()
+		String toCopy = networkChangeListener.getAtomicIpMacMap().get()
 			.entrySet()
 			.stream()
 			.map(e -> e.getKey() + " -> " + e.getValue())
