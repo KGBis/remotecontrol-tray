@@ -1,3 +1,6 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray;
 
 import com.beust.jcommander.ParameterException;
@@ -38,7 +41,7 @@ public class RemoteControl {
 		this.trayManager = trayManager;
 	}
 
-	public void start(CliArguments cliArgs) throws IOException, InterruptedException {
+	public void start(CliArguments cliArgs) throws IOException {
 		trayManager.initializeTray();
 		networkServer.arguments(cliArgs).start();
 	}
@@ -75,7 +78,7 @@ public class RemoteControl {
 			log.error("Error while binding port to " + PORT + ". Check if already in use!");
 			System.exit(1);
 		}
-		catch (IOException | InterruptedException e) {
+		catch (IOException e) {
 			log.error("Something bad happened. Please report the following error: ", e);
 			Thread.currentThread().interrupt();
 			System.exit(-1);

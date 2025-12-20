@@ -1,9 +1,10 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.internal;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,9 +13,12 @@ import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.NetworkIF;
 
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,66 +41,72 @@ class NetworkInterfacesTest {
 	NetworkInterfaces networkInterfaces;
 
 	@Test
-	void testSelectMdnsAddress() throws Exception {
+	void getActiveInterfaces_noInterfaces() {
 		when(systemInfo.getHardware()).thenReturn(hardwareAbstractionLayer);
-		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(List.of(networkIF));
-		when(networkIF.getIPv4addr()).thenReturn(new String[] { "192.168.1.100" });
-		when(networkIF.isConnectorPresent()).thenReturn(true);
-		when(networkIF.getName()).thenReturn("eth0");
-		when(networkIF.queryNetworkInterface()).thenReturn(NetworkInterface.getByName("eth0"));
-
-		Optional<InetAddress> address = networkInterfaces.selectMdnsAddress();
-		assertTrue(address.isPresent());
-		assertEquals("192.168.1.100", address.get().getHostAddress());
-	}
-
-	@ParameterizedTest
-	@ValueSource(booleans = { true, false })
-	void testSelectMdnsAddress_mixedInterfaces(boolean connPresent) throws Exception {
-		NetworkIF ethMock = mock(NetworkIF.class);
-
-		// to avoid stubbing errors
-		if (connPresent) {
-			when(ethMock.getName()).thenReturn("eth0");
-			when(ethMock.queryNetworkInterface()).thenReturn(NetworkInterface.getByName("eth0"));
-		}
-		when(ethMock.getIPv4addr()).thenReturn(new String[] { "192.168.1.10" });
-		when(ethMock.isConnectorPresent()).thenReturn(connPresent);
-
-		NetworkIF wlanMock = mock(NetworkIF.class);
-		when(wlanMock.getName()).thenReturn("wlan0");
-		when(wlanMock.getIPv4addr()).thenReturn(new String[] { "192.168.1.20" });
-		when(wlanMock.isConnectorPresent()).thenReturn(true);
-		when(wlanMock.queryNetworkInterface()).thenReturn(NetworkInterface.getByName("wlan0"));
-
-		NetworkIF dockerMock = mock(NetworkIF.class);
-		when(dockerMock.getName()).thenReturn("docker0");
-		when(dockerMock.getIPv4addr()).thenReturn(new String[] { "172.17.0.1" });
-		when(dockerMock.isConnectorPresent()).thenReturn(true);
-		when(dockerMock.queryNetworkInterface()).thenReturn(NetworkInterface.getByName("docker0"));
-
-		when(systemInfo.getHardware()).thenReturn(hardwareAbstractionLayer);
-		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(List.of(ethMock, wlanMock, dockerMock));
-
-		Optional<InetAddress> address = networkInterfaces.selectMdnsAddress();
-		assertTrue(address.isPresent());
-
-		if (connPresent)
-			assertEquals("192.168.1.10", address.get().getHostAddress());
-		else
-			assertEquals("192.168.1.20", address.get().getHostAddress());
+		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(List.of());
+		List<NetworkIF> activeInterfaces = networkInterfaces.getActiveInterfaces();
+		assertEquals(0, activeInterfaces.size());
 	}
 
 	@Test
-	void testSelectMdnsAddress_noneAvailable() throws Exception {
+	void getActiveInterfaces_interfaceList() {
 		when(systemInfo.getHardware()).thenReturn(hardwareAbstractionLayer);
-		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(List.of(networkIF));
-		when(networkIF.getIPv4addr()).thenReturn(new String[] { "127.0.0.1" });
-		when(networkIF.isConnectorPresent()).thenReturn(true);
-		when(networkIF.queryNetworkInterface()).thenReturn(NetworkInterface.getByName("lo"));
+		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(Collections.singletonList(networkIF));
+		when(networkIF.getIPv4addr()).thenReturn(new String[] { "192.168.1.144" });
+		List<NetworkIF> activeInterfaces = networkInterfaces.getActiveInterfaces();
+		assertEquals(1, activeInterfaces.size());
+	}
 
-		Optional<InetAddress> address = networkInterfaces.selectMdnsAddress();
-		assertTrue(address.isEmpty());
+	@Test
+	void getValidAddressesWithInterface_noneFound() {
+		when(systemInfo.getHardware()).thenReturn(hardwareAbstractionLayer);
+		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(List.of());
+
+		Map<InetAddress, String> validAddressesWithInterface = networkInterfaces.getValidAddressesWithInterface();
+
+		assertEquals(0, validAddressesWithInterface.size());
+	}
+
+	@Test
+	void getValidAddressesWithInterface_foundValidInterfaces() throws UnknownHostException {
+		InetAddress inetAddress1 = InetAddress.getByName("192.168.1.144");
+		InetAddress inetAddress2 = InetAddress.getByName("192.168.1.43");
+
+		NetworkInterface networkInterface1 = mock(NetworkInterface.class);
+		InterfaceAddress interfaceAddress1 = mock(InterfaceAddress.class);
+
+		when(networkInterface1.getInterfaceAddresses()).thenReturn(Collections.singletonList(interfaceAddress1));
+		when(interfaceAddress1.getAddress()).thenReturn(inetAddress1);
+		when(interfaceAddress1.getBroadcast()).thenReturn(inetAddress1);
+
+		InterfaceAddress interfaceAddress2 = mock(InterfaceAddress.class);
+		NetworkInterface networkInterface2 = mock(NetworkInterface.class);
+
+		when(networkInterface2.getInterfaceAddresses()).thenReturn(Collections.singletonList(interfaceAddress2));
+		when(interfaceAddress2.getAddress()).thenReturn(inetAddress2);
+		when(interfaceAddress2.getBroadcast()).thenReturn(inetAddress2);
+
+		NetworkIF networkIF2 = mock(NetworkIF.class);
+		when(systemInfo.getHardware()).thenReturn(hardwareAbstractionLayer);
+		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(List.of(networkIF, networkIF2));
+
+		when(networkIF.getIfOperStatus()).thenReturn(NetworkIF.IfOperStatus.UP);
+		when(networkIF.isConnectorPresent()).thenReturn(true);
+		when(networkIF.getIPv4addr()).thenReturn(new String[] { "192.168.1.144" });
+		when(networkIF.queryNetworkInterface()).thenReturn(networkInterface1);
+		when(networkIF.getMacaddr()).thenReturn("00:11:22:33:44:55");
+		when(networkIF.getName()).thenReturn("eth2");
+
+		when(networkIF2.getIfOperStatus()).thenReturn(NetworkIF.IfOperStatus.UP);
+		when(networkIF2.isConnectorPresent()).thenReturn(true);
+		when(networkIF2.getIPv4addr()).thenReturn(new String[] { "192.168.1.43" });
+		when(networkIF2.queryNetworkInterface()).thenReturn(networkInterface2);
+		when(networkIF2.getMacaddr()).thenReturn("00:00:22:33:44:0A");
+		when(networkIF2.getName()).thenReturn("wlan0");
+
+		Map<InetAddress, String> validAddressesWithInterface = networkInterfaces.getValidAddressesWithInterface();
+
+		assertEquals(2, validAddressesWithInterface.size());
 	}
 
 	@Test
@@ -107,10 +117,34 @@ class NetworkInterfacesTest {
 	}
 
 	@Test
-	void testPriority() {
-		NetworkIF eth = mock(NetworkIF.class);
-		when(eth.getName()).thenReturn("eth0");
-		assertEquals(0, networkInterfaces.priority(eth));
+	void invalidIp_isDiscarded() {
+		when(systemInfo.getHardware()).thenReturn(hardwareAbstractionLayer);
+		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(List.of(networkIF));
+
+		when(networkIF.getIfOperStatus()).thenReturn(NetworkIF.IfOperStatus.UP);
+		when(networkIF.isConnectorPresent()).thenReturn(true);
+		when(networkIF.getIPv4addr()).thenReturn(new String[] { "not-an-ip" });
+
+		Map<InetAddress, String> result = networkInterfaces.getValidAddressesWithInterface();
+
+		assertTrue(result.isEmpty());
+	}
+
+	@Test
+	void loopbackInterface_isDiscarded() {
+		NetworkInterface ni = mock(NetworkInterface.class);
+
+		when(systemInfo.getHardware()).thenReturn(hardwareAbstractionLayer);
+		when(hardwareAbstractionLayer.getNetworkIFs()).thenReturn(List.of(networkIF));
+
+		when(networkIF.getIfOperStatus()).thenReturn(NetworkIF.IfOperStatus.UP);
+		when(networkIF.isConnectorPresent()).thenReturn(true);
+		when(networkIF.getIPv4addr()).thenReturn(new String[] { "127.0.0.1" });
+		when(networkIF.queryNetworkInterface()).thenReturn(ni);
+
+		Map<InetAddress, String> result = networkInterfaces.getValidAddressesWithInterface();
+
+		assertTrue(result.isEmpty());
 	}
 
 }

@@ -1,3 +1,6 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
@@ -27,10 +30,10 @@ public class NetworkActionFactory {
 			case "INFO":
 				return new InfoNetworkAction(socket, remoteCommand, networkInfoProvider);
 			case "SHUTDOWN":
-				return new ShutdownNetworkAction(socket, remoteCommand, networkInfoProvider, isDryRun);
+				return new ShutdownNetworkAction(socket, remoteCommand, isDryRun);
 			case "ACK":
 			default:
-				return new AckNetworkAction(socket, remoteCommand, networkInfoProvider);
+				return new AckNetworkAction(socket, remoteCommand);
 		}
 	}
 

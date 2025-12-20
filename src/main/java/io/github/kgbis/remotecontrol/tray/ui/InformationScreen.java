@@ -1,7 +1,10 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
+import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -49,11 +52,11 @@ public class InformationScreen {
 
 	private final DefaultTableModel model;
 
-	private final NetworkChangeListener networkChangeListener;
+	private final NetworkInfoProvider networkInfoProvider;
 
 	@Inject
-	public InformationScreen(NetworkChangeListener networkChangeListener) {
-		this.networkChangeListener = networkChangeListener;
+	public InformationScreen(NetworkInfoProvider networkInfoProvider) {
+		this.networkInfoProvider = networkInfoProvider;
 
 		frame = new JFrame(REMOTE_PC_CONTROL);
 		frame.setIconImage(ResourcesHelper.getIcon());
@@ -223,12 +226,12 @@ public class InformationScreen {
 	// Load IPs and MACs to table
 	private void loadData() {
 		model.setRowCount(0);
-		networkChangeListener.getAtomicIpMacMap().get().forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
+		networkInfoProvider.getAddresses().forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
 	}
 
 	// Copy all to clipboard
 	private void copyAll() {
-		String toCopy = networkChangeListener.getAtomicIpMacMap().get()
+		String toCopy = networkInfoProvider.getAddresses()
 			.entrySet()
 			.stream()
 			.map(e -> e.getKey() + " -> " + e.getValue())

@@ -1,6 +1,8 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,9 +23,6 @@ class AckNetworkActionTest {
 	@Mock
 	Socket socket;
 
-	@Mock
-	NetworkInfoProvider networkInfoProvider;
-
 	AckNetworkAction ackNetworkAction;
 
 	@Test
@@ -31,7 +30,7 @@ class AckNetworkActionTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
 
-		ackNetworkAction = new AckNetworkAction(socket, new String[] { "ACK" }, networkInfoProvider);
+		ackNetworkAction = new AckNetworkAction(socket, new String[] { "ACK" });
 		ackNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -44,7 +43,7 @@ class AckNetworkActionTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
 
-		ackNetworkAction = new AckNetworkAction(socket, new String[] {}, networkInfoProvider);
+		ackNetworkAction = new AckNetworkAction(socket, new String[] {});
 		ackNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());

@@ -1,12 +1,17 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.info;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import oshi.hardware.NetworkIF;
 
+import java.net.InetAddress;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -15,20 +20,20 @@ import static org.mockito.Mockito.when;
 class NetworkInfoProviderTest {
 
 	@Mock
-	NetworkIF networkIF;
+	InetAddress inetAddress;
+
+	@InjectMocks
+	NetworkInfoProvider networkInfoProvider;
 
 	@Test
 	void testGetMacAndIPv4Addresses() {
-		when(networkIF.getIPv4addr()).thenReturn(new String[] { "10.0.0.1" });
-		when(networkIF.getMacaddr()).thenReturn("AA:AA:AA:AA:AA:AA");
+		Map<InetAddress, String> data = Map.of(inetAddress, "AA:AA:AA:AA:AA:AA");
 
-		NetworkChangeListener listener = new NetworkChangeListener();
-		listener.onNetworkChange(List.of(networkIF));
+		when(inetAddress.getHostAddress()).thenReturn("10.0.0.1");
+		networkInfoProvider.onChange(data);
 
-		NetworkInfoProvider provider = new NetworkInfoProvider(listener);
-
-		assertEquals("AA:AA:AA:AA:AA:AA", provider.getMac("10.0.0.1"));
-		assertEquals(List.of("10.0.0.1"), provider.getIPv4Addresses());
+		assertEquals("AA:AA:AA:AA:AA:AA", networkInfoProvider.getMac("10.0.0.1"));
+		assertEquals(List.of("10.0.0.1"), networkInfoProvider.getIPv4Addresses());
 	}
 
 }

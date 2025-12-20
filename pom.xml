@@ -7,10 +7,19 @@
 
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
-    <version>2025.12.17.2</version> <!-- yyyy.MM.dd.commit-number -->
+    <version>2025.12.20.1</version> <!-- yyyy.MM.dd.commit-number -->
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License v3.0 or later</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
 
     <properties>
         <!-- Java -->
@@ -35,6 +44,7 @@
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback-classic.version>1.5.21</logback-classic.version>
         <commons-lang3.version>3.19.0</commons-lang3.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
         <oshi.version>6.9.1</oshi.version>
         <jcommander.version>1.82</jcommander.version>
         <SystemTray.version>4.4</SystemTray.version>
@@ -89,6 +99,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons-lang3.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
         </dependency>
 
         <!--

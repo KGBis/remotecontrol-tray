@@ -1,6 +1,8 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -20,8 +22,8 @@ public class ShutdownNetworkAction extends NetworkAction {
 
 	private final boolean isDryRun;
 
-	public ShutdownNetworkAction(Socket socket, String[] args, NetworkInfoProvider provider, boolean isDryRun) {
-		super(socket, args, provider);
+	public ShutdownNetworkAction(Socket socket, String[] args, boolean isDryRun) {
+		super(socket, args);
 		this.isDryRun = isDryRun;
 	}
 

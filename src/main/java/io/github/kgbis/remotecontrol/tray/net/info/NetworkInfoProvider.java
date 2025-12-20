@@ -1,28 +1,26 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.info;
 
-import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Singleton
 @Slf4j
 public class NetworkInfoProvider {
 
 	@Getter
-	private final NetworkChangeListener networkChangeListener;
-
-	@Inject
-	public NetworkInfoProvider(NetworkChangeListener networkChangeListener) {
-		this.networkChangeListener = networkChangeListener;
-	}
+	private Map<String, String> addresses;
 
 	public String getMac(String ip) {
-		return networkChangeListener.getAtomicIpMacMap().get().getOrDefault(ip, "");
+		return addresses.getOrDefault(ip, "");
 	}
 
 	public String getHostName(String ip) {
@@ -34,12 +32,14 @@ public class NetworkInfoProvider {
 		}
 	}
 
-	public void awaitInitialization() throws InterruptedException {
-		networkChangeListener.awaitInitialization(7500);
+	public List<String> getIPv4Addresses() {
+		return List.copyOf(addresses.keySet());
 	}
 
-	public List<String> getIPv4Addresses() {
-		return new ArrayList<>(networkChangeListener.getAtomicIpMacMap().get().keySet());
+	public void onChange(Map<InetAddress, String> data) {
+		this.addresses = data.entrySet()
+			.stream()
+			.collect(Collectors.toMap(k -> k.getKey().getHostAddress(), Map.Entry::getValue));
 	}
 
 }

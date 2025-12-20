@@ -1,6 +1,8 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,9 +26,6 @@ class ShutdownNetworkActionTest {
 	@Mock
 	Socket socket;
 
-	@Mock
-	NetworkInfoProvider networkInfoProvider;
-
 	ShutdownNetworkAction shutdownNetworkAction;
 
 	@Test
@@ -34,8 +33,7 @@ class ShutdownNetworkActionTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
 
-		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10", "MINUTES" },
-				networkInfoProvider, true);
+		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10", "MINUTES" }, true);
 		shutdownNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -48,8 +46,7 @@ class ShutdownNetworkActionTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
 
-		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10", "KILOS" },
-				networkInfoProvider, true);
+		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10", "KILOS" }, true);
 		shutdownNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -59,23 +56,20 @@ class ShutdownNetworkActionTest {
 
 	@Test
 	void testParseArguments() {
-		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10", "MINUTES" },
-				networkInfoProvider, true);
+		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10", "MINUTES" }, true);
 		ShutdownNetworkActionData result = shutdownNetworkAction.parseArguments();
 		Assertions.assertEquals(new ShutdownNetworkActionData(10, ChronoUnit.MINUTES), result);
 	}
 
 	@Test
 	void testParseArguments_invalidNumberOfArguments() {
-		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10" },
-				networkInfoProvider, true);
+		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10" }, true);
 		assertNull(shutdownNetworkAction.parseArguments());
 	}
 
 	@Test
 	void testParseArguments_invalidArguments() {
-		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10", "KILOS" },
-				networkInfoProvider, true);
+		shutdownNetworkAction = new ShutdownNetworkAction(socket, new String[] { "SHUTDOWN", "10", "KILOS" }, true);
 		assertNull(shutdownNetworkAction.parseArguments());
 	}
 

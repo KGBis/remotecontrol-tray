@@ -1,6 +1,8 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -10,8 +12,8 @@ import java.util.Arrays;
 @Slf4j
 public class AckNetworkAction extends NetworkAction {
 
-	public AckNetworkAction(Socket socket, String[] args, NetworkInfoProvider provider) {
-		super(socket, args, provider);
+	public AckNetworkAction(Socket socket, String[] args) {
+		super(socket, args);
 	}
 
 	@Override

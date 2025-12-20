@@ -1,20 +1,21 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.ioc;
 
 import com.google.inject.AbstractModule;
 import io.github.kgbis.remotecontrol.tray.RemoteControl;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactory;
 import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactoryDefaultImpl;
-import io.github.kgbis.remotecontrol.tray.net.mdns.MulticastServiceRegistar;
-import io.github.kgbis.remotecontrol.tray.net.server.ServerLoopRunnerDefaultImpl;
-import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactoryDefaultImpl;
+import io.github.kgbis.remotecontrol.tray.net.mdns.NetworkMulticastManager;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
 import io.github.kgbis.remotecontrol.tray.net.server.ServerLoopRunner;
+import io.github.kgbis.remotecontrol.tray.net.server.ServerLoopRunnerDefaultImpl;
 import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactory;
+import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactoryDefaultImpl;
 import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
 import io.github.kgbis.remotecontrol.tray.ui.TrayController;
 import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
@@ -31,12 +32,10 @@ public class RemoteControlModule extends AbstractModule {
 		bind(ServerSocketFactory.class).to(ServerSocketFactoryDefaultImpl.class).in(Singleton.class);
 		bind(InformationScreen.class).in(Singleton.class);
 		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);
-		bind(MulticastServiceRegistar.class).in(Singleton.class);
 		bind(NetworkActionFactory.class).in(Singleton.class);
-		bind(NetworkChangeListener.class).in(Singleton.class);
-		bind(NetworkChangeRegistrar.class).in(Singleton.class);
 		bind(NetworkInfoProvider.class).in(Singleton.class);
 		bind(NetworkInterfaces.class).in(Singleton.class);
+		bind(NetworkMulticastManager.class).in(Singleton.class);
 		bind(NetworkServer.class).in(Singleton.class);
 		bind(RemoteControl.class).in(Singleton.class);
 		bind(SystemInfo.class).in(Singleton.class);

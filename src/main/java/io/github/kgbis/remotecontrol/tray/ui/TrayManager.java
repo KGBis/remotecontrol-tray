@@ -1,3 +1,6 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.ui;
 
 import dorkbox.systemTray.Menu;
@@ -16,8 +19,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
-import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupport.NONE;
-import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.*;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.getDesktop;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isNoneTraySupport;
 
 @Singleton
 @Slf4j
@@ -40,7 +43,8 @@ public class TrayManager {
 	public void initializeTray() {
 		EventQueue.invokeLater(() -> {
 			if (isNoneTraySupport()) {
-				log.info("{} detected. No System Tray. It does not support it correctly.", StringUtils.capitalize(getDesktop()));
+				log.info("{} detected. No System Tray. It does not support it correctly.",
+						StringUtils.capitalize(getDesktop()));
 				controller.toggleWindow();
 				return;
 			}

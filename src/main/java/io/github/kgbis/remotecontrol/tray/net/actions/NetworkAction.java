@@ -1,6 +1,8 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.DataOutputStream;
@@ -14,12 +16,9 @@ public abstract class NetworkAction {
 
 	protected final String[] args;
 
-	protected final NetworkInfoProvider networkInfoProvider;
-
-	protected NetworkAction(Socket socket, String[] args, NetworkInfoProvider networkInfoProvider) {
+	protected NetworkAction(Socket socket, String[] args) {
 		this.socket = socket;
 		this.args = args;
-		this.networkInfoProvider = networkInfoProvider;
 	}
 
 	public abstract void execute() throws IOException;

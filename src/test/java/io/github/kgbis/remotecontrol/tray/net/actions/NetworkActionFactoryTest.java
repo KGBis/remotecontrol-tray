@@ -1,6 +1,8 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,15 +14,12 @@ import java.net.Socket;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-@SuppressWarnings("unused")
 @ExtendWith(MockitoExtension.class)
 class NetworkActionFactoryTest {
 
+	@SuppressWarnings("unused")
 	@Mock
 	NetworkInfoProvider networkInfoProvider;
-
-	@Mock
-	NetworkChangeListener networkChangeListener;
 
 	@Mock
 	Socket socket;

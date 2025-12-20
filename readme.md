@@ -35,13 +35,8 @@ or [open an issue](https://github.com/KGBis/remotecontrol-tray/issues) in Github
 
 ## License
 
-This software is distributed under the __GNU General Public License version 2 (GPLv2)__
-
-* You may use the application free of charge.
-* You may study and modify the source code.
-* You may redistribute it or publish modified versions under the same GPLv2 license.
-* You may not distribute modified versions as proprietary software or sell the software without complying with GPLv2.
-* You must include credits and the original license notice when publishing modifications.
+RemoteControlTray is licensed under the GNU Lesser General Public License v3.0
+(or later). See the LICENSE file for details.
 
 ## Technical Stuff
 

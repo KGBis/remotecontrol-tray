@@ -1,3 +1,6 @@
+/*
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.mdns;
 
 import jakarta.inject.Singleton;
@@ -9,8 +12,9 @@ import java.net.InetAddress;
 @Singleton
 public class JmDNSFactoryDefaultImpl implements JmDNSFactory {
 
-    @Override
-    public JmDNS create(InetAddress addr) throws IOException {
-        return JmDNS.create(addr);
-    }
+	@Override
+	public JmDNS create(InetAddress addr) throws IOException {
+		return JmDNS.create(addr);
+	}
+
 }
