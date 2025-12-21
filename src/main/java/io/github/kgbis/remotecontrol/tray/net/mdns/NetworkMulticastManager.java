@@ -29,6 +29,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -79,6 +80,11 @@ public class NetworkMulticastManager {
 	}
 
 	public void start() {
+        if(isWindows7()) {
+            log.warn("Windows 7 is not supported. mDNS disabled.");
+            return;
+        }
+
 		if (running) {
 			return;
 		}
@@ -168,6 +174,11 @@ public class NetworkMulticastManager {
 				}
 			}
 		}
+	}
+
+	boolean isWindows7() {
+		return Strings.CI.startsWith(System.getProperty("os.name"), "Windows") &&
+				System.getProperty("os.version").startsWith("6.1");
 	}
 
 	private Map<String, String> setProperties(InetAddress inetAddress) throws UnknownHostException {

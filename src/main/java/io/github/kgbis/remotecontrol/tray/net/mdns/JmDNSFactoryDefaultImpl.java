@@ -34,15 +34,7 @@ public class JmDNSFactoryDefaultImpl implements JmDNSFactory {
 
 	@Override
 	public JmDNS create(InetAddress inetAddress) throws IOException {
-		JmDNS jmDNS;
-		try {
-			jmDNS = JmDNS.create(inetAddress);
-		}
-		catch (BindException e) {
-			log.warn("mDNS failed on {}, retrying default interface", inetAddress);
-			jmDNS = JmDNS.create();
-		}
-		return jmDNS;
+		return JmDNS.create(inetAddress);
 	}
 
 }
