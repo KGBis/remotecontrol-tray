@@ -1,7 +1,7 @@
 # Remote PC Control Tray
 
-Remote PC Control Tray is the *server-side* component of an Android application that allows you to **wake up** and *
-*shut down** a computer remotely over the local network.
+Remote PC Control Tray is the *server-side* component of an Android application that allows you to **wake up** and
+**shut down** a computer remotely over the local network.
 
 It is designed to be simple, lightweight and reliable, without unnecessary background services or complex configuration.
 
