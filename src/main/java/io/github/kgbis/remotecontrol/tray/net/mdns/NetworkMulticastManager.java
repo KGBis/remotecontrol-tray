@@ -49,7 +49,7 @@ public class NetworkMulticastManager {
 
 	public static final String RPCCTL_TCP_LOCAL = "_rpcctl._tcp.local";
 
-	public static final String RPCCT = "rpcct-";
+	public static final String RPCCTL = "rpcctl";
 
 	private final NetworkInterfaces networkInterfaces;
 
@@ -103,12 +103,15 @@ public class NetworkMulticastManager {
 	private void monitorLoop() {
 		int pollIntervalMs = (int) (POLL_INTERVAL_MS * 7.5);
 
+		log.info("Starting mDNS initialization");
+
 		while (running) {
 			try {
 				monitor();
 				Thread.sleep(pollIntervalMs);
 			}
 			catch (InterruptedException | IOException e) {
+				log.error("mDNS init failed. Exception: {}, Reason: {}", e.getClass().getSimpleName(), e.getMessage());
 				Thread.currentThread().interrupt();
 			}
 		}
@@ -137,7 +140,7 @@ public class NetworkMulticastManager {
 	void startMdns(InetAddress inetAddress) throws IOException {
 		synchronized (lock) {
 			String hostAddress = inetAddress.getHostAddress();
-			String serviceName = RPCCT + StringUtils.substringAfterLast(hostAddress, ".");
+			String serviceName = getServiceName(inetAddress);
 
 			Map<String, String> props = setProperties(inetAddress);
 			ServiceInfo service = ServiceInfo.create(RPCCTL_TCP_LOCAL, serviceName, PORT, 0, 0, true, props);
@@ -175,6 +178,12 @@ public class NetworkMulticastManager {
 		props.put("mac", addresses.get(inetAddress));
 
 		return props;
+	}
+
+	private String getServiceName(InetAddress inetAddress) {
+		String hostAddress = inetAddress.getHostAddress();
+		String hostName = infoProvider.getHostName(hostAddress);
+		return StringUtils.joinWith("-", RPCCTL, hostName, StringUtils.substringAfterLast(hostAddress, "."));
 	}
 
 }
