@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.jmdns.JmDNS;
 import java.io.IOException;
-import java.net.BindException;
 import java.net.InetAddress;
 
 @Slf4j
