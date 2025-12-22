@@ -20,6 +20,9 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.info;
 
+import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
+import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,12 +34,18 @@ import java.util.stream.Collectors;
 
 @Singleton
 @Slf4j
-public class NetworkInfoProvider {
+public class NetworkInfoProvider implements InfoListener<InetAddress, String> {
 
-	@Getter
+	private final InformationScreen informationScreen;
+
 	private Map<String, String> addresses;
 
-	public String getMac(String ip) {
+	@Inject
+    public NetworkInfoProvider(InformationScreen informationScreen) {
+        this.informationScreen = informationScreen;
+    }
+
+    public String getMac(String ip) {
 		return addresses.getOrDefault(ip, "");
 	}
 
@@ -53,10 +62,12 @@ public class NetworkInfoProvider {
 		return List.copyOf(addresses.keySet());
 	}
 
+	@Override
 	public void onChange(Map<InetAddress, String> data) {
 		this.addresses = data.entrySet()
 			.stream()
 			.collect(Collectors.toMap(k -> k.getKey().getHostAddress(), Map.Entry::getValue));
+		informationScreen.onChange(addresses);
 	}
 
 }

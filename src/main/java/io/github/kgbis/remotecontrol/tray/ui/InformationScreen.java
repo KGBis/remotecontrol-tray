@@ -22,6 +22,7 @@ package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,11 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isFullTraySupport;
@@ -63,24 +68,26 @@ import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.
 
 @Singleton
 @Slf4j
-public class InformationScreen {
+public class InformationScreen implements InfoListener<String, String> {
 
 	private final JFrame frame;
 
 	private final DefaultTableModel model;
 
-	private final NetworkInfoProvider networkInfoProvider;
+	// private final NetworkInfoProvider networkInfoProvider;
 
-	@Inject
-	public InformationScreen(NetworkInfoProvider networkInfoProvider) {
-		this.networkInfoProvider = networkInfoProvider;
+	private Map<String, String> addresses = new HashMap<>();
+
+	// @Inject
+	public InformationScreen(/*NetworkInfoProvider networkInfoProvider*/) {
+		// this.networkInfoProvider = networkInfoProvider;
 
 		frame = new JFrame(REMOTE_PC_CONTROL);
 		frame.setIconImage(ResourcesHelper.getIcon());
 		frame.setLayout(new BorderLayout(10, 10));
 		frame.setAlwaysOnTop(false);
 		frame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
-		frame.setExtendedState(/* isPartialTraySupport() ? Frame.ICONIFIED : */ Frame.NORMAL);
+		frame.setExtendedState(Frame.NORMAL);
 
 		// ---------------------
 		// Header panel (text)
@@ -242,13 +249,14 @@ public class InformationScreen {
 
 	// Load IPs and MACs to table
 	private void loadData() {
-		model.setRowCount(0);
-		networkInfoProvider.getAddresses().forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
+		//model.setRowCount(0);
+		//addresses.forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
+		onChange(addresses);
 	}
 
 	// Copy all to clipboard
 	private void copyAll() {
-		String toCopy = networkInfoProvider.getAddresses()
+		String toCopy = /*networkInfoProvider.getAddresses()*/ addresses
 			.entrySet()
 			.stream()
 			.map(e -> e.getKey() + " -> " + e.getValue())
@@ -268,4 +276,10 @@ public class InformationScreen {
 		log.debug("Copied selected row to clipboard:\n{}", sb);
 	}
 
+	@Override
+	public void onChange(Map<String, String> map) {
+		addresses = Map.copyOf(map);
+		model.setRowCount(0);
+		addresses.forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
+	}
 }

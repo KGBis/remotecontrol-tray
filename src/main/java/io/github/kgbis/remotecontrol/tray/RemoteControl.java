@@ -59,8 +59,8 @@ public class RemoteControl {
 	}
 
 	public void start(CliArguments cliArgs) throws IOException {
-		trayManager.initializeTray();
 		networkServer.arguments(cliArgs).start();
+		trayManager.initializeTray();
 	}
 
 	public static void main(String[] args) {
