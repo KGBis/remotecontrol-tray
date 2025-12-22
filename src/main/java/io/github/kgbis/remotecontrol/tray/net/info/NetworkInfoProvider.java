@@ -24,7 +24,6 @@ import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
 import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetAddress;
@@ -41,11 +40,11 @@ public class NetworkInfoProvider implements InfoListener<InetAddress, String> {
 	private Map<String, String> addresses;
 
 	@Inject
-    public NetworkInfoProvider(InformationScreen informationScreen) {
-        this.informationScreen = informationScreen;
-    }
+	public NetworkInfoProvider(InformationScreen informationScreen) {
+		this.informationScreen = informationScreen;
+	}
 
-    public String getMac(String ip) {
+	public String getMac(String ip) {
 		return addresses.getOrDefault(ip, "");
 	}
 

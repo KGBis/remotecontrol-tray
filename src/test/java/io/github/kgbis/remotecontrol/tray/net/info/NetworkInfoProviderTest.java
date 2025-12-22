@@ -20,6 +20,7 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.info;
 
+import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,30 +28,35 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class NetworkInfoProviderTest {
 
+	@SuppressWarnings("unused")
 	@Mock
-	InetAddress inetAddress;
+	InformationScreen informationScreen;
 
 	@InjectMocks
 	NetworkInfoProvider networkInfoProvider;
 
 	@Test
-	void testGetMacAndIPv4Addresses() {
+	void testGetMacAndIPv4Addresses() throws UnknownHostException {
+		InetAddress inetAddress = InetAddress.getByName("10.0.0.1");
 		Map<InetAddress, String> data = Map.of(inetAddress, "AA:AA:AA:AA:AA:AA");
 
-		when(inetAddress.getHostAddress()).thenReturn("10.0.0.1");
 		networkInfoProvider.onChange(data);
 
 		assertEquals("AA:AA:AA:AA:AA:AA", networkInfoProvider.getMac("10.0.0.1"));
 		assertEquals(List.of("10.0.0.1"), networkInfoProvider.getIPv4Addresses());
+		verify(informationScreen).onChange(anyMap());
+
 	}
 
 }
