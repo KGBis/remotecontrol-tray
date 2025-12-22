@@ -30,6 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import oshi.SystemInfo;
+import oshi.hardware.HardwareAbstractionLayer;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -58,6 +60,8 @@ public class NetworkMulticastManager {
 
 	private final NetworkInfoProvider infoProvider;
 
+	private final SystemInfo systemInfo;
+
 	private Thread monitorThread;
 
 	private volatile boolean running = false;
@@ -73,21 +77,25 @@ public class NetworkMulticastManager {
 
 	@Inject
 	public NetworkMulticastManager(NetworkInterfaces networkInterfaces, JmDNSFactory jmDNSFactory,
-			NetworkInfoProvider infoProvider) {
+			NetworkInfoProvider infoProvider, SystemInfo systemInfo) {
 		this.networkInterfaces = networkInterfaces;
 		this.jmDNSFactory = jmDNSFactory;
 		this.infoProvider = infoProvider;
+		this.systemInfo = systemInfo;
 	}
 
 	public void start() {
-        if(isWindows7()) {
-            log.warn("Windows 7 is not supported. mDNS disabled.");
-            return;
-        }
+		if (isWindows7()) {
+			log.warn("Windows 7 is not supported. mDNS disabled.");
+			return;
+		}
 
 		if (running) {
 			return;
 		}
+
+		HardwareAbstractionLayer hardware = systemInfo.getHardware();
+		log.info("Hardware UUID: {}", hardware.getComputerSystem().getHardwareUUID());
 
 		running = true;
 		activeMdns.clear();
@@ -117,7 +125,7 @@ public class NetworkMulticastManager {
 				Thread.sleep(pollIntervalMs);
 			}
 			catch (InterruptedException | IOException e) {
-				log.error("mDNS init failed. Exception: {}, Reason: {}", e.getClass().getSimpleName(), e.getMessage());
+				log.warn("mDNS init failed. Exception: {}, Reason: {}", e.getClass().getSimpleName(), e.getMessage());
 				Thread.currentThread().interrupt();
 			}
 		}
@@ -177,13 +185,13 @@ public class NetworkMulticastManager {
 	}
 
 	boolean isWindows7() {
-		return Strings.CI.startsWith(System.getProperty("os.name"), "Windows") &&
-				System.getProperty("os.version").startsWith("6.1");
+		return Strings.CI.startsWith(System.getProperty("os.name"), "Windows")
+				&& System.getProperty("os.version").startsWith("6.1");
 	}
 
 	private Map<String, String> setProperties(InetAddress inetAddress) throws UnknownHostException {
 		Map<String, String> props = new HashMap<>();
-		props.put("version", ResourcesHelper.getVersion());
+		props.put("tray_version", ResourcesHelper.getVersion());
 		props.put("os", System.getProperty("os.name"));
 		props.put("hostname", InetAddress.getLocalHost().getHostName());
 		props.put("mac", addresses.get(inetAddress));
@@ -193,7 +201,7 @@ public class NetworkMulticastManager {
 
 	private String getServiceName(InetAddress inetAddress) {
 		String hostAddress = inetAddress.getHostAddress();
-		String hostName = infoProvider.getHostName(hostAddress);
+		String hostName = infoProvider.getHostName(hostAddress).toLowerCase();
 		return StringUtils.joinWith("-", RPCCTL, hostName, StringUtils.substringAfterLast(hostAddress, "."));
 	}
 
