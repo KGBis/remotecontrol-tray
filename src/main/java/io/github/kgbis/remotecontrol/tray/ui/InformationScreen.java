@@ -22,6 +22,7 @@ package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
+import io.github.kgbis.remotecontrol.tray.ui.support.AddressTableUpdater;
 import jakarta.inject.Singleton;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -70,12 +71,13 @@ public class InformationScreen implements InfoListener<String, String> {
 
 	private final JFrame frame;
 
+	private final AddressTableUpdater updater;
+
 	@Getter(value = AccessLevel.PROTECTED)
 	private final DefaultTableModel model;
 
 	private Map<String, String> addresses = new HashMap<>();
 
-	// @Inject
 	public InformationScreen() {
 		frame = new JFrame(REMOTE_PC_CONTROL);
 		frame.setIconImage(ResourcesHelper.getIcon());
@@ -99,6 +101,8 @@ public class InformationScreen implements InfoListener<String, String> {
 				return false;
 			}
 		};
+
+		updater = new AddressTableUpdater(model);
 
 		JTable table = new JTable(model);
 		table.setFillsViewportHeight(true);
@@ -271,8 +275,7 @@ public class InformationScreen implements InfoListener<String, String> {
 	@Override
 	public void onChange(Map<String, String> map) {
 		addresses = Map.copyOf(map);
-		model.setRowCount(0);
-		addresses.forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
+		updater.onChange(map);
 	}
 
 }
