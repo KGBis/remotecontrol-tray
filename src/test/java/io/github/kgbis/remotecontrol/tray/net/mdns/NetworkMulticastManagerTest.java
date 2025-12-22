@@ -21,6 +21,7 @@
 package io.github.kgbis.remotecontrol.tray.net.mdns;
 
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -57,6 +59,9 @@ class NetworkMulticastManagerTest {
 	@Mock
 	NetworkInfoProvider infoProvider;
 
+	@Mock
+	DeviceIdProvider deviceIdProvider;
+
 	@Spy
 	@InjectMocks
 	NetworkMulticastManager networkMulticastManager;
@@ -65,7 +70,9 @@ class NetworkMulticastManagerTest {
 	void start_callsRegister() throws IOException {
 		InetAddress address = InetAddress.getByName("192.168.1.144");
 
+		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
 		networkMulticastManager.startMdns(address);
 
@@ -75,7 +82,10 @@ class NetworkMulticastManagerTest {
 	@Test
 	void stop_callsShutdownMdns() throws IOException {
 		InetAddress address = InetAddress.getByName("192.168.1.144");
+
 		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+		when(infoProvider.getHostName(any())).thenReturn("my-host");
+		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
 		networkMulticastManager.startMdns(address);
 		networkMulticastManager.stop();
@@ -91,7 +101,10 @@ class NetworkMulticastManagerTest {
 	@Test
 	void shutdown_CallsShutdownMdns() throws IOException {
 		InetAddress address = InetAddress.getByName("192.168.1.144");
+
 		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+		when(infoProvider.getHostName(any())).thenReturn("my-host");
+		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
 		networkMulticastManager.startMdns(address);
 		networkMulticastManager.shutdownMdns(address);
@@ -112,6 +125,8 @@ class NetworkMulticastManagerTest {
 
 		when(interfaces.getValidAddressesWithInterface()).thenReturn(map);
 		when(jmDNSFactory.create(address)).thenReturn(jmDNS);
+		when(infoProvider.getHostName(any())).thenReturn("my-host");
+		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
 		networkMulticastManager.monitor();
 
@@ -126,6 +141,8 @@ class NetworkMulticastManagerTest {
 
 		when(interfaces.getValidAddressesWithInterface()).thenReturn(first).thenReturn(second);
 		when(jmDNSFactory.create(address)).thenReturn(jmDNS);
+		when(infoProvider.getHostName(any())).thenReturn("my-host");
+		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
 		networkMulticastManager.monitor(); // add
 		networkMulticastManager.monitor(); // remove
@@ -140,6 +157,8 @@ class NetworkMulticastManagerTest {
 
 		when(interfaces.getValidAddressesWithInterface()).thenReturn(map).thenReturn(map);
 		when(jmDNSFactory.create(address)).thenReturn(jmDNS);
+		when(infoProvider.getHostName(any())).thenReturn("my-host");
+		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
 		networkMulticastManager.monitor();
 		networkMulticastManager.monitor();

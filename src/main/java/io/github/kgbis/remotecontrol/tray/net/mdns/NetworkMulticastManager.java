@@ -22,6 +22,7 @@ package io.github.kgbis.remotecontrol.tray.net.mdns;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -30,14 +31,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
-import oshi.SystemInfo;
-import oshi.hardware.HardwareAbstractionLayer;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +58,7 @@ public class NetworkMulticastManager {
 
 	private final NetworkInfoProvider infoProvider;
 
-	private final SystemInfo systemInfo;
+	private final DeviceIdProvider deviceIdProvider;
 
 	private Thread monitorThread;
 
@@ -77,11 +75,11 @@ public class NetworkMulticastManager {
 
 	@Inject
 	public NetworkMulticastManager(NetworkInterfaces networkInterfaces, JmDNSFactory jmDNSFactory,
-			NetworkInfoProvider infoProvider, SystemInfo systemInfo) {
+			NetworkInfoProvider infoProvider, DeviceIdProvider deviceIdProvider) {
 		this.networkInterfaces = networkInterfaces;
 		this.jmDNSFactory = jmDNSFactory;
 		this.infoProvider = infoProvider;
-		this.systemInfo = systemInfo;
+		this.deviceIdProvider = deviceIdProvider;
 	}
 
 	public void start() {
@@ -93,9 +91,6 @@ public class NetworkMulticastManager {
 		if (running) {
 			return;
 		}
-
-		HardwareAbstractionLayer hardware = systemInfo.getHardware();
-		log.info("Hardware UUID: {}", hardware.getComputerSystem().getHardwareUUID());
 
 		running = true;
 		activeMdns.clear();
@@ -189,9 +184,10 @@ public class NetworkMulticastManager {
 				&& System.getProperty("os.version").startsWith("6.1");
 	}
 
-	private Map<String, String> setProperties(InetAddress inetAddress) throws UnknownHostException {
+	private Map<String, String> setProperties(InetAddress inetAddress) throws IOException {
 		Map<String, String> props = new HashMap<>();
-		props.put("tray_version", ResourcesHelper.getVersion());
+		props.put("tray-version", ResourcesHelper.getVersion());
+		props.put("device-id", deviceIdProvider.getDeviceId().toString());
 		props.put("os", System.getProperty("os.name"));
 		props.put("hostname", InetAddress.getLocalHost().getHostName());
 		props.put("mac", addresses.get(inetAddress));

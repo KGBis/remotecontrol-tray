@@ -24,6 +24,7 @@ import com.google.inject.AbstractModule;
 import io.github.kgbis.remotecontrol.tray.RemoteControl;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactory;
 import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactoryDefaultImpl;
@@ -45,8 +46,7 @@ public class RemoteControlModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
-		bind(ServerLoopRunner.class).to(ServerLoopRunnerDefaultImpl.class).in(Singleton.class);
-		bind(ServerSocketFactory.class).to(ServerSocketFactoryDefaultImpl.class).in(Singleton.class);
+		bind(DeviceIdProvider.class).in(Singleton.class);
 		bind(InformationScreen.class).in(Singleton.class);
 		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);
 		bind(NetworkActionFactory.class).in(Singleton.class);
@@ -55,6 +55,8 @@ public class RemoteControlModule extends AbstractModule {
 		bind(NetworkMulticastManager.class).in(Singleton.class);
 		bind(NetworkServer.class).in(Singleton.class);
 		bind(RemoteControl.class).in(Singleton.class);
+		bind(ServerLoopRunner.class).to(ServerLoopRunnerDefaultImpl.class).in(Singleton.class);
+		bind(ServerSocketFactory.class).to(ServerSocketFactoryDefaultImpl.class).in(Singleton.class);
 		bind(SystemInfo.class).in(Singleton.class);
 		bind(TrayController.class).in(Singleton.class);
 		bind(TrayManager.class).in(Singleton.class);
