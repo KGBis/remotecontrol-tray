@@ -22,7 +22,8 @@ package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
-import io.github.kgbis.remotecontrol.tray.ui.support.AddressTableUpdater;
+import io.github.kgbis.remotecontrol.tray.ui.support.InformationModel;
+import io.github.kgbis.remotecontrol.tray.ui.support.InformationTableRenderer;
 import jakarta.inject.Singleton;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -57,7 +58,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -71,38 +71,41 @@ public class InformationScreen implements InfoListener<String, String> {
 
 	private final JFrame frame;
 
-	private final AddressTableUpdater updater;
-
 	@Getter(value = AccessLevel.PROTECTED)
 	private final DefaultTableModel model;
 
-	private Map<String, String> addresses = new HashMap<>();
+	private final InformationModel infoModel;
+
+	private final InformationTableRenderer renderer;
 
 	public InformationScreen() {
-		frame = new JFrame(REMOTE_PC_CONTROL);
-		frame.setIconImage(ResourcesHelper.getIcon());
-		frame.setLayout(new BorderLayout(10, 10));
-		frame.setAlwaysOnTop(false);
-		frame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
-		frame.setExtendedState(Frame.NORMAL);
+		this.infoModel = new InformationModel();
 
-		// ---------------------
-		// Header panel (text)
-		// ---------------------
-		JPanel headerPanel = buildHeaderPanel();
-		frame.add(headerPanel, BorderLayout.NORTH);
-
-		// ---------------
-		// IP + MAC Table
-		// ---------------
-		model = new DefaultTableModel(new Object[] { "IP Address", "MAC" }, 0) {
+		this.model = new DefaultTableModel(new Object[] { "IP Address", "MAC" }, 0) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		};
 
-		updater = new AddressTableUpdater(model);
+		this.renderer = new InformationTableRenderer(model);
+
+		this.frame = buildFrame();
+	}
+
+	private JFrame buildFrame() {
+		JFrame jFrame = new JFrame(REMOTE_PC_CONTROL);
+		jFrame.setIconImage(ResourcesHelper.getIcon());
+		jFrame.setLayout(new BorderLayout(10, 10));
+		jFrame.setAlwaysOnTop(false);
+		jFrame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
+		jFrame.setExtendedState(Frame.NORMAL);
+
+		// ---------------------
+		// Header panel (text)
+		// ---------------------
+		JPanel headerPanel = buildHeaderPanel();
+		jFrame.add(headerPanel, BorderLayout.NORTH);
 
 		JTable table = new JTable(model);
 		table.setFillsViewportHeight(true);
@@ -111,26 +114,26 @@ public class InformationScreen implements InfoListener<String, String> {
 		table.setShowVerticalLines(false);
 
 		JScrollPane scroll = new JScrollPane(table);
-		frame.add(scroll, BorderLayout.CENTER);
+		jFrame.add(scroll, BorderLayout.CENTER);
 
 		// -----------
 		// Bottom bar
 		// -----------
 		JPanel buttonBar = buildBottomBar(table);
-		frame.add(buttonBar, BorderLayout.SOUTH);
+		jFrame.add(buttonBar, BorderLayout.SOUTH);
 
-		frame.setMinimumSize(new Dimension(380, 200));
-		frame.pack();
-		frame.setVisible(false);
+		jFrame.setMinimumSize(new Dimension(380, 200));
+		jFrame.pack();
+		jFrame.setVisible(false);
 
 		// Register ESC key to close
-		frame.getRootPane()
-			.registerKeyboardAction(e -> frame.setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+		jFrame.getRootPane()
+			.registerKeyboardAction(e -> jFrame.setVisible(false), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
 					JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		// Register CLOSE (x) window to exit
-		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter() {
+		jFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		jFrame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				log.debug("Window close clicked. Exiting");
@@ -138,6 +141,7 @@ public class InformationScreen implements InfoListener<String, String> {
 			}
 		});
 
+		return jFrame;
 	}
 
 	public void show() {
@@ -248,12 +252,13 @@ public class InformationScreen implements InfoListener<String, String> {
 
 	// Load IPs and MACs to table
 	private void loadData() {
-		onChange(addresses);
+		onChange(infoModel.getAddresses());
 	}
 
 	// Copy all to clipboard
 	private void copyAll() {
-		String toCopy = /* networkInfoProvider.getAddresses() */ addresses.entrySet()
+		String toCopy = infoModel.getAddresses()
+			.entrySet()
 			.stream()
 			.map(e -> e.getKey() + " -> " + e.getValue())
 			.collect(Collectors.joining("\n"));
@@ -274,8 +279,8 @@ public class InformationScreen implements InfoListener<String, String> {
 
 	@Override
 	public void onChange(Map<String, String> map) {
-		addresses = Map.copyOf(map);
-		updater.onChange(map);
+		infoModel.update(map);
+		renderer.render(infoModel.getAddresses());
 	}
 
 }

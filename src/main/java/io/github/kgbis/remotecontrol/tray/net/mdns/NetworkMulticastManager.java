@@ -186,11 +186,13 @@ public class NetworkMulticastManager {
 
 	private Map<String, String> setProperties(InetAddress inetAddress) throws IOException {
 		Map<String, String> props = new HashMap<>();
-		props.put("tray-version", ResourcesHelper.getVersion());
 		props.put("device-id", deviceIdProvider.getDeviceId().toString());
-		props.put("os", System.getProperty("os.name"));
-		props.put("hostname", InetAddress.getLocalHost().getHostName());
-		props.put("mac", addresses.get(inetAddress));
+		props.put("os-name", System.getProperty("os.name"));
+		props.put("os-version", System.getProperty("os.version"));
+		props.put("host-name", InetAddress.getLocalHost().getHostName());
+		props.put("host-ip-address", inetAddress.getHostAddress());
+		props.put("host-mac-address", addresses.get(inetAddress));
+		props.put("tray-version", ResourcesHelper.getVersion());
 
 		return props;
 	}
