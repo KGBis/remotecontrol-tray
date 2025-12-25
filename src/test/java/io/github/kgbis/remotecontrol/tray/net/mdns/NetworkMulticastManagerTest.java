@@ -22,6 +22,7 @@ package io.github.kgbis.remotecontrol.tray.net.mdns;
 
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
+import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaceProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,12 +34,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.jmdns.JmDNS;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,6 +52,9 @@ class NetworkMulticastManagerTest {
 
 	@Mock
 	NetworkInterfaces interfaces;
+
+	@Mock
+	NetworkInterfaceProvider networkInterfaceProvider;
 
 	@Mock
 	JmDNS jmDNS;
@@ -74,6 +80,11 @@ class NetworkMulticastManagerTest {
 		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
+		NetworkInterface ni = mock(NetworkInterface.class);
+		when(ni.getName()).thenReturn("wlan0");
+		when(ni.getDisplayName()).thenReturn("Wi-Fi");
+		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+
 		networkMulticastManager.startMdns(address);
 
 		verify(jmDNS, times(1)).registerService(any());
@@ -86,6 +97,11 @@ class NetworkMulticastManagerTest {
 		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+
+		NetworkInterface ni = mock(NetworkInterface.class);
+		when(ni.getName()).thenReturn("wlan0");
+		when(ni.getDisplayName()).thenReturn("Wi-Fi");
+		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
 
 		networkMulticastManager.startMdns(address);
 		networkMulticastManager.stop();
@@ -105,6 +121,11 @@ class NetworkMulticastManagerTest {
 		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+
+		NetworkInterface ni = mock(NetworkInterface.class);
+		when(ni.getName()).thenReturn("wlan0");
+		when(ni.getDisplayName()).thenReturn("Wi-Fi");
+		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
 
 		networkMulticastManager.startMdns(address);
 		networkMulticastManager.shutdownMdns(address);
@@ -128,6 +149,11 @@ class NetworkMulticastManagerTest {
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
+		NetworkInterface ni = mock(NetworkInterface.class);
+		when(ni.getName()).thenReturn("wlan0");
+		when(ni.getDisplayName()).thenReturn("Wi-Fi");
+		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+
 		networkMulticastManager.monitor();
 
 		verify(networkMulticastManager).startMdns(address);
@@ -144,6 +170,11 @@ class NetworkMulticastManagerTest {
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
+		NetworkInterface ni = mock(NetworkInterface.class);
+		when(ni.getName()).thenReturn("wlan0");
+		when(ni.getDisplayName()).thenReturn("Wi-Fi");
+		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+
 		networkMulticastManager.monitor(); // add
 		networkMulticastManager.monitor(); // remove
 
@@ -159,6 +190,11 @@ class NetworkMulticastManagerTest {
 		when(jmDNSFactory.create(address)).thenReturn(jmDNS);
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+
+		NetworkInterface ni = mock(NetworkInterface.class);
+		when(ni.getName()).thenReturn("wlan0");
+		when(ni.getDisplayName()).thenReturn("Wi-Fi");
+		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
 
 		networkMulticastManager.monitor();
 		networkMulticastManager.monitor();

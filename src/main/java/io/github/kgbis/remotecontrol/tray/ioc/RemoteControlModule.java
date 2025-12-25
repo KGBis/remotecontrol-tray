@@ -25,6 +25,7 @@ import io.github.kgbis.remotecontrol.tray.RemoteControl;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
+import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaceProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactory;
 import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactoryDefaultImpl;
@@ -51,6 +52,7 @@ public class RemoteControlModule extends AbstractModule {
 		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);
 		bind(NetworkActionFactory.class).in(Singleton.class);
 		bind(NetworkInfoProvider.class).in(Singleton.class);
+		bind(NetworkInterfaceProvider.class).in(Singleton.class);
 		bind(NetworkInterfaces.class).in(Singleton.class);
 		bind(NetworkMulticastManager.class).in(Singleton.class);
 		bind(NetworkServer.class).in(Singleton.class);

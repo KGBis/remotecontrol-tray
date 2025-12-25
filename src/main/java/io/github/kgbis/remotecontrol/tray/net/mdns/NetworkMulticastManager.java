@@ -23,6 +23,7 @@ package io.github.kgbis.remotecontrol.tray.net.mdns;
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
+import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaceProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -36,6 +37,8 @@ import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -60,6 +63,8 @@ public class NetworkMulticastManager {
 
 	private final DeviceIdProvider deviceIdProvider;
 
+	private final NetworkInterfaceProvider networkInterfaceProvider;
+
 	private Thread monitorThread;
 
 	private volatile boolean running = false;
@@ -75,11 +80,13 @@ public class NetworkMulticastManager {
 
 	@Inject
 	public NetworkMulticastManager(NetworkInterfaces networkInterfaces, JmDNSFactory jmDNSFactory,
-			NetworkInfoProvider infoProvider, DeviceIdProvider deviceIdProvider) {
+			NetworkInfoProvider infoProvider, DeviceIdProvider deviceIdProvider,
+			NetworkInterfaceProvider networkInterfaceProvider) {
 		this.networkInterfaces = networkInterfaces;
 		this.jmDNSFactory = jmDNSFactory;
 		this.infoProvider = infoProvider;
 		this.deviceIdProvider = deviceIdProvider;
+		this.networkInterfaceProvider = networkInterfaceProvider;
 	}
 
 	public void start() {
@@ -193,8 +200,31 @@ public class NetworkMulticastManager {
 		props.put("host-ip-address", inetAddress.getHostAddress());
 		props.put("host-mac-address", addresses.get(inetAddress));
 		props.put("tray-version", ResourcesHelper.getVersion());
+		props.put("interface-type", getInterfaceType(inetAddress));
 
 		return props;
+	}
+
+	private String getInterfaceType(InetAddress inetAddress) {
+		try {
+			NetworkInterface ni = networkInterfaceProvider.getByInetAddress(inetAddress);
+			String name = ni.getName().toLowerCase();
+			String display = ni.getDisplayName().toLowerCase();
+
+			boolean wifi = name.contains("wlan") || name.contains("wifi") || display.contains("wi-fi")
+					|| display.contains("wireless");
+
+			boolean ethernet = name.startsWith("eth") || display.contains("ethernet");
+
+			if (wifi)
+				return "WIFI";
+			if (ethernet)
+				return "ETHERNET";
+		}
+		catch (SocketException ignored) {
+			// ignored
+		}
+		return "UNKNOWN";
 	}
 
 	private String getServiceName(InetAddress inetAddress) {
