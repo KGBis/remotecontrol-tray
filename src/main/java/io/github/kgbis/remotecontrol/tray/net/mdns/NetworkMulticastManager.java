@@ -216,10 +216,10 @@ public class NetworkMulticastManager {
 			String name = ni.getName().toLowerCase();
 			String display = ni.getDisplayName().toLowerCase();
 
-			boolean wifi = name.contains("wlan") || name.contains("wifi") || display.contains("wi-fi")
+			boolean wifi = name.startsWith("wl") || name.contains("wlan") || name.contains("wifi") || display.contains("wi-fi")
 					|| display.contains("wireless");
 
-			boolean ethernet = name.startsWith("eth") || display.contains("ethernet");
+			boolean ethernet = name.startsWith("eth") || name.startsWith("en") || display.contains("ethernet");
 
 			if (wifi)
 				return "WIFI";
