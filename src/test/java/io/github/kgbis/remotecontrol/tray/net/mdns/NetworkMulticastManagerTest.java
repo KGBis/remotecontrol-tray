@@ -35,6 +35,7 @@ import javax.jmdns.JmDNS;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
@@ -80,10 +81,7 @@ class NetworkMulticastManagerTest {
 		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		NetworkInterface ni = mock(NetworkInterface.class);
-		when(ni.getName()).thenReturn("wlan0");
-		when(ni.getDisplayName()).thenReturn("Wi-Fi");
-		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+		networkInterface(address);
 
 		networkMulticastManager.startMdns(address);
 
@@ -98,10 +96,7 @@ class NetworkMulticastManagerTest {
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		NetworkInterface ni = mock(NetworkInterface.class);
-		when(ni.getName()).thenReturn("wlan0");
-		when(ni.getDisplayName()).thenReturn("Wi-Fi");
-		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+		networkInterface(address);
 
 		networkMulticastManager.startMdns(address);
 		networkMulticastManager.stop();
@@ -122,10 +117,7 @@ class NetworkMulticastManagerTest {
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		NetworkInterface ni = mock(NetworkInterface.class);
-		when(ni.getName()).thenReturn("wlan0");
-		when(ni.getDisplayName()).thenReturn("Wi-Fi");
-		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+		networkInterface(address);
 
 		networkMulticastManager.startMdns(address);
 		networkMulticastManager.shutdownMdns(address);
@@ -149,10 +141,7 @@ class NetworkMulticastManagerTest {
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		NetworkInterface ni = mock(NetworkInterface.class);
-		when(ni.getName()).thenReturn("wlan0");
-		when(ni.getDisplayName()).thenReturn("Wi-Fi");
-		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+		networkInterface(address);
 
 		networkMulticastManager.monitor();
 
@@ -170,10 +159,7 @@ class NetworkMulticastManagerTest {
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		NetworkInterface ni = mock(NetworkInterface.class);
-		when(ni.getName()).thenReturn("wlan0");
-		when(ni.getDisplayName()).thenReturn("Wi-Fi");
-		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+		networkInterface(address);
 
 		networkMulticastManager.monitor(); // add
 		networkMulticastManager.monitor(); // remove
@@ -191,10 +177,7 @@ class NetworkMulticastManagerTest {
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
 		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		NetworkInterface ni = mock(NetworkInterface.class);
-		when(ni.getName()).thenReturn("wlan0");
-		when(ni.getDisplayName()).thenReturn("Wi-Fi");
-		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+		networkInterface(address);
 
 		networkMulticastManager.monitor();
 		networkMulticastManager.monitor();
@@ -210,6 +193,13 @@ class NetworkMulticastManagerTest {
 		networkMulticastManager.monitor();
 
 		verify(infoProvider).onChange(any());
+	}
+
+	private void networkInterface(InetAddress address) throws SocketException {
+		NetworkInterface ni = mock(NetworkInterface.class);
+		when(ni.getName()).thenReturn("wlan0");
+		when(ni.getDisplayName()).thenReturn("Wi-Fi");
+		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
 	}
 
 }

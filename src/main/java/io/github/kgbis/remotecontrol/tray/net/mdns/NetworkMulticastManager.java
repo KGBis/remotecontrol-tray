@@ -208,6 +208,11 @@ public class NetworkMulticastManager {
 	private String getInterfaceType(InetAddress inetAddress) {
 		try {
 			NetworkInterface ni = networkInterfaceProvider.getByInetAddress(inetAddress);
+			if (ni == null) {
+				log.debug("No NetworkInterface for {}", inetAddress);
+				return "UNKNOWN";
+			}
+
 			String name = ni.getName().toLowerCase();
 			String display = ni.getDisplayName().toLowerCase();
 
