@@ -114,6 +114,9 @@ public class InformationScreen implements InfoListener<String, String> {
 		table.setShowVerticalLines(false);
 
 		JScrollPane scroll = new JScrollPane(table);
+		int preferredHeight = table.getRowHeight() * 5 + table.getTableHeader().getPreferredSize().height;
+		scroll.setPreferredSize(new Dimension(scroll.getPreferredSize().width, preferredHeight));
+
 		jFrame.add(scroll, BorderLayout.CENTER);
 
 		// -----------
