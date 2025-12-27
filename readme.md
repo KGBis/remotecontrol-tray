@@ -184,37 +184,47 @@ set -e
 
 echo "[pre-commit] Updating version..."
 
-# Current date
-DATE=$(date +"%Y.%m.%d")
+# Current date parts
+YEAR=$(date +"%Y")
+MONTH=$(date +"%m")
 
 # Get current version from pom.xml
 CURRENT=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 
-# if current version starts with current date, increment "build"
-if [[ "$CURRENT" == "$DATE."* ]]; then
-    BUILD=${CURRENT##*.}
-    BUILD=$((BUILD + 1))
+# Parse current version into parts
+IFS='.' read -r CURRENT_YEAR CURRENT_MONTH CURRENT_REV <<< "$CURRENT"
+
+# If current version matches current year and month, increment revision
+if [[ "$CURRENT_YEAR" == "$YEAR" && "$CURRENT_MONTH" == "$MONTH" ]]; then
+    # Ensure CURRENT_REV is a number
+    if [[ "$CURRENT_REV" =~ ^[0-9]+$ ]]; then
+        REV=$((CURRENT_REV + 1))
+    else
+        REV=1
+    fi
 else
-    BUILD=1
+    # New month or year, reset revision to 1
+    REV=1
 fi
 
-NEW_VERSION="$DATE.$BUILD"
+NEW_VERSION="$YEAR.$MONTH.$REV"
 
+echo "[Version Hook] Current version: $CURRENT"
 echo "[Version Hook] New version: $NEW_VERSION"
 
-# set new version
+# Set new version
 mvn -q versions:set -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false
 mvn -q versions:commit
 
-# write version file
+# Write version file
 ROOT=$(git rev-parse --show-toplevel)
 VERSION_FILE="$ROOT/src/main/resources/version.txt"
 echo $NEW_VERSION > $VERSION_FILE
 
-# Add modified pom.xml to the commit
+# Add modified files to the commit
 git add pom.xml
 git add $VERSION_FILE
 
-echo "[Version Hook] pom.xml updated. Done."
+echo "[Version Hook] pom.xml and version.txt updated. Done."
 ```
 
