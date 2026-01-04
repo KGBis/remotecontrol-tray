@@ -27,7 +27,7 @@ import java.net.Socket;
 import java.util.Arrays;
 
 @Slf4j
-public class AckNetworkAction extends NetworkAction {
+public class AckNetworkAction extends NetworkAction<Void> {
 
 	public AckNetworkAction(Socket socket, String[] args) {
 		super(socket, args);
@@ -35,12 +35,12 @@ public class AckNetworkAction extends NetworkAction {
 
 	@Override
 	public void execute() throws IOException {
-		log.info("ACK sent for args={}", (args != null ? Arrays.toString(args) : ""));
+		log.debug("ACK sent for args={}", (args != null ? Arrays.toString(args) : ""));
 		writeToSocket(socket, "ACK");
 	}
 
 	@Override
-	protected <T> T parseArguments() {
+	protected Void parseArguments() {
 		return null;
 	}
 

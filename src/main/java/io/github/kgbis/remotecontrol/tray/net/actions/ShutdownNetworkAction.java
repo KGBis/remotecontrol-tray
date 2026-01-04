@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-public class ShutdownNetworkAction extends NetworkAction {
+public class ShutdownNetworkAction extends NetworkAction<ShutdownNetworkActionData> {
 
 	private final boolean isDryRun;
 
@@ -55,17 +55,18 @@ public class ShutdownNetworkAction extends NetworkAction {
 		String[] cmdLine = buildCommandLine(totalTimeInSeconds);
 
 		log.info("Executing shutdown -> {}", StringUtils.join(cmdLine, " "));
-		writeToSocket(socket, "ACK");
 
+		int exitCode = 0;
 		if (!isDryRun) {
-			execute(cmdLine);
+			exitCode = execute(cmdLine);
 		}
 		else {
 			log.info("DryRun mode ON: shutdown not executed");
 		}
+
+		writeToSocket(socket, exitCode == 0 ? "ACK" : "ERROR " + exitCode);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected ShutdownNetworkActionData parseArguments() {
 		if (args.length < 3)
 			return null;

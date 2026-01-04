@@ -28,7 +28,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 @Slf4j
-public class InfoNetworkAction extends NetworkAction {
+public class InfoNetworkAction extends NetworkAction<String> {
 
 	private final NetworkInfoProvider provider;
 
@@ -43,18 +43,15 @@ public class InfoNetworkAction extends NetworkAction {
 
 		if (!provider.getIPv4Addresses().contains(ip)) {
 			log.warn("Unknown IP requested: {}", ip);
+			writeToSocket(socket, "ERROR Unknown IP requested: " + ip);
 			return;
 		}
 
 		String msg = provider.getHostName(ip) + " " + provider.getMac(ip);
 		log.info("Responding with: {}", msg);
-
-		OutputStream out = socket.getOutputStream();
-		out.write((msg + "\n").getBytes());
-		out.flush();
+		writeToSocket(socket, msg);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected String parseArguments() {
 		if (args.length < 2)

@@ -70,13 +70,14 @@ class InfoNetworkActionTest {
 	void testExecute_IpIsNotRegistered() throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(networkInfoProvider.getIPv4Addresses()).thenReturn(List.of("192.168.1.100", "192.168.1.101"));
+		when(socket.getOutputStream()).thenReturn(outputStream);
 
 		infoNetworkAction = new InfoNetworkAction(socket, new String[] { "INFO", "192.168.1.102" },
 				networkInfoProvider);
 		infoNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-		assertEquals(0, inputStream.readAllBytes().length);
+		assertEquals(42, inputStream.readAllBytes().length);
 	}
 
 	@Test

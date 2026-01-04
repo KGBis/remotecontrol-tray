@@ -30,7 +30,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 @Slf4j
-public abstract class NetworkAction {
+public abstract class NetworkAction<R> {
 
 	protected final Socket socket;
 
@@ -43,11 +43,13 @@ public abstract class NetworkAction {
 
 	public abstract void execute() throws IOException;
 
-	protected abstract <T> T parseArguments();
+	protected abstract R parseArguments();
 
-	protected void execute(String[] cmdLine) {
+	protected int execute(String[] cmdLine) {
 		@SuppressWarnings("ConfusingArgumentToVarargsMethod")
 		String strCommandLine = StringUtils.joinWith(" ", cmdLine);
+
+		int exitCode = 0;
 
 		try {
 			ProcessBuilder builder = new ProcessBuilder(cmdLine);
@@ -65,7 +67,7 @@ public abstract class NetworkAction {
 			}
 
 			// Wait for the process to complete and get the exit code
-			int exitCode = process.waitFor();
+			exitCode = process.waitFor();
 			log.debug("shutdown exit code: {}", exitCode);
 		}
 		catch (IOException e) {
@@ -75,6 +77,8 @@ public abstract class NetworkAction {
 			log.error("Error executing '{}' command", strCommandLine, e);
 			Thread.currentThread().interrupt();
 		}
+
+		return exitCode;
 	}
 
 	void writeToSocket(Socket socket, String message) throws IOException {

@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class CancelShutdownNetworkAction extends NetworkAction {
+public class CancelShutdownNetworkAction extends NetworkAction<String[]> {
 
 	protected CancelShutdownNetworkAction(Socket socket, String[] args) {
 		super(socket, args);
@@ -40,8 +40,8 @@ public class CancelShutdownNetworkAction extends NetworkAction {
 	public void execute() throws IOException {
 		String[] cmdLine = parseArguments();
 		log.info("Executing cancel shutdown -> {}", StringUtils.join(cmdLine, " "));
-		writeToSocket(socket, "ACK");
-		execute(cmdLine);
+		int exitCode = execute(cmdLine);
+		writeToSocket(socket, exitCode == 0 ? "ACK" : "ERROR " + exitCode);
 	}
 
 	@Override
