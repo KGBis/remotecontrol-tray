@@ -25,9 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -60,34 +58,7 @@ public class ShutdownNetworkAction extends NetworkAction {
 		writeToSocket(socket, "ACK");
 
 		if (!isDryRun) {
-			try {
-				ProcessBuilder builder = new ProcessBuilder(cmdLine);
-
-				// Redirect the error stream to the output stream to ensure all output is
-				// captured
-				builder.redirectErrorStream(true);
-				Process process = builder.start();
-
-				// Get the input stream (which now includes standard error due to
-				// redirectErrorStream(true))
-				try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-					String line;
-					while ((line = reader.readLine()) != null) {
-						log.debug(line);
-					}
-				}
-
-				// Wait for the process to complete and get the exit code
-				int exitCode = process.waitFor();
-				log.debug("shutdown exit code: {}", exitCode);
-			}
-			catch (IOException e) {
-				log.error("Error executing shutdown command", e);
-			}
-			catch (InterruptedException e) {
-				log.error("Error executing shutdown command", e);
-				Thread.currentThread().interrupt();
-			}
+			execute(cmdLine);
 		}
 		else {
 			log.info("DryRun mode ON: shutdown not executed");

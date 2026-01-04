@@ -48,6 +48,8 @@ public class NetworkActionFactory {
 				return new InfoNetworkAction(socket, remoteCommand, networkInfoProvider);
 			case "SHUTDOWN":
 				return new ShutdownNetworkAction(socket, remoteCommand, isDryRun);
+			case "CANCEL_SHUTDOWN":
+				return new CancelShutdownNetworkAction(socket, remoteCommand);
 			case "ACK":
 			default:
 				return new AckNetworkAction(socket, remoteCommand);

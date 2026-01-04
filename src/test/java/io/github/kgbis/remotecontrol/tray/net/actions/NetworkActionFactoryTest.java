@@ -52,6 +52,13 @@ class NetworkActionFactoryTest {
 	}
 
 	@Test
+	void testCreateCancelShutdownNetworkAction() {
+		String[] remoteCommand = { "CANCEL_SHUTDOWN" };
+		NetworkAction result = networkActionFactory.createAction(remoteCommand, socket, false);
+		assertInstanceOf(CancelShutdownNetworkAction.class, result);
+	}
+
+	@Test
 	void testCreateInfoNetworkAction() {
 		String[] remoteCommand = { "INFO", "10.0.0.1" };
 		NetworkAction result = networkActionFactory.createAction(remoteCommand, socket, false);

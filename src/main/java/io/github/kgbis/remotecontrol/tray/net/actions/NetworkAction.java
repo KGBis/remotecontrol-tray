@@ -21,9 +21,12 @@
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 @Slf4j
@@ -41,6 +44,38 @@ public abstract class NetworkAction {
 	public abstract void execute() throws IOException;
 
 	protected abstract <T> T parseArguments();
+
+	protected void execute(String[] cmdLine) {
+		@SuppressWarnings("ConfusingArgumentToVarargsMethod")
+		String strCommandLine = StringUtils.joinWith(" ", cmdLine);
+
+		try {
+			ProcessBuilder builder = new ProcessBuilder(cmdLine);
+
+			// Redirect the error stream to the output stream to make all output captured
+			builder.redirectErrorStream(true);
+			Process process = builder.start();
+
+			// Get the input stream (includes standard error by redirectErrorStream(true))
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					log.debug(line);
+				}
+			}
+
+			// Wait for the process to complete and get the exit code
+			int exitCode = process.waitFor();
+			log.debug("shutdown exit code: {}", exitCode);
+		}
+		catch (IOException e) {
+			log.error("Error executing '{}' command", strCommandLine, e);
+		}
+		catch (InterruptedException e) {
+			log.error("Error executing '{}' command", strCommandLine, e);
+			Thread.currentThread().interrupt();
+		}
+	}
 
 	void writeToSocket(Socket socket, String message) throws IOException {
 		DataOutputStream outToClient = new DataOutputStream(socket.getOutputStream());
