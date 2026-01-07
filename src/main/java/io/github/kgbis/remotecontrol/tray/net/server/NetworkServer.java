@@ -196,6 +196,7 @@ public class NetworkServer {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	void handleClient(Socket socket) {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 			try (socket) {

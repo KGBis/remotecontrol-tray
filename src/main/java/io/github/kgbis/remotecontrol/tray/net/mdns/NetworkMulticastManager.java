@@ -21,13 +21,13 @@
 package io.github.kgbis.remotecontrol.tray.net.mdns;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaceProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -40,9 +40,14 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.net.server.NetworkServer.POLL_INTERVAL_MS;
 import static io.github.kgbis.remotecontrol.tray.net.server.NetworkServer.PORT;
@@ -75,8 +80,9 @@ public class NetworkMulticastManager {
 	Map<InetAddress, JmDNS> activeMdns = new ConcurrentHashMap<>();
 
 	// Map of NetworkIF per address, just for the UI
-	@Getter
 	Map<InetAddress, String> addresses = new ConcurrentHashMap<>();
+
+	AtomicReference<Device> device = new AtomicReference<>();
 
 	@Inject
 	public NetworkMulticastManager(NetworkInterfaces networkInterfaces, JmDNSFactory jmDNSFactory,
@@ -137,23 +143,27 @@ public class NetworkMulticastManager {
 		// get all valid addresses
 		addresses.clear();
 		addresses.putAll(networkInterfaces.getValidAddressesWithInterface());
-		infoProvider.onChange(addresses);
 
 		Set<InetAddress> current = addresses.keySet();
 		Set<InetAddress> previous = activeMdns.keySet();
 
 		// remove old
 		for (InetAddress addr : CollectionUtils.subtract(previous, current)) {
-			shutdownMdns(addr);
+			if (Boolean.TRUE.equals(shutdownMdns(addr))) {
+				removeInterface(addr);
+			}
 		}
 
 		// add new
 		for (InetAddress addr : CollectionUtils.subtract(current, previous)) {
-			startMdns(addr);
+			storeInterface(startMdns(addr));
 		}
+
+		// update information
+		infoProvider.onChange(device.get());
 	}
 
-	void startMdns(InetAddress inetAddress) throws IOException {
+	Map<String, String> startMdns(InetAddress inetAddress) throws IOException {
 		synchronized (lock) {
 			String hostAddress = inetAddress.getHostAddress();
 			String serviceName = getServiceName(inetAddress);
@@ -164,25 +174,30 @@ public class NetworkMulticastManager {
 			jmdns.registerService(service);
 			activeMdns.put(inetAddress, jmdns);
 			log.info("mDNS service started at {}", hostAddress);
+
+			return props;
 		}
 	}
 
-	void shutdownMdns(InetAddress inetAddress) {
+	Boolean shutdownMdns(InetAddress inetAddress) {
 		synchronized (lock) {
 			String hostAddress = inetAddress.getHostAddress();
+
+			Boolean result = null;
 
 			JmDNS jmDNS = activeMdns.get(inetAddress);
 			if (jmDNS != null) {
 				jmDNS.unregisterAllServices();
 				try {
 					jmDNS.close();
-					activeMdns.remove(inetAddress, jmDNS);
+					result = activeMdns.remove(inetAddress, jmDNS);
 					log.info("mDNS service shutdown at {}", hostAddress);
 				}
 				catch (IOException e) {
 					log.debug("Error while closing JmDNS: {}", e.getMessage());
 				}
 			}
+			return result;
 		}
 	}
 
@@ -205,6 +220,56 @@ public class NetworkMulticastManager {
 		return props;
 	}
 
+	private void removeInterface(InetAddress inetAddress) {
+		synchronized (lock) {
+			if (device.get() != null) {
+				device.getAndUpdate(dev -> {
+					dev.setInterfaces(dev.getInterfaces()
+						.stream()
+						.filter(inf -> !inf.getIp().equals(inetAddress.getHostAddress()))
+						.collect(Collectors.toCollection(HashSet::new)));
+					return dev;
+				});
+
+				log.debug("removed device interface {}", device);
+			}
+		}
+	}
+
+	private void storeInterface(Map<String, String> map) {
+		synchronized (lock) {
+			List<Device.DeviceInterface> deviceInterfaces = List.of(Device.DeviceInterface.builder()
+				.ip(map.get("host-ip-address"))
+				.mac(map.get("host-mac-address"))
+				.type(Device.InterfaceType.valueOf(map.get("interface-type")))
+				.build());
+
+			if (device.get() == null) {
+				Device.DeviceInfo deviceInfo = Device.DeviceInfo.builder()
+					.osName(map.get("os-name"))
+					.osVersion(map.get("os-version"))
+					.trayVersion(map.get("tray-version"))
+					.build();
+
+				device.set(Device.builder()
+					.id(UUID.fromString(map.get("device-id")))
+					.hostname(map.get("host-name"))
+					.deviceInfo(deviceInfo)
+					.interfaces(new HashSet<>(deviceInterfaces))
+					.build());
+			}
+			else {
+				device.getAndUpdate(dev -> {
+					dev.getInterfaces().addAll(deviceInterfaces);
+					return dev;
+				});
+			}
+
+			log.debug("store device interface {}", device);
+		}
+
+	}
+
 	private String getInterfaceType(InetAddress inetAddress) {
 		try {
 			NetworkInterface ni = networkInterfaceProvider.getByInetAddress(inetAddress);
@@ -216,8 +281,8 @@ public class NetworkMulticastManager {
 			String name = ni.getName().toLowerCase();
 			String display = ni.getDisplayName().toLowerCase();
 
-			boolean wifi = name.startsWith("wl") || name.contains("wlan") || name.contains("wifi") || display.contains("wi-fi")
-					|| display.contains("wireless");
+			boolean wifi = name.startsWith("wl") || name.contains("wlan") || name.contains("wifi")
+					|| display.contains("wi-fi") || display.contains("wireless");
 
 			boolean ethernet = name.startsWith("eth") || name.startsWith("en") || display.contains("ethernet");
 

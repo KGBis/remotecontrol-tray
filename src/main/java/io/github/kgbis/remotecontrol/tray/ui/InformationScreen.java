@@ -21,6 +21,7 @@
 package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
 import io.github.kgbis.remotecontrol.tray.ui.support.InformationModel;
 import io.github.kgbis.remotecontrol.tray.ui.support.InformationTableRenderer;
@@ -58,7 +59,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
@@ -67,7 +67,7 @@ import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.
 
 @Singleton
 @Slf4j
-public class InformationScreen implements InfoListener<String, String> {
+public class InformationScreen implements InfoListener {
 
 	private final JFrame frame;
 
@@ -81,7 +81,7 @@ public class InformationScreen implements InfoListener<String, String> {
 	public InformationScreen() {
 		this.infoModel = new InformationModel();
 
-		this.model = new DefaultTableModel(new Object[] { "IP Address", "MAC" }, 0) {
+		this.model = new DefaultTableModel(new Object[] { "Type", "IP Address", "MAC" }, 0) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
@@ -255,7 +255,7 @@ public class InformationScreen implements InfoListener<String, String> {
 
 	// Load IPs and MACs to table
 	private void loadData() {
-		onChange(infoModel.getAddresses());
+		onChange(infoModel.getDevice());
 	}
 
 	// Copy all to clipboard
@@ -281,9 +281,9 @@ public class InformationScreen implements InfoListener<String, String> {
 	}
 
 	@Override
-	public void onChange(Map<String, String> map) {
-		infoModel.update(map);
-		renderer.render(infoModel.getAddresses());
+	public void onChange(Device device) {
+		infoModel.update(device);
+		renderer.render(device.getInterfaces());
 	}
 
 }

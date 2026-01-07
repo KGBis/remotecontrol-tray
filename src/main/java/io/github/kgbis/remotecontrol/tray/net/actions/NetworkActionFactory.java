@@ -37,6 +37,7 @@ public class NetworkActionFactory {
 		this.networkInfoProvider = networkInfoProvider;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public NetworkAction createAction(String[] remoteCommand, Socket socket, boolean isDryRun) {
 		// See if "ACK" option is worth or better to reuse "INFO"
 		if (ArrayUtils.isEmpty(remoteCommand)) {

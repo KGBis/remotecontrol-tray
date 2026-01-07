@@ -20,42 +20,64 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.info;
 
-import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
-import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Setter;
+import lombok.ToString;
 
-import java.net.InetAddress;
+import java.util.Comparator;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
-@Singleton
-@Slf4j
-public class NetworkInfoProvider implements InfoListener {
+@Builder
+@ToString
+@Getter
+public class Device {
 
-	private final InformationScreen informationScreen;
+	private UUID id;
 
+	private String hostname;
+
+	private DeviceInfo deviceInfo;
+
+	@Builder.Default
+	@Setter
+	private Set<DeviceInterface> interfaces = new TreeSet<>(Comparator.comparing(DeviceInterface::getIp));
+
+	@Builder
+	@ToString
 	@Getter
-	private Device device;
+	public static class DeviceInfo {
 
-	@Inject
-	public NetworkInfoProvider(InformationScreen informationScreen) {
-		this.informationScreen = informationScreen;
+		private String osName;
+
+		private String osVersion;
+
+		private String trayVersion;
+
 	}
 
-	public String getHostName(String ip) {
-		try {
-			return InetAddress.getLocalHost().getHostName();
-		}
-		catch (Exception e) {
-			return ip;
-		}
+	@Builder
+	@ToString
+	@Getter
+	public static class DeviceInterface {
+
+		private String ip;
+
+		private String mac;
+
+		@Builder.Default
+		private int port = 6800;
+
+		private InterfaceType type;
+
 	}
 
-	@Override
-	public void onChange(Device device) {
-		this.device = device;
-		informationScreen.onChange(device);
+	public enum InterfaceType {
+
+		ETHERNET, WIFI, UNKNOWN
+
 	}
 
 }

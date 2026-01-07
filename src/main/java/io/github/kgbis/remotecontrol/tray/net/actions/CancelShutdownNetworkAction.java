@@ -41,7 +41,7 @@ public class CancelShutdownNetworkAction extends NetworkAction<String[]> {
 		String[] cmdLine = parseArguments();
 		log.info("Executing cancel shutdown -> {}", StringUtils.join(cmdLine, " "));
 		int exitCode = execute(cmdLine);
-		writeToSocket(socket, exitCode == 0 ? "ACK" : "ERROR " + exitCode);
+		writeToSocket(socket, (exitCode == 0 || exitCode == 1116) ? "ACK" : "ERROR " + exitCode);
 	}
 
 	@Override

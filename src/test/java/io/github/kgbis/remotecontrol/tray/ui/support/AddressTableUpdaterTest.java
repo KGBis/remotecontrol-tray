@@ -20,10 +20,12 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.table.DefaultTableModel;
-import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,17 +33,28 @@ class AddressTableUpdaterTest {
 
 	@Test
 	void onChange_updatesTableModel() {
-		DefaultTableModel model = new DefaultTableModel(new Object[] { "IP", "MAC" }, 0);
-
+		DefaultTableModel model = new DefaultTableModel(new Object[] { "Type", "IP", "MAC" }, 0);
 		AddressTableUpdater updater = new AddressTableUpdater(model);
 
-		Map<String, String> data = Map.of("192.168.1.10", "00:11:22:33:44:55");
+		Device device = Device.builder()
+			.id(UUID.randomUUID())
+			.hostname("Hostname")
+			.deviceInfo(
+					Device.DeviceInfo.builder().osName("Windows 11").osVersion("10.0").trayVersion("2026.01.1").build())
+			.interfaces(Set.of(Device.DeviceInterface.builder()
+				.ip("10.0.0.2")
+				.mac("22:2A:00:2A:A2:22")
+				.port(6800)
+				.type(Device.InterfaceType.WIFI)
+				.build()))
+			.build();
 
-		updater.onChange(data);
+		updater.onChange(device);
 
 		assertEquals(1, model.getRowCount());
-		assertEquals("192.168.1.10", model.getValueAt(0, 0));
-		assertEquals("00:11:22:33:44:55", model.getValueAt(0, 1));
+		assertEquals(Device.InterfaceType.WIFI, model.getValueAt(0, 0));
+		assertEquals("10.0.0.2", model.getValueAt(0, 1));
+		assertEquals("22:2A:00:2A:A2:22", model.getValueAt(0, 2));
 	}
 
 }

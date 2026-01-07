@@ -20,17 +20,19 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 
 @Slf4j
 public class InfoNetworkAction extends NetworkAction<String> {
 
 	private final NetworkInfoProvider provider;
+
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	public InfoNetworkAction(Socket socket, String[] args, NetworkInfoProvider networkInfoProvider) {
 		super(socket, args);
@@ -41,15 +43,19 @@ public class InfoNetworkAction extends NetworkAction<String> {
 	public void execute() throws IOException {
 		String ip = parseArguments();
 
-		if (!provider.getIPv4Addresses().contains(ip)) {
+		if (!deviceContainsIp(ip)) {
 			log.warn("Unknown IP requested: {}", ip);
 			writeToSocket(socket, "ERROR Unknown IP requested: " + ip);
 			return;
 		}
 
-		String msg = provider.getHostName(ip) + " " + provider.getMac(ip);
+		String msg = objectMapper.writeValueAsString(provider.getDevice());
 		log.info("Responding with: {}", msg);
 		writeToSocket(socket, msg);
+	}
+
+	private boolean deviceContainsIp(String ip) {
+		return provider.getDevice().getInterfaces().stream().anyMatch(iface -> iface.getIp().equals(ip));
 	}
 
 	@Override

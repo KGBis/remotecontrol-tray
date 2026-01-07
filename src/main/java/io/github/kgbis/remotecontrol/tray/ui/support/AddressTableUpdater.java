@@ -20,12 +20,12 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
 
 import javax.swing.table.DefaultTableModel;
-import java.util.Map;
 
-public class AddressTableUpdater implements InfoListener<String, String> {
+public class AddressTableUpdater implements InfoListener {
 
 	private final DefaultTableModel model;
 
@@ -34,9 +34,10 @@ public class AddressTableUpdater implements InfoListener<String, String> {
 	}
 
 	@Override
-	public void onChange(Map<String, String> map) {
+	public void onChange(Device device) {
 		model.setRowCount(0);
-		map.forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
+		device.getInterfaces()
+			.forEach(iface -> model.addRow(new Object[] { iface.getType(), iface.getIp(), iface.getMac() }));
 	}
 
 }

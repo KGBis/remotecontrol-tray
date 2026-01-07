@@ -27,13 +27,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,15 +46,39 @@ class NetworkInfoProviderTest {
 	NetworkInfoProvider networkInfoProvider;
 
 	@Test
-	void testGetMacAndIPv4Addresses() throws UnknownHostException {
-		InetAddress inetAddress = InetAddress.getByName("10.0.0.1");
-		Map<InetAddress, String> data = Map.of(inetAddress, "AA:AA:AA:AA:AA:AA");
+	void testGetMacAndIPv4Addresses() {
+		Device device = Device.builder()
+			.id(UUID.randomUUID())
+			.hostname("Hostname")
+			.deviceInfo(
+					Device.DeviceInfo.builder().osName("Windows 11").osVersion("10.0").trayVersion("2026.01.1").build())
+			.interfaces(Set.of(
+					Device.DeviceInterface.builder()
+						.ip("10.0.0.1")
+						.mac("AA:AA:AA:AA:AA:AA")
+						.port(6800)
+						.type(Device.InterfaceType.ETHERNET)
+						.build(),
+					Device.DeviceInterface.builder()
+						.ip("10.0.0.2")
+						.mac("22:2A:00:2A:A2:22")
+						.port(6800)
+						.type(Device.InterfaceType.WIFI)
+						.build()))
+			.build();
 
-		networkInfoProvider.onChange(data);
+		networkInfoProvider.onChange(device);
 
-		assertEquals("AA:AA:AA:AA:AA:AA", networkInfoProvider.getMac("10.0.0.1"));
-		assertEquals(List.of("10.0.0.1"), networkInfoProvider.getIPv4Addresses());
-		verify(informationScreen).onChange(anyMap());
+		assertNotNull(networkInfoProvider.getDevice());
+		assertTrue(networkInfoProvider.getDevice()
+			.getInterfaces()
+			.stream()
+			.anyMatch(iface -> iface.getMac().equals("AA:AA:AA:AA:AA:AA")));
+		assertTrue(networkInfoProvider.getDevice()
+			.getInterfaces()
+			.stream()
+			.anyMatch(iface -> iface.getIp().equals("10.0.0.2")));
+		verify(informationScreen).onChange(any(Device.class));
 
 	}
 
