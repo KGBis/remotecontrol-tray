@@ -50,7 +50,7 @@ public class InfoNetworkAction extends NetworkAction<String> {
 		}
 
 		String msg = objectMapper.writeValueAsString(provider.getDevice());
-		log.info("Responding with: {}", msg);
+		log.debug("Responding with: {}", msg);
 		writeToSocket(socket, msg);
 	}
 
