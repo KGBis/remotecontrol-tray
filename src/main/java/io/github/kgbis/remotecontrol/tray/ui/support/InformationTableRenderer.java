@@ -20,10 +20,28 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-public enum TraySupport {
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+import javax.swing.table.DefaultTableModel;
+import java.util.Map;
+import java.util.Set;
+
+public final class InformationTableRenderer {
+
+	private final DefaultTableModel model;
+
+	public InformationTableRenderer(DefaultTableModel model) {
+		this.model = model;
+	}
+
+	public void render(Map<String, String> data) {
+		model.setRowCount(0);
+		data.forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
+	}
+
+	public void render(Set<Device.DeviceInterface> interfaces) {
+		model.setRowCount(0);
+		interfaces.forEach(iface -> model.addRow(new Object[] { iface.getType(), iface.getIp(), iface.getMac() }));
+	}
 
 }

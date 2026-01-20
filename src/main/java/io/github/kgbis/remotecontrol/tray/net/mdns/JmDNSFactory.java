@@ -18,12 +18,14 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.net.mdns;
 
-public enum TraySupport {
+import javax.jmdns.JmDNS;
+import java.io.IOException;
+import java.net.InetAddress;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+public interface JmDNSFactory {
+
+	JmDNS create(InetAddress addr) throws IOException;
 
 }

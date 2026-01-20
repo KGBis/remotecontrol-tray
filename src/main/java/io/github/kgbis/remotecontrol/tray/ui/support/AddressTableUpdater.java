@@ -20,10 +20,24 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-public enum TraySupport {
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
+import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+import javax.swing.table.DefaultTableModel;
+
+public class AddressTableUpdater implements InfoListener {
+
+	private final DefaultTableModel model;
+
+	public AddressTableUpdater(DefaultTableModel model) {
+		this.model = model;
+	}
+
+	@Override
+	public void onChange(Device device) {
+		model.setRowCount(0);
+		device.getInterfaces()
+			.forEach(iface -> model.addRow(new Object[] { iface.getType(), iface.getIp(), iface.getMac() }));
+	}
 
 }

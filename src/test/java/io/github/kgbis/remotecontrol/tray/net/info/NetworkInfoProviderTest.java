@@ -1,34 +1,85 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.info;
 
+import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import oshi.hardware.NetworkIF;
 
-import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class NetworkInfoProviderTest {
 
+	@SuppressWarnings("unused")
 	@Mock
-	NetworkIF networkIF;
+	InformationScreen informationScreen;
+
+	@InjectMocks
+	NetworkInfoProvider networkInfoProvider;
 
 	@Test
 	void testGetMacAndIPv4Addresses() {
-		when(networkIF.getIPv4addr()).thenReturn(new String[] { "10.0.0.1" });
-		when(networkIF.getMacaddr()).thenReturn("AA:AA:AA:AA:AA:AA");
+		Device device = Device.builder()
+			.id(UUID.randomUUID())
+			.hostname("Hostname")
+			.deviceInfo(
+					Device.DeviceInfo.builder().osName("Windows 11").osVersion("10.0").trayVersion("2026.01.1").build())
+			.interfaces(Set.of(
+					Device.DeviceInterface.builder()
+						.ip("10.0.0.1")
+						.mac("AA:AA:AA:AA:AA:AA")
+						.port(6800)
+						.type(Device.InterfaceType.ETHERNET)
+						.build(),
+					Device.DeviceInterface.builder()
+						.ip("10.0.0.2")
+						.mac("22:2A:00:2A:A2:22")
+						.port(6800)
+						.type(Device.InterfaceType.WIFI)
+						.build()))
+			.build();
 
-		NetworkChangeListener listener = new NetworkChangeListener();
-		listener.onNetworkChange(List.of(networkIF));
+		networkInfoProvider.onChange(device);
 
-		NetworkInfoProvider provider = new NetworkInfoProvider(listener);
+		assertNotNull(networkInfoProvider.getDevice());
+		assertTrue(networkInfoProvider.getDevice()
+			.getInterfaces()
+			.stream()
+			.anyMatch(iface -> iface.getMac().equals("AA:AA:AA:AA:AA:AA")));
+		assertTrue(networkInfoProvider.getDevice()
+			.getInterfaces()
+			.stream()
+			.anyMatch(iface -> iface.getIp().equals("10.0.0.2")));
+		verify(informationScreen).onChange(any(Device.class));
 
-		assertEquals("AA:AA:AA:AA:AA:AA", provider.getMac("10.0.0.1"));
-		assertEquals(List.of("10.0.0.1"), provider.getIPv4Addresses());
 	}
 
 }

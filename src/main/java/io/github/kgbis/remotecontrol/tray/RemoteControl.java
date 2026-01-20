@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray;
 
 import com.beust.jcommander.ParameterException;
@@ -38,9 +58,9 @@ public class RemoteControl {
 		this.trayManager = trayManager;
 	}
 
-	public void start(CliArguments cliArgs) throws IOException, InterruptedException {
-		trayManager.initializeTray();
+	public void start(CliArguments cliArgs) throws IOException {
 		networkServer.arguments(cliArgs).start();
+		trayManager.initializeTray();
 	}
 
 	public static void main(String[] args) {
@@ -75,7 +95,7 @@ public class RemoteControl {
 			log.error("Error while binding port to " + PORT + ". Check if already in use!");
 			System.exit(1);
 		}
-		catch (IOException | InterruptedException e) {
+		catch (IOException e) {
 			log.error("Something bad happened. Please report the following error: ", e);
 			Thread.currentThread().interrupt();
 			System.exit(-1);

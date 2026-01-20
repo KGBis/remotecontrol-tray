@@ -18,12 +18,19 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.net.internal;
 
-public enum TraySupport {
+import jakarta.inject.Singleton;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+
+@Singleton
+public class NetworkInterfaceProvider {
+
+	public NetworkInterface getByInetAddress(InetAddress inetAddress) throws SocketException {
+		return NetworkInterface.getByInetAddress(inetAddress);
+	}
 
 }

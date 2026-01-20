@@ -18,12 +18,19 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.net.internal;
 
-public enum TraySupport {
+import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
+import jakarta.inject.Singleton;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+import java.io.IOException;
+import java.util.UUID;
+
+@Singleton
+public class DeviceIdProvider {
+
+	public UUID getDeviceId() throws IOException {
+		return ResourcesHelper.getSystemId();
+	}
 
 }

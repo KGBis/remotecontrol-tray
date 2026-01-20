@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.logging;
 
 import ch.qos.logback.classic.Level;
@@ -14,11 +34,11 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.APP_NAME;
+import static io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper.getOSLogDirectory;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
@@ -62,10 +82,12 @@ public class LogbackConfiguration {
 		fileAppender.setEncoder(fileEncoder);
 		fileAppender.start();
 
-		// oshi logger (too much logs on Linux when in DEBUG)
+		// oshi logger and mDNS (too much logs when in DEBUG)
 		Logger oshi = context.getLogger("oshi");
+		Logger mDns = context.getLogger("javax.jmdns");
 		if (rootLevel.equals(Level.DEBUG) || rootLevel.equals(Level.TRACE)) {
 			oshi.setLevel(Level.INFO);
+			mDns.setLevel(Level.INFO);
 		}
 
 		// Root logger
@@ -91,33 +113,6 @@ public class LogbackConfiguration {
 		console.start();
 
 		return console;
-	}
-
-	@SuppressWarnings("ResultOfMethodCallIgnored")
-	private static Path getOSLogDirectory() {
-		String userHome = System.getProperty("user.home");
-		String os = System.getProperty("os.name").toLowerCase();
-
-		Path logDir;
-		if (os.contains("win")) {
-			String appData = System.getenv("APPDATA");
-			logDir = appData != null ? Path.of(appData, APP_NAME, "logs") : Path.of(userHome, APP_NAME, "logs");
-		}
-		else if (os.contains("mac")) {
-			logDir = Path.of(userHome, "Library", "Logs", APP_NAME);
-		}
-		else {
-			// Linux/Unix
-			logDir = Path.of(userHome, ".config", APP_NAME, "logs");
-		}
-
-		// Create directories if they don't exist
-		File dir = new File(logDir.toUri());
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-
-		return logDir;
 	}
 
 }

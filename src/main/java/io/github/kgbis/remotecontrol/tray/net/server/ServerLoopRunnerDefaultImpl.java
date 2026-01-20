@@ -18,12 +18,26 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.net.server;
 
-public enum TraySupport {
+import jakarta.inject.Singleton;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+@Singleton
+public class ServerLoopRunnerDefaultImpl implements ServerLoopRunner {
+
+	private Thread thread;
+
+	@Override
+	public void start(Runnable loop) {
+		thread = new Thread(loop, "socket-thread");
+		thread.start();
+	}
+
+	@Override
+	public void stop() throws InterruptedException {
+		if (thread != null) {
+			thread.join(2000);
+		}
+	}
 
 }

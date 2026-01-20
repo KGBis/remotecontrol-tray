@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.ui;
 
 import dorkbox.systemTray.Menu;
@@ -16,8 +36,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
-import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupport.NONE;
-import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.*;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.getDesktop;
+import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isNoneTraySupport;
 
 @Singleton
 @Slf4j
@@ -40,7 +60,8 @@ public class TrayManager {
 	public void initializeTray() {
 		EventQueue.invokeLater(() -> {
 			if (isNoneTraySupport()) {
-				log.info("{} detected. No System Tray. It does not support it correctly.", StringUtils.capitalize(getDesktop()));
+				log.info("{} detected. No System Tray. It does not support it correctly.",
+						StringUtils.capitalize(getDesktop()));
 				controller.toggleWindow();
 				return;
 			}

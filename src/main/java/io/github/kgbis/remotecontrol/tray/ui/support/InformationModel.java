@@ -20,10 +20,39 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-public enum TraySupport {
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+public final class InformationModel {
+
+	private final Map<String, String> addresses = new LinkedHashMap<>();
+
+	private final AtomicReference<Device> device = new AtomicReference<>();
+
+	public void update(Map<String, String> newData) {
+		addresses.clear();
+		addresses.putAll(newData);
+	}
+
+	// @formatter:off
+	public Map<String, String> getAddresses() {
+		return Map.copyOf(addresses);
+	}
+	// @formatter:on
+
+	public Device getDevice() {
+		return device.get();
+	}
+
+	public int size() {
+		return addresses.size();
+	}
+
+	public void update(Device device) {
+		this.device.set(device);
+	}
 
 }

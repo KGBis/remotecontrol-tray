@@ -20,49 +20,43 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
-public class InfoNetworkAction extends NetworkAction<String> {
+public class CancelShutdownNetworkAction extends NetworkAction<String[]> {
 
-	private final NetworkInfoProvider provider;
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
-
-	public InfoNetworkAction(Socket socket, String[] args, NetworkInfoProvider networkInfoProvider) {
+	protected CancelShutdownNetworkAction(Socket socket, String[] args) {
 		super(socket, args);
-		this.provider = networkInfoProvider;
 	}
 
 	@Override
 	public void execute() throws IOException {
-		String ip = parseArguments();
-
-		if (!deviceContainsIp(ip)) {
-			log.warn("Unknown IP requested: {}", ip);
-			writeToSocket(socket, "ERROR Unknown IP requested: " + ip);
-			return;
-		}
-
-		String msg = objectMapper.writeValueAsString(provider.getDevice());
-		log.debug("Responding with: {}", msg);
-		writeToSocket(socket, msg);
-	}
-
-	private boolean deviceContainsIp(String ip) {
-		return provider.getDevice().getInterfaces().stream().anyMatch(iface -> iface.getIp().equals(ip));
+		String[] cmdLine = parseArguments();
+		log.info("Executing cancel shutdown -> {}", StringUtils.join(cmdLine, " "));
+		int exitCode = execute(cmdLine);
+		writeToSocket(socket, (exitCode == 0 || exitCode == 1116) ? "ACK" : "ERROR " + exitCode);
 	}
 
 	@Override
-	protected String parseArguments() {
-		if (args.length < 2)
-			return null;
-		return args[1];
+	protected String[] parseArguments() {
+		List<String> cmd = new ArrayList<>();
+		cmd.add("shutdown");
+
+		if (SystemUtils.IS_OS_WINDOWS) {
+			cmd.add("-a");
+		}
+		else {
+			cmd.add("-c");
+		}
+
+		return cmd.toArray(new String[0]);
 	}
 
 }

@@ -1,6 +1,25 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,9 +40,6 @@ class AckNetworkActionTest {
 	@Mock
 	Socket socket;
 
-	@Mock
-	NetworkInfoProvider networkInfoProvider;
-
 	AckNetworkAction ackNetworkAction;
 
 	@Test
@@ -31,7 +47,7 @@ class AckNetworkActionTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
 
-		ackNetworkAction = new AckNetworkAction(socket, new String[] { "ACK" }, networkInfoProvider);
+		ackNetworkAction = new AckNetworkAction(socket, new String[] { "ACK" });
 		ackNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -44,7 +60,7 @@ class AckNetworkActionTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
 
-		ackNetworkAction = new AckNetworkAction(socket, new String[] {}, networkInfoProvider);
+		ackNetworkAction = new AckNetworkAction(socket, new String[] {});
 		ackNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());

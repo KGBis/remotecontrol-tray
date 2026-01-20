@@ -1,11 +1,29 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.server;
 
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeListener;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkChangeRegistrar;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.net.mdns.NetworkMulticastManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +56,9 @@ public class NetworkServer {
 
 	private final ServerLoopRunner loopRunner;
 
-	private final NetworkInfoProvider networkInfoProvider;
-
 	private final NetworkActionFactory networkActionFactory;
+
+	private final NetworkMulticastManager networkMulticastManager;
 
 	private volatile boolean running = false;
 
@@ -48,15 +66,13 @@ public class NetworkServer {
 
 	private ServerSocket serverSocket;
 
-	private NetworkChangeRegistrar listener;
-
 	@Inject
 	public NetworkServer(ServerSocketFactory socketFactory, ServerLoopRunner loopRunner,
-			NetworkInfoProvider networkInfoProvider, NetworkActionFactory networkActionFactory) {
+			NetworkActionFactory networkActionFactory, NetworkMulticastManager networkMulticastManager) {
 		this.socketFactory = socketFactory;
 		this.loopRunner = loopRunner;
-		this.networkInfoProvider = networkInfoProvider;
 		this.networkActionFactory = networkActionFactory;
+		this.networkMulticastManager = networkMulticastManager;
 	}
 
 	public NetworkServer arguments(CliArguments args) {
@@ -67,12 +83,9 @@ public class NetworkServer {
 		return this;
 	}
 
-	public synchronized void start() throws IOException, InterruptedException {
-		// wait until NetworkInfoProvider has initialized
-		networkInfoProvider.awaitInitialization();
-
-		// register network interfaces listener
-		registerNetworkListener(networkInfoProvider.getNetworkChangeListener());
+	public synchronized void start() throws IOException {
+		// register multicast services
+		networkMulticastManager.start();
 
 		// register shutdown hook
 		registerShutdownHook();
@@ -104,10 +117,9 @@ public class NetworkServer {
 		running = false;
 		log.info("Stopping NetworkServer...");
 
-		// Stop listener
-		if (listener != null) {
-			listener.removeListener(networkInfoProvider.getNetworkChangeListener());
-			listener.stop();
+		// Stop mDNS
+		if (networkMulticastManager != null) {
+			networkMulticastManager.stop();
 		}
 
 		closeSocket();
@@ -184,6 +196,7 @@ public class NetworkServer {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	void handleClient(Socket socket) {
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 			try (socket) {
@@ -211,14 +224,6 @@ public class NetworkServer {
 				log.warn("Error stopping server from ShutdownHook. Nothing to worry about", e);
 			}
 		}, "shutdown-hook"));
-	}
-
-	private void registerNetworkListener(final NetworkChangeListener networkChangeListener) {
-		listener = new NetworkChangeRegistrar(POLL_INTERVAL_MS);
-		listener.addListener(networkChangeListener);
-
-		log.info("Listening for network interfaces changes");
-		listener.start();
 	}
 
 }

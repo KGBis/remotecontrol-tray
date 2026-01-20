@@ -18,12 +18,12 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.net.internal;
 
-public enum TraySupport {
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+public interface InfoListener {
+
+	void onChange(Device device);
 
 }

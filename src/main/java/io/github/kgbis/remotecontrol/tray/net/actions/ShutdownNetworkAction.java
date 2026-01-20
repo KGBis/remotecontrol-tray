@@ -1,14 +1,31 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -16,12 +33,12 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-public class ShutdownNetworkAction extends NetworkAction {
+public class ShutdownNetworkAction extends NetworkAction<ShutdownNetworkActionData> {
 
 	private final boolean isDryRun;
 
-	public ShutdownNetworkAction(Socket socket, String[] args, NetworkInfoProvider provider, boolean isDryRun) {
-		super(socket, args, provider);
+	public ShutdownNetworkAction(Socket socket, String[] args, boolean isDryRun) {
+		super(socket, args);
 		this.isDryRun = isDryRun;
 	}
 
@@ -38,44 +55,18 @@ public class ShutdownNetworkAction extends NetworkAction {
 		String[] cmdLine = buildCommandLine(totalTimeInSeconds);
 
 		log.info("Executing shutdown -> {}", StringUtils.join(cmdLine, " "));
-		writeToSocket(socket, "ACK");
 
+		int exitCode = 0;
 		if (!isDryRun) {
-			try {
-				ProcessBuilder builder = new ProcessBuilder(cmdLine);
-
-				// Redirect the error stream to the output stream to ensure all output is
-				// captured
-				builder.redirectErrorStream(true);
-				Process process = builder.start();
-
-				// Get the input stream (which now includes standard error due to
-				// redirectErrorStream(true))
-				try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-					String line;
-					while ((line = reader.readLine()) != null) {
-						log.debug(line);
-					}
-				}
-
-				// Wait for the process to complete and get the exit code
-				int exitCode = process.waitFor();
-				log.debug("shutdown exit code: {}", exitCode);
-			}
-			catch (IOException e) {
-				log.error("Error executing shutdown command", e);
-			}
-			catch (InterruptedException e) {
-				log.error("Error executing shutdown command", e);
-				Thread.currentThread().interrupt();
-			}
+			exitCode = execute(cmdLine);
 		}
 		else {
 			log.info("DryRun mode ON: shutdown not executed");
 		}
+
+		writeToSocket(socket, exitCode == 0 ? "ACK" : "ERROR " + exitCode);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected ShutdownNetworkActionData parseArguments() {
 		if (args.length < 3)
 			return null;

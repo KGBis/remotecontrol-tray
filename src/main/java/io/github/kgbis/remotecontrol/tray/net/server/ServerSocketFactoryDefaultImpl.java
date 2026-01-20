@@ -18,12 +18,19 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.net.server;
 
-public enum TraySupport {
+import jakarta.inject.Singleton;
 
-	FULL, // Tray + reliable events
-	PARTIAL, // Visible Tray, partial/broken events
-	NONE // No tray
+import java.io.IOException;
+import java.net.ServerSocket;
+
+@Singleton
+public class ServerSocketFactoryDefaultImpl implements ServerSocketFactory {
+
+	@Override
+	public ServerSocket create() throws IOException {
+		return new ServerSocket();
+	}
 
 }
