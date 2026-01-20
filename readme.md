@@ -13,12 +13,13 @@ The application opens a server socket on port **6800** and listens for requests 
 
 Supported commands are:
 
-- `INFO` — Retrieve basic information about the target computer (hostname, MAC addresses).
+- `INFO` — Retrieve information about the target computer (hostname, OS, IP and MAC addresses).
 - `SHUTDOWN` — Shut down the computer remotely.
+- `CANCEL_SHUTDOWN` — Cancel a previous delayed shut down command.
 
 On the target computer, a **system tray icon** is available to:
 
-- Display detected network interfaces (IP and MAC)
+- Display detected network interfaces (Interface type, IP and MAC)
 - Exit the application
 
 That’s all — simple, explicit and enough for the intended use case.
