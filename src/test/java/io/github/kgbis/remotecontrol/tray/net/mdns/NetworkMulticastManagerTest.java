@@ -24,6 +24,7 @@ import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaceProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
+import org.apache.commons.lang3.Strings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,155 +52,181 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class NetworkMulticastManagerTest {
 
-	@Mock
-	NetworkInterfaces interfaces;
+    @Mock
+    NetworkInterfaces interfaces;
 
-	@Mock
-	NetworkInterfaceProvider networkInterfaceProvider;
+    @Mock
+    NetworkInterfaceProvider networkInterfaceProvider;
 
-	@Mock
-	JmDNS jmDNS;
+    @Mock
+    JmDNS jmDNS;
 
-	@Mock
-	JmDNSFactory jmDNSFactory;
+    @Mock
+    JmDNSFactory jmDNSFactory;
 
-	@Mock
-	NetworkInfoProvider infoProvider;
+    @Mock
+    NetworkInfoProvider infoProvider;
 
-	@Mock
-	DeviceIdProvider deviceIdProvider;
+    @Mock
+    DeviceIdProvider deviceIdProvider;
 
-	@Spy
-	@InjectMocks
-	NetworkMulticastManager networkMulticastManager;
+    @Spy
+    @InjectMocks
+    NetworkMulticastManager networkMulticastManager;
 
-	@Test
-	void start_callsRegister() throws IOException {
-		InetAddress address = InetAddress.getByName("192.168.1.144");
+    boolean isWindows7() {
+        return Strings.CI.startsWith(System.getProperty("os.name"), "Windows")
+                && System.getProperty("os.version").startsWith("6.1");
+    }
 
-		when(infoProvider.getHostName(any())).thenReturn("my-host");
-		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
-		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+    @Test
+    void start_callsRegister() throws IOException {
+        InetAddress address = InetAddress.getByName("192.168.1.144");
 
-		networkInterface(address);
+        when(infoProvider.getHostName(any())).thenReturn("my-host");
+        if (isWindows7())
+            when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
+        else
+            when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+        when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		networkMulticastManager.startMdns(address);
+        networkInterface(address);
 
-		verify(jmDNS, times(1)).registerService(any());
-	}
+        networkMulticastManager.startMdns(address);
 
-	@Test
-	void stop_callsShutdownMdns() throws IOException {
-		InetAddress address = InetAddress.getByName("192.168.1.144");
+        if(isWindows7())
+            verify(jmDNS, times(0)).registerService(any());
+        else
+            verify(jmDNS, times(1)).registerService(any());
+    }
 
-		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
-		when(infoProvider.getHostName(any())).thenReturn("my-host");
-		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+    @Test
+    void stop_callsShutdownMdns() throws IOException {
+        InetAddress address = InetAddress.getByName("192.168.1.144");
 
-		networkInterface(address);
+        if (isWindows7())
+            when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
+        else
+            when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+        when(infoProvider.getHostName(any())).thenReturn("my-host");
+        when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		networkMulticastManager.startMdns(address);
-		networkMulticastManager.stop();
-		verify(networkMulticastManager, times(1)).shutdownMdns(address);
-	}
+        networkInterface(address);
 
-	@Test
-	void stop_doesNothingWhenNotRegistered() {
-		networkMulticastManager.stop();
-		verify(networkMulticastManager, times(0)).shutdownMdns(any());
-	}
+        networkMulticastManager.startMdns(address);
+        networkMulticastManager.stop();
+        verify(networkMulticastManager, times(1)).shutdownMdns(address);
+    }
 
-	@Test
-	void shutdown_CallsShutdownMdns() throws IOException {
-		InetAddress address = InetAddress.getByName("192.168.1.144");
+    @Test
+    void stop_doesNothingWhenNotRegistered() {
+        networkMulticastManager.stop();
+        verify(networkMulticastManager, times(0)).shutdownMdns(any());
+    }
 
-		when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
-		when(infoProvider.getHostName(any())).thenReturn("my-host");
-		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+    @Test
+    void shutdown_CallsShutdownMdns() throws IOException {
+        InetAddress address = InetAddress.getByName("192.168.1.144");
 
-		networkInterface(address);
+        if (isWindows7())
+            when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
+        else
+            when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+        when(infoProvider.getHostName(any())).thenReturn("my-host");
+        when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		networkMulticastManager.startMdns(address);
-		networkMulticastManager.shutdownMdns(address);
-		verify(jmDNS, times(1)).unregisterAllServices();
-	}
+        networkInterface(address);
 
-	@Test
-	void shutdown_doesNothingWhenNotRegistered() throws UnknownHostException {
-		InetAddress address = InetAddress.getByName("192.168.1.144");
-		networkMulticastManager.shutdownMdns(address);
-		verify(jmDNS, times(0)).unregisterAllServices();
-	}
+        networkMulticastManager.startMdns(address);
+        networkMulticastManager.shutdownMdns(address);
+        verify(jmDNS, times(1)).unregisterAllServices();
+    }
 
-	@Test
-	void monitor_registersNewAddress() throws Exception {
-		InetAddress address = InetAddress.getByName("192.168.1.144");
-		Map<InetAddress, String> map = Map.of(address, "00:11:22:33:44:55");
+    @Test
+    void shutdown_doesNothingWhenNotRegistered() throws UnknownHostException {
+        InetAddress address = InetAddress.getByName("192.168.1.144");
+        networkMulticastManager.shutdownMdns(address);
+        verify(jmDNS, times(0)).unregisterAllServices();
+    }
 
-		when(interfaces.getValidAddressesWithInterface()).thenReturn(map);
-		when(jmDNSFactory.create(address)).thenReturn(jmDNS);
-		when(infoProvider.getHostName(any())).thenReturn("my-host");
-		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+    @Test
+    void monitor_registersNewAddress() throws Exception {
+        InetAddress address = InetAddress.getByName("192.168.1.144");
+        Map<InetAddress, String> map = Map.of(address, "00:11:22:33:44:55");
 
-		networkInterface(address);
+        when(interfaces.getValidAddressesWithInterface()).thenReturn(map);
+        if (isWindows7())
+            when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
+        else
+            when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+        when(infoProvider.getHostName(any())).thenReturn("my-host");
+        when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		networkMulticastManager.monitor();
+        networkInterface(address);
 
-		verify(networkMulticastManager).startMdns(address);
-	}
+        networkMulticastManager.monitor();
 
-	@Test
-	void monitor_shutsDownRemovedAddress() throws Exception {
-		InetAddress address = InetAddress.getByName("192.168.1.144");
-		Map<InetAddress, String> first = Map.of(address, "00:11:22:33:44:55");
-		Map<InetAddress, String> second = Map.of();
+        verify(networkMulticastManager).startMdns(address);
+    }
 
-		when(interfaces.getValidAddressesWithInterface()).thenReturn(first).thenReturn(second);
-		when(jmDNSFactory.create(address)).thenReturn(jmDNS);
-		when(infoProvider.getHostName(any())).thenReturn("my-host");
-		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+    @Test
+    void monitor_shutsDownRemovedAddress() throws Exception {
+        InetAddress address = InetAddress.getByName("192.168.1.144");
+        Map<InetAddress, String> first = Map.of(address, "00:11:22:33:44:55");
+        Map<InetAddress, String> second = Map.of();
 
-		networkInterface(address);
+        when(interfaces.getValidAddressesWithInterface()).thenReturn(first).thenReturn(second);
+        if (isWindows7())
+            when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
+        else
+            when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+        when(infoProvider.getHostName(any())).thenReturn("my-host");
+        when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		networkMulticastManager.monitor(); // add
-		networkMulticastManager.monitor(); // remove
+        networkInterface(address);
 
-		verify(networkMulticastManager).shutdownMdns(address);
-	}
+        networkMulticastManager.monitor(); // add
+        networkMulticastManager.monitor(); // remove
 
-	@Test
-	void monitor_doesNothingWhenNoChanges() throws Exception {
-		InetAddress address = InetAddress.getByName("192.168.1.144");
-		Map<InetAddress, String> map = Map.of(address, "00:11:22:33:44:55");
+        verify(networkMulticastManager).shutdownMdns(address);
+    }
 
-		when(interfaces.getValidAddressesWithInterface()).thenReturn(map).thenReturn(map);
-		when(jmDNSFactory.create(address)).thenReturn(jmDNS);
-		when(infoProvider.getHostName(any())).thenReturn("my-host");
-		when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
+    @Test
+    void monitor_doesNothingWhenNoChanges() throws Exception {
+        InetAddress address = InetAddress.getByName("192.168.1.144");
+        Map<InetAddress, String> map = Map.of(address, "00:11:22:33:44:55");
 
-		networkInterface(address);
+        when(interfaces.getValidAddressesWithInterface()).thenReturn(map).thenReturn(map);
+        if (isWindows7())
+            when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
+        else
+            when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
+        when(infoProvider.getHostName(any())).thenReturn("my-host");
+        when(deviceIdProvider.getDeviceId()).thenReturn(UUID.randomUUID());
 
-		networkMulticastManager.monitor();
-		networkMulticastManager.monitor();
+        networkInterface(address);
 
-		verify(networkMulticastManager, times(1)).startMdns(address);
-		verify(networkMulticastManager, never()).shutdownMdns(any());
-	}
+        networkMulticastManager.monitor();
+        networkMulticastManager.monitor();
 
-	@Test
-	void monitor_notifiesInfoProvider() throws Exception {
-		when(interfaces.getValidAddressesWithInterface()).thenReturn(Collections.emptyMap());
+        verify(networkMulticastManager, times(1)).startMdns(address);
+        verify(networkMulticastManager, never()).shutdownMdns(any());
+    }
 
-		networkMulticastManager.monitor();
+    @Test
+    void monitor_notifiesInfoProvider() throws Exception {
+        when(interfaces.getValidAddressesWithInterface()).thenReturn(Collections.emptyMap());
 
-		verify(infoProvider).onChange(any());
-	}
+        networkMulticastManager.monitor();
 
-	private void networkInterface(InetAddress address) throws SocketException {
-		NetworkInterface ni = mock(NetworkInterface.class);
-		when(ni.getName()).thenReturn("wlan0");
-		when(ni.getDisplayName()).thenReturn("Wi-Fi");
-		when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
-	}
+        verify(infoProvider).onChange(any());
+    }
+
+    private void networkInterface(InetAddress address) throws SocketException {
+        NetworkInterface ni = mock(NetworkInterface.class);
+        when(ni.getName()).thenReturn("wlan0");
+        when(ni.getDisplayName()).thenReturn("Wi-Fi");
+        when(networkInterfaceProvider.getByInetAddress(address)).thenReturn(ni);
+    }
 
 }
