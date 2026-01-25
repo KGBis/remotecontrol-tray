@@ -24,6 +24,7 @@ import ch.qos.logback.classic.Level;
 import com.beust.jcommander.Parameter;
 import lombok.Getter;
 
+/** @noinspection FieldMayBeFinal, unused */
 @Getter
 public class CliArguments {
 

@@ -210,7 +210,7 @@ public class NetworkServer {
 			}
 		}
 		catch (Exception e) {
-			log.error("Error handling client", e);
+			log.error("Error handling client: {}", e.getMessage());
 		}
 	}
 
