@@ -7,7 +7,7 @@
 
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
-    <version>2026.01.4</version> <!-- yyyy.MM.commit-number -->
+    <version>2026.01.5</version> <!-- yyyy.MM.commit-number -->
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
@@ -42,7 +42,7 @@
         <!-- Dependencies -->
         <lombok.version>1.18.42</lombok.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
-        <logback-classic.version>1.5.21</logback-classic.version>
+        <logback-classic.version>1.5.25</logback-classic.version>
         <commons-lang3.version>3.19.0</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <oshi.version>6.9.1</oshi.version>
@@ -50,7 +50,7 @@
         <SystemTray.version>4.4</SystemTray.version>
         <guice.version>7.0.0</guice.version>
         <guava.version>33.5.0-jre</guava.version>
-        <jmdns.version>3.6.2</jmdns.version>
+        <jmdns.version>3.6.3</jmdns.version>
         <junit-jupiter.version>5.11.3</junit-jupiter.version>
     </properties>
 
