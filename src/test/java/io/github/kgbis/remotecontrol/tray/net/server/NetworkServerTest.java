@@ -35,7 +35,6 @@ import java.net.Socket;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -70,7 +69,6 @@ class NetworkServerTest {
 	@Test
 	void startShouldStartLoope() throws Exception {
 		when(socketFactory.create()).thenReturn(serverSocket);
-		doNothing().when(serverSocket).setReuseAddress(anyBoolean());
 		doNothing().when(serverSocket).bind(any());
 		doNothing().when(serverSocket).setSoTimeout(anyInt());
 

@@ -98,8 +98,6 @@ public class NetworkServer {
 		running = true;
 
 		serverSocket = socketFactory.create();
-		// Enable SO_REUSEADDR socket option (important for Windows)
-		serverSocket.setReuseAddress(true);
 		serverSocket.bind(new InetSocketAddress(PORT));
 		serverSocket.setSoTimeout(POLL_INTERVAL_MS);
 
