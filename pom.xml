@@ -7,7 +7,7 @@
 
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
-    <version>2026.02.3</version> <!-- yyyy.MM.commit-number -->
+    <version>2026.02.4</version> <!-- yyyy.MM.commit-number -->
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
@@ -23,7 +23,7 @@
 
     <properties>
         <!-- Java -->
-        <java.version>11</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -43,7 +43,7 @@
         <lombok.version>1.18.42</lombok.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback-classic.version>1.5.25</logback-classic.version>
-        <commons-lang3.version>3.19.0</commons-lang3.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <oshi.version>6.9.1</oshi.version>
         <jcommander.version>1.82</jcommander.version>
@@ -51,7 +51,8 @@
         <guice.version>7.0.0</guice.version>
         <guava.version>33.5.0-jre</guava.version>
         <jmdns.version>3.6.3</jmdns.version>
-        <junit-jupiter.version>5.11.3</junit-jupiter.version>
+        <jackson-databind.version>2.21.0</jackson-databind.version>
+        <junit-jupiter.version>6.0.3</junit-jupiter.version>
     </properties>
 
     <dependencies>
@@ -147,7 +148,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.21.0</version>
+            <version>${jackson-databind.version}</version>
         </dependency>
 
         <!-- test -->

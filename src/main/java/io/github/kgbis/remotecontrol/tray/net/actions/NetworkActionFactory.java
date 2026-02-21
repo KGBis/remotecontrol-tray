@@ -39,22 +39,17 @@ public class NetworkActionFactory {
 
 	@SuppressWarnings("rawtypes")
 	public NetworkAction createAction(String[] remoteCommand, Socket socket, boolean isDryRun) {
-		// See if "ACK" option is worth or better to reuse "INFO"
+		// When mobile app "pings", it sends no command. Replace with ACK
 		if (ArrayUtils.isEmpty(remoteCommand)) {
 			remoteCommand = new String[] { "ACK" };
 		}
 
-		switch (remoteCommand[0].toUpperCase()) {
-			case "INFO":
-				return new InfoNetworkAction(socket, remoteCommand, networkInfoProvider);
-			case "SHUTDOWN":
-				return new ShutdownNetworkAction(socket, remoteCommand, isDryRun);
-			case "CANCEL_SHUTDOWN":
-				return new CancelShutdownNetworkAction(socket, remoteCommand);
-			case "ACK":
-			default:
-				return new AckNetworkAction(socket, remoteCommand);
-		}
+		return switch (remoteCommand[0].toUpperCase()) {
+			case "INFO" -> new InfoNetworkAction(socket, remoteCommand, networkInfoProvider);
+			case "SHUTDOWN" -> new ShutdownNetworkAction(socket, remoteCommand, isDryRun);
+			case "CANCEL_SHUTDOWN" -> new CancelShutdownNetworkAction(socket, remoteCommand);
+			default -> new AckNetworkAction(socket, remoteCommand);
+		};
 	}
 
 }
