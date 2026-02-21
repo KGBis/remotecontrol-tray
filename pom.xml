@@ -44,7 +44,7 @@
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback-classic.version>1.5.25</logback-classic.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
+        <commons-collections4.version>4.5.0</commons-collections4.version>
         <oshi.version>6.9.1</oshi.version>
         <jcommander.version>1.82</jcommander.version>
         <SystemTray.version>4.4</SystemTray.version>
