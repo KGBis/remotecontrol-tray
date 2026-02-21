@@ -1,0 +1,64 @@
+name: Build installers
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            installer: msi
+            artifact: windows
+          - os: ubuntu-latest
+            installer: deb
+            artifact: linux
+          - os: macos-latest
+            installer: dmg
+            artifact: macos
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B clean package
+
+      - name: Get project version
+        id: version
+        shell: bash
+        run: |
+          echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+
+      - name: Create installer with jpackage
+        shell: bash
+        run: |
+          mkdir -p build/installer
+
+          jpackage \
+            --type ${{ matrix.installer }} \
+            --name RemoteControlTray \
+            --app-version ${{ steps.version.outputs.version }} \
+            --input target \
+            --main-jar RemoteControlTray.jar \
+            --dest build/installer \
+            $( [[ "${{ matrix.os }}" == "windows-latest" ]] && echo "--win-menu --win-shortcut --win-per-user-install" )
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: RemoteControlTray-${{ matrix.artifact }}
+          path: build/installer/*
