@@ -78,7 +78,7 @@ public final class TraySupportDetector {
 
 		// --- KDE Plasma ---
 		if (desktop.contains("kde") || desktop.contains("plasma")) {
-			// Icono can appear, broken events
+			// Icon can appear, broken events
 			return TraySupport.NONE;
 		}
 
