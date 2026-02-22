@@ -2,6 +2,8 @@ package io.github.kgbis.remotecontrol.tray.net.actions;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +26,7 @@ class CancelShutdownNetworkActionTest {
 	CancelShutdownNetworkAction cancelShutdownNetworkAction;
 
 	@Test
+	@EnabledOnOs({ OS.WINDOWS, OS.LINUX })
 	void testExecute() throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
@@ -37,6 +40,7 @@ class CancelShutdownNetworkActionTest {
 	}
 
 	@Test
+	@EnabledOnOs({ OS.WINDOWS, OS.LINUX })
 	void testExecute_wrongArguments_shouldNeverHappen_butWorks() throws IOException {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);

@@ -17,6 +17,11 @@ Supported commands are:
 - `SHUTDOWN` — Shut down the computer remotely.
 - `CANCEL_SHUTDOWN` — Cancel a previous delayed shut down command.
 
+> **Note:** On MacOS to cancel an already scheduled shutdown
+>> `sudo killall shutdown`
+>
+>should be used. Hence, this is not supported. **See [shutdown man page](https://ss64.com/mac/shutdown.html)**
+
 On the target computer, a **system tray icon** is available to:
 
 - Display detected network interfaces (Interface type, IP and MAC)
@@ -143,11 +148,11 @@ RemoteControlTray is licensed under the **GNU Lesser General Public License v3.0
 
 ## Technical notes
 
-The application is written entirely in **Java** and currently targets **Java 11**.
+The application is written entirely in **Java** and currently targets **Java 21**.
 
-> A **Java 11+ JRE/JDK** must be installed on the target computer to run this program.
+> A **Java 21+ JRE/JDK** must be installed on the target computer to run this program.
 
-A future goal is to provide a standalone executable with an embedded JRE.
+**Work in Progress:** Provide a standalone executable (installer) with an embedded JRE for Linux, Windows and MacOS.
 
 ---
 
