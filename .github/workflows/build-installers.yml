@@ -104,7 +104,7 @@ jobs:
             --main-jar RemoteControlTray.jar \
             --dest build/installer \
             --app-version $APP_VERSION \
-            --copyright \"Copyright (c) 2026 Enrique García (KGBis)\" \
+            --copyright \"Copyright © 2026 Enrique García (KGBis)\" \
             --license-file LICENSE"
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
