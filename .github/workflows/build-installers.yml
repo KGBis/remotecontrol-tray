@@ -104,6 +104,7 @@ jobs:
       - name: Upload assets to Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: v${{ needs.create-release.outputs.version }}
           files: build/installer/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
