@@ -99,23 +99,25 @@ jobs:
             ICON_FLAG="--icon .packaging/icons/computer.png"
           fi
 
-          MAIN_FLAGS="--name RemoteControlTray \
-            --input target \
-            --main-jar RemoteControlTray.jar \
-            --dest build/installer \
-            --app-version $APP_VERSION \
-            --copyright \"Copyright © 2026 Enrique García (KGBis)\" \
-            --license-file LICENSE"
+          MAIN_FLAGS=(
+            --name RemoteControlTray
+            --input target
+            --main-jar RemoteControlTray.jar
+            --dest build/installer
+            --app-version "$APP_VERSION"
+            --copyright "Copyright © 2026 Enrique García (KGBis)"
+            --license-file LICENSE
+            )
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            jpackage --type msi $MAIN_FLAGS $WIN_FLAGS $ICON_FLAG
+            jpackage --type msi "${MAIN_FLAGS[@]}" $WIN_FLAGS $ICON_FLAG
 
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            jpackage --type dmg $MAIN_FLAGS $ICON_FLAG
+            jpackage --type dmg "${MAIN_FLAGS[@]}" $ICON_FLAG
 
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            jpackage --type deb $MAIN_FLAGS $ICON_FLAG
-            jpackage --type rpm $MAIN_FLAGS $ICON_FLAG
+            jpackage --type deb "${MAIN_FLAGS[@]}" $ICON_FLAG
+            jpackage --type rpm "${MAIN_FLAGS[@]}" $ICON_FLAG
           fi
 
       - name: Normalize installer name
