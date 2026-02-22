@@ -39,7 +39,7 @@ jobs:
             installer: msi
             artifact: windows
           - os: ubuntu-latest
-            installer: deb
+            installer: linux
             artifact: linux
           - os: macos-latest
             installer: dmg
@@ -76,24 +76,67 @@ jobs:
         run: |
           mkdir -p build/installer
 
+          # default version (pom.xml)
           APP_VERSION="${{ needs.create-release.outputs.version }}"
           WIN_FLAGS=""
 
+          # MSI version 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             APP_VERSION="${{ steps.winver.outputs.msi_version }}"
             WIN_FLAGS="--win-menu --win-shortcut --win-per-user-install"
           fi
+          
+          # icon
+          ICON_FLAG=""
+          
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            ICON_FLAG="--icon .packaging/icons/computer.ico"
+          
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            ICON_FLAG="--icon .packaging/icons/computer.icns"
+          
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            ICON_FLAG="--icon .packaging/icons/computer.png"
+          fi
 
-          echo "Using app version: $APP_VERSION"
-
-          jpackage \
-            --type ${{ matrix.installer }} \
-            --name RemoteControlTray \
-            --app-version "$APP_VERSION" \
+          MAIN_FLAGS="--name RemoteControlTray \
             --input target \
             --main-jar RemoteControlTray.jar \
             --dest build/installer \
-            $WIN_FLAGS
+            --app-version $APP_VERSION \
+            --copyright \"Copyright (c) 2026 Enrique García (KGBis)\" \
+            --license-file LICENSE"
+
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            jpackage --type msi $MAIN_FLAGS $WIN_FLAGS $ICON_FLAG
+
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            jpackage --type dmg $MAIN_FLAGS $ICON_FLAG
+
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            jpackage --type deb $MAIN_FLAGS $ICON_FLAG
+            jpackage --type rpm $MAIN_FLAGS $ICON_FLAG
+          fi
+
+      - name: Normalize installer name
+        shell: bash
+        run: |
+          cd build/installer
+
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            mv *.msi RemoteControlTray-Windows-x64.msi
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            mv *.dmg RemoteControlTray-macOS.dmg
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            mv *.deb RemoteControlTray-Linux-amd64.deb
+            mv *.rpm RemoteControlTray-Linux-x86_64.rpm
+          fi
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd build/installer
+          sha256sum * > checksums.sha256
 
       - name: Upload artifact (optional)
         uses: actions/upload-artifact@v4
