@@ -30,13 +30,14 @@ public class LinuxAutoStartManager implements AutoStartManager {
 	private final Path desktopFile = Paths.get(System.getProperty("user.home"), ".config", "autostart",
 			"remotecontroltray.desktop");
 
-	private static final String DESKTOP_ENTRY = """
-			[Desktop Entry]
-			Type=Application
-			Name=RemoteControlTray
-			Exec=remotecontroltray
-			X-GNOME-Autostart-enabled=true
-			""";
+    private static final String DESKTOP_ENTRY = """
+            [Desktop Entry]
+            Type=Application
+            Name=RemoteControlTray
+            Exec=/opt/remotecontroltray/bin/RemoteControlTray
+            Icon=computer
+            X-GNOME-Autostart-enabled=true
+            """;
 
 	@Override
 	public boolean isSupported() {
