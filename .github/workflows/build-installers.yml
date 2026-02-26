@@ -8,7 +8,6 @@ on:
 jobs:
   # Job 1: Gather pom.xml version and create single Release
   create-release:
-    if: github.event.inputs.release == 'true'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
