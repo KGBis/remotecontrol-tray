@@ -22,6 +22,7 @@ package io.github.kgbis.remotecontrol.tray.misc;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -36,19 +37,24 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
 import java.util.UUID;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.APP_NAME;
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResourcesHelper {
 
-	private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
+	public static final String OS_NAME = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
 	private static final String USER_HOME = System.getProperty("user.home");
 
 	/* Config and log paths */
+
+	private static final String APP_CONFIG_FILE = "remoteshutdown.cfg.json";
 
 	// Windows
 	private static final String WIN_LOG_FOLDER = "LOCALAPPDATA";
@@ -139,6 +145,13 @@ public class ResourcesHelper {
 
 		systemId = uuid;
 		return uuid;
+	}
+
+	public static Path getConfigFile() {
+		Path configPath = getOSConfigDirectory();
+		log.debug("Using config directory: {}", configPath);
+
+		return Paths.get(configPath.toString(), APP_CONFIG_FILE);
 	}
 
 	public static Path getOSConfigDirectory() {

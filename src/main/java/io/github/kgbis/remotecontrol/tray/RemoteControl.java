@@ -23,8 +23,11 @@ package io.github.kgbis.remotecontrol.tray;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.cli.CliParser;
+import io.github.kgbis.remotecontrol.tray.configuration.Config;
+import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
 import io.github.kgbis.remotecontrol.tray.ioc.RemoteControlModule;
 import io.github.kgbis.remotecontrol.tray.logging.LogbackConfiguration;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
@@ -48,19 +51,29 @@ public class RemoteControl {
 
 	public static final String APP_NAME = "RemoteControlTray";
 
+	private final AutoStartController autoStartManagerFactory;
+
 	private final NetworkServer networkServer;
 
 	private final TrayManager trayManager;
 
 	@Inject
-	public RemoteControl(NetworkServer networkServer, TrayManager trayManager) {
+	public RemoteControl(AutoStartController autoStartManagerFactory, NetworkServer networkServer,
+			TrayManager trayManager) {
+		this.autoStartManagerFactory = autoStartManagerFactory;
 		this.networkServer = networkServer;
 		this.trayManager = trayManager;
 	}
 
 	public void start(CliArguments cliArgs) throws IOException {
+		loadConfig();
 		networkServer.arguments(cliArgs).start();
 		trayManager.initializeTray();
+	}
+
+	private void loadConfig() throws IOException {
+		Config config = ConfigManager.load();
+		autoStartManagerFactory.syncAutoStart(config.isAppAutoStartOnLogin());
 	}
 
 	public static void main(String[] args) {
