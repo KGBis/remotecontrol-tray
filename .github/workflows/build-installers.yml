@@ -4,12 +4,6 @@ on:
   push:
     branches: [ master ]
   workflow_dispatch:
-    inputs:
-      release:
-        description: "Create GitHub Release"
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   # Job 1: Gather pom.xml version and create single Release
