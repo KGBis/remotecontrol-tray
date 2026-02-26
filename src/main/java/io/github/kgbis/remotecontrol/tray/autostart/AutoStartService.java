@@ -47,7 +47,7 @@ public class AutoStartService {
 			}
 
 		}
-		catch (Exception e) {
+		catch (Exception e) { // NOSONAR
 			log.warn("Autostart sync failed", e);
 		}
 	}

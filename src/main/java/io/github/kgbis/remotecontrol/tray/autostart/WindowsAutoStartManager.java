@@ -27,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.github.kgbis.remotecontrol.tray.RemoteControl.APP_NAME;
+
 @Slf4j
 public class WindowsAutoStartManager implements AutoStartManager {
 
@@ -45,23 +47,35 @@ public class WindowsAutoStartManager implements AutoStartManager {
 		return Files.exists(shortcut);
 	}
 
+	/**
+	 * Creates a link from<br>
+	 * <i>C:\Users\&lt;user&gt;\AppData\Local\RemoteControlTray\RemoteControlTray.exe</i><br>
+	 * to user's startup file<br>
+	 * <i>C:\Users\&lt;user&gt;\AppData\Roaming\Microsoft\Windows\Start
+	 * Menu\Programs\Startup\RemoteControlTray.lnk</i>
+	 * @throws IOException if create shortcut process cannot be run
+	 * @throws InterruptedException if create shortcut thread is interrupted while waiting
+	 * for the process to end
+	 */
 	@Override
 	public void enable() throws IOException, InterruptedException {
 		Path exe = locateInstalledExe();
 		WindowsShortcutCreator.createShortcut(shortcut, exe);
 	}
 
+	/**
+	 * Deletes <i>C:\Users\&lt;user&gt;\AppData\Roaming\Microsoft\Windows\Start
+	 * Menu\Programs\Startup\RemoteControlTray.lnk</i> so on next login program will not
+	 * automatically run
+	 * @throws IOException if an I/O error occurs
+	 */
 	@Override
 	public void disable() throws IOException {
 		Files.deleteIfExists(shortcut);
 	}
 
 	private Path locateInstalledExe() {
-		// C:\Users\Kike\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
-		log.info("Trying to find exe at {}", System.getenv("LOCALAPPDATA"));
-		if (true)
-			System.exit(0);
-		return Paths.get(System.getenv("LOCALAPPDATA"), "RemoteControlTray.exe");
+		return Paths.get(System.getenv("LOCALAPPDATA"), APP_NAME, "RemoteControlTray.exe");
 	}
 
 }

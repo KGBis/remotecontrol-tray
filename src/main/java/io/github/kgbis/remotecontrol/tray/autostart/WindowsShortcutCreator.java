@@ -28,8 +28,15 @@ import java.nio.file.Path;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class WindowsShortcutCreator {
 
+	/**
+	 * Creates a shortcut using Windows Script
+	 * @param shortcut Target shortcut path
+	 * @param exePath Source executable path
+	 * @throws IOException if process cannot be run
+	 * @throws InterruptedException if thread is interrupted while waiting for the process
+	 * to end
+	 */
 	public static void createShortcut(Path shortcut, Path exePath) throws IOException, InterruptedException {
-
 		String ps = """
 				$WshShell = New-Object -ComObject WScript.Shell
 				$Shortcut = $WshShell.CreateShortcut('%s')
