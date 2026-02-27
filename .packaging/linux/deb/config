@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+# Cargar el módulo de debconf
+. /usr/share/debconf/confmodule
+
+# Indicar qué template usar y lanzar la interfaz
+db_input high remotecontroltray/copy-desktop || true
+db_go || true

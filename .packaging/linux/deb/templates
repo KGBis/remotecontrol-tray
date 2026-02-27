@@ -1,0 +1,5 @@
+Template: remotecontroltray/copy-desktop
+Type: boolean
+Default: true
+Description: ¿Deseas crear un acceso directo en el escritorio?
+ Se copiará el lanzador de la aplicación al escritorio del usuario actual.
