@@ -36,6 +36,7 @@ jobs:
             --main-jar RemoteControlTray.jar \
             --dest build/installer \
             --app-version "${{ inputs.version }}" \
+            --linux-shortcut \
             --icon .packaging/icons/computer.png \
             --vendor "KGBis" \
             --license-file LICENSE
@@ -46,6 +47,7 @@ jobs:
             --main-jar RemoteControlTray.jar \
             --dest build/installer \
             --app-version "${{ inputs.version }}" \
+            --linux-shortcut \
             --icon .packaging/icons/computer.png \
             --vendor "KGBis" \
             --license-file LICENSE \
