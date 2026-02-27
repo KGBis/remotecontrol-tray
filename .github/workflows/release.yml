@@ -5,7 +5,7 @@ on:
     outputs:
       version:
         description: "Project version from pom.xml"
-        value: ${{ jobs.release.outputs.version }}
+        value: "0.0.0"
 
 jobs:
   release:
