@@ -5,6 +5,7 @@ on:
     outputs:
       version:
         description: "Project version from pom.xml"
+        value: "0.0.0"
 
 jobs:
   release:
