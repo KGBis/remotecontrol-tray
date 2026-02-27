@@ -43,7 +43,16 @@ jobs:
           mv *.dmg RemoteControlTray-macOS.dmg
           sha256sum * > checksums-macOS.sha256
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: RemoteControlTray-macOS
           path: build/installer/*
+
+      - name: Upload assets to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.create-release.outputs.version }}
+          files: build/installer/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
