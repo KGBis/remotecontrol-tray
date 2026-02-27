@@ -97,8 +97,8 @@ jobs:
           LINUX_FLAGS="--linux-shortcut"
           
           # Debian
-          chmod +x .packaging/linux/deb/config .packaging/linux/deb/postinst
-          DEB_FLAGS="--linux-package-deps debconf --resource-dir .packaging/linux/deb"
+          chmod +x .packaging/linux/deb/postinst
+          DEB_FLAGS="--linux-package-deps debconf --resource-dir .packaging/linux/deb/"
           
           # icon
           ICON_FLAG=""
