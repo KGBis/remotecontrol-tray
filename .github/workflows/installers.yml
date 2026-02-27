@@ -11,18 +11,18 @@ jobs:
 
   windows:
     needs: release
-    uses: ./.github/workflows/installers/windows.yml
+    uses: ./.github/workflows/windows.yml
     with:
       version: ${{ needs.release.outputs.version }}
 
   linux:
     needs: release
-    uses: ./.github/workflows/installers/linux.yml
+    uses: ./.github/workflows/linux.yml
     with:
       version: ${{ needs.release.outputs.version }}
 
   macos:
     needs: release
-    uses: ./.github/workflows/installers/macos.yml
+    uses: ./.github/workflows/macos.yml
     with:
       version: ${{ needs.release.outputs.version }}
