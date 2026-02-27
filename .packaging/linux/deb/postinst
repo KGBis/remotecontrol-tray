@@ -2,8 +2,15 @@
 set -e
 . /usr/share/debconf/confmodule
 
-# Solo leemos la respuesta que ya se capturó en el paso 'config'
+# FORZAR REGISTRO: Si el template no existe, lo cargamos manualmente
+if ! db_get remotecontroltray/copy-desktop; then
+    # El archivo templates está en la misma carpeta que el script en /var/lib/dpkg/info/
+    db_x_loadtemplatefile /var/lib/dpkg/info/remotecontroltray.templates
+fi
+
 db_get remotecontroltray/copy-desktop
+# ... resto del script ...
+
 
 if [ "$RET" = "true" ]; then
     REAL_USER=${SUDO_USER:-$USER}
