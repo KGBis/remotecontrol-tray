@@ -1,35 +1,29 @@
 #!/bin/bash
 set -e
 
-# 1. Cargar debconf
+# 1. Cargar la librería oficial de debconf
 . /usr/share/debconf/confmodule
 
-# 2. Definir la pregunta dinámicamente
-# Usamos comandos simples uno a uno para evitar errores de sintaxis
-debconf-communicate remotecontroltray <<EOF >/dev/null
-REGISTER remotecontroltray/copy-desktop boolean
-SET remotecontroltray/copy-desktop true
-SUBST remotecontroltray/copy-desktop description ¿Deseas crear un acceso directo en el escritorio?
-EOF
+# 2. Registrar la pregunta dinámicamente sin bloquear la DB
+# Registramos una pregunta genérica y le asignamos nuestros textos
+db_register debconf/boolean remotecontroltray/copy-desktop || true
+db_subst remotecontroltray/copy-desktop description "¿Deseas crear un acceso directo en el escritorio?" || true
+db_set remotecontroltray/copy-desktop true || true
 
-# 3. Lanzar la pregunta
-# Importante: No usamos SETTITLE aquí para evitar el error 20,
-# la descripción del template ya sirve como título.
+# 3. Mostrar la pregunta
 db_input high remotecontroltray/copy-desktop || true
 db_go || true
 
-# 4. Leer respuesta y ejecutar lógica
+# 4. Obtener respuesta y ejecutar lógica
 db_get remotecontroltray/copy-desktop
 if [ "$RET" = "true" ]; then
     REAL_USER=${SUDO_USER:-$USER}
+
     if [ "$REAL_USER" != "root" ]; then
         USER_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
 
-        # Detectar escritorio
-        if [ -f "$USER_HOME/.config/user-dirs.dirs" ]; then
-            DESKTOP_DIR=$(sudo -u "$REAL_USER" xdg-user-dir DESKTOP)
-        fi
-        DESKTOP_DIR=${DESKTOP_DIR:-"$USER_HOME/Desktop"}
+        # Detectar ruta del escritorio
+        DESKTOP_DIR=$(sudo -u "$REAL_USER" xdg-user-dir DESKTOP 2>/dev/null || echo "$USER_HOME/Desktop")
 
         SRC="/opt/remotecontroltray/lib/remotecontroltray-RemoteControlTray.desktop"
         DEST="$DESKTOP_DIR/remotecontroltray-RemoteControlTray.desktop"
@@ -43,4 +37,5 @@ if [ "$RET" = "true" ]; then
     fi
 fi
 
+# Finalizar debconf correctamente
 db_stop
