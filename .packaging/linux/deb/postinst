@@ -4,19 +4,17 @@ set -e
 # 1. Cargar debconf
 . /usr/share/debconf/confmodule
 
-# 2. CREAR EL TEMPLATE AL VUELO (Ya que jpackage no lo incluye)
-# Esto registra la pregunta directamente en la base de datos de debconf
-db_capb backup
-db_settitle "Instalación de RemoteControlTray"
-
-# Definimos la pregunta dinámicamente
-cat <<EOF | debconf-communicate remotecontroltray >/dev/null
+# 2. Definir la pregunta dinámicamente
+# Usamos comandos simples uno a uno para evitar errores de sintaxis
+debconf-communicate remotecontroltray <<EOF >/dev/null
 REGISTER remotecontroltray/copy-desktop boolean
 SET remotecontroltray/copy-desktop true
 SUBST remotecontroltray/copy-desktop description ¿Deseas crear un acceso directo en el escritorio?
 EOF
 
 # 3. Lanzar la pregunta
+# Importante: No usamos SETTITLE aquí para evitar el error 20,
+# la descripción del template ya sirve como título.
 db_input high remotecontroltray/copy-desktop || true
 db_go || true
 
@@ -26,8 +24,12 @@ if [ "$RET" = "true" ]; then
     REAL_USER=${SUDO_USER:-$USER}
     if [ "$REAL_USER" != "root" ]; then
         USER_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
-        # Intentar obtener escritorio con xdg-user-dir
-        DESKTOP_DIR=$(sudo -u "$REAL_USER" xdg-user-dir DESKTOP || echo "$USER_HOME/Desktop")
+
+        # Detectar escritorio
+        if [ -f "$USER_HOME/.config/user-dirs.dirs" ]; then
+            DESKTOP_DIR=$(sudo -u "$REAL_USER" xdg-user-dir DESKTOP)
+        fi
+        DESKTOP_DIR=${DESKTOP_DIR:-"$USER_HOME/Desktop"}
 
         SRC="/opt/remotecontroltray/lib/remotecontroltray-RemoteControlTray.desktop"
         DEST="$DESKTOP_DIR/remotecontroltray-RemoteControlTray.desktop"

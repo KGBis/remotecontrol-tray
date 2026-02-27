@@ -123,7 +123,6 @@ jobs:
             --copyright "Copyright © 2026 Enrique García (KGBis)"
             --vendor "KGBis"
             --license-file LICENSE
-            --verbose
             )
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
