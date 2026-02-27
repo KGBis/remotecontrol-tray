@@ -1,0 +1,63 @@
+name: Linux installer
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - run: mvn -B clean package
+
+      - run: |
+          rm -rf dist
+          mkdir -p dist/app
+          cp target/RemoteControlTray.jar dist/app/
+
+      - run: |
+          mkdir -p build/installer
+
+          jpackage --type deb \
+            --name RemoteControlTray \
+            --input dist/app \
+            --main-jar RemoteControlTray.jar \
+            --dest build/installer \
+            --app-version "${{ inputs.version }}" \
+            --icon .packaging/icons/computer.png \
+            --vendor "KGBis" \
+            --license-file LICENSE
+
+          jpackage --type rpm \
+            --name RemoteControlTray \
+            --input dist/app \
+            --main-jar RemoteControlTray.jar \
+            --dest build/installer \
+            --app-version "${{ inputs.version }}" \
+            --icon .packaging/icons/computer.png \
+            --vendor "KGBis" \
+            --license-file LICENSE \
+            --verbose
+
+      - run: |
+          cd build/installer
+          mv *.deb RemoteControlTray-Linux-amd64.deb
+          mv *.rpm RemoteControlTray-Linux-x86_64.rpm
+          sha256sum * > checksums-linux.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RemoteControlTray-linux
+          path: build/installer/*

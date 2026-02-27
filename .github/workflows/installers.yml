@@ -1,0 +1,28 @@
+name: Build installers
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  release:
+    uses: ./.github/workflows/release.yml
+
+  windows:
+    needs: release
+    uses: ./.github/workflows/installers/windows.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+
+  linux:
+    needs: release
+    uses: ./.github/workflows/installers/linux.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
+
+  macos:
+    needs: release
+    uses: ./.github/workflows/installers/macos.yml
+    with:
+      version: ${{ needs.release.outputs.version }}
