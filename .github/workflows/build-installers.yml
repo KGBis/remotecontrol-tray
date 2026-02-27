@@ -32,7 +32,7 @@ jobs:
   build-installers:
     needs: create-release
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         include:
           - os: windows-latest
@@ -85,7 +85,10 @@ jobs:
 
           # default version (pom.xml)
           APP_VERSION="${{ needs.create-release.outputs.version }}"
+          
+          # Extra flags
           WIN_FLAGS=""
+          LINUX_FLAGS="--linux-shortcut"
 
           # MSI version 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
@@ -116,17 +119,18 @@ jobs:
             --copyright "Copyright © 2026 Enrique García (KGBis)"
             --vendor "KGBis"
             --license-file LICENSE
+            --verbose
             )
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            jpackage --type msi "${MAIN_FLAGS[@]}" $WIN_FLAGS $ICON_FLAG
+            jpackage --type msi "${MAIN_FLAGS[@]}" $ICON_FLAG $WIN_FLAGS
 
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             jpackage --type dmg "${MAIN_FLAGS[@]}" $ICON_FLAG
 
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            jpackage --type deb "${MAIN_FLAGS[@]}" $ICON_FLAG
-            jpackage --type rpm "${MAIN_FLAGS[@]}" $ICON_FLAG
+            jpackage --type deb "${MAIN_FLAGS[@]}" $ICON_FLAG $LINUX_FLAGS
+            jpackage --type rpm "${MAIN_FLAGS[@]}" $ICON_FLAG $LINUX_FLAGS
           fi
 
       - name: Normalize installer name
