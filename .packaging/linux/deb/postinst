@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+. /usr/share/debconf/confmodule
+
+# Solo leemos la respuesta que ya se capturó en el paso 'config'
+db_get remotecontroltray/copy-desktop
+
+if [ "$RET" = "true" ]; then
+    REAL_USER=${SUDO_USER:-$USER}
+    if [ "$REAL_USER" != "root" ]; then
+        USER_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
+        DESKTOP_DIR=$(sudo -u "$REAL_USER" xdg-user-dir DESKTOP || echo "$USER_HOME/Desktop")
+
+        SRC="/opt/remotecontroltray/lib/remotecontroltray-RemoteControlTray.desktop"
+        DEST="$DESKTOP_DIR/remotecontroltray-RemoteControlTray.desktop"
+
+        if [ -f "$SRC" ]; then
+            mkdir -p "$DESKTOP_DIR"
+            cp "$SRC" "$DEST"
+            chown "$REAL_USER":"$REAL_USER" "$DEST"
+            chmod +x "$DEST"
+        fi
+    fi
+fi
+
+db_stop
