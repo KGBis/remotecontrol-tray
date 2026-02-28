@@ -52,7 +52,7 @@
         <guice.version>7.0.0</guice.version>
         <guava.version>33.5.0-jre</guava.version>
         <jmdns.version>3.6.3</jmdns.version>
-        <jackson-databind.version>2.21.0</jackson-databind.version>
+        <jackson-databind.version>2.21.1</jackson-databind.version>
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
     </properties>
 
