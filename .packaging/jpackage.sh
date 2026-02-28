@@ -41,3 +41,15 @@ MAIN_FLAGS=(
 
 # shellcheck disable=SC2086
 jpackage --type deb "${MAIN_FLAGS[@]}" $ICON_FLAG $DEBIAN_FLAGS
+
+MAIN_FLAGS=(
+  --name $ARTIFACT
+  --input $DIST_PATH
+  --main-jar $JAR_NAME
+  --dest ../target/installer
+  --app-version "$APP_VERSION"
+  --copyright "Copyright © 2026 Enrique García (KGBis)"
+  --vendor "KGBis"
+)
+
+jpackage --type app-image "${MAIN_FLAGS[@]}" $ICON_FLAG $DEBIAN_FLAGS
