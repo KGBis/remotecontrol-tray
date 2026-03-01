@@ -8,6 +8,7 @@ Type=Application
 Categories=Utility;Network;
 MimeType=
 StartupNotify=true
-
+Hidden=false
+NoDisplay=false
 X-GNOME-Autostart-enabled=true
 X-KDE-autostart-after=panel

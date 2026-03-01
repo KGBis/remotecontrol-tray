@@ -97,7 +97,7 @@ esac
 
 # install uninstall script
 cp uninstall.sh "$INSTALL_DIR/uninstall.sh"
-chmod +x "$INSTALL_DIR/uninstall.sh"
+chmod 744 "$INSTALL_DIR/uninstall.sh"
 
 echo
 echo "✓ Installation complete"
