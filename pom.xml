@@ -8,7 +8,7 @@
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
     <!-- yyyy.MM.commit-number -->
-    <version>2026.03.5</version>
+    <version>2026.03.6</version>
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
@@ -231,7 +231,7 @@
                     </descriptorRefs>
 
                     <!-- Overrides the default naming -->
-                    <finalName>${artifactId}</finalName>
+                    <finalName>${project.artifactId}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
 
                     <archive>

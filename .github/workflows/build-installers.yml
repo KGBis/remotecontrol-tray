@@ -188,20 +188,26 @@ jobs:
           # Artifact name
           ARTIFACT=${{ needs.create-release.outputs.artifact }}
           
-          cd installer/app
+          # create release directory
+          mkdir -p release
+          
+          # move and rename installers to release
+          # cd installer/app
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mv *.msi "$ARTIFACT-Windows-x64.msi"
+            mv installer/app/*.msi release/$ARTIFACT-windows-x64.msi
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            mv *.dmg $ARTIFACT-macOS.dmg
+            mv installer/app/*.dmg release/$ARTIFACT-macos.dmg
           fi
 
       - name: Generate checksums
         shell: bash
         run: |
-          mkdir -p release
-          mv installer/app/* release/ || true
+          # mkdir -p release
+          # mv installer/app/* release/ || true
           mv *.run release/ || true
+          
+          ls -la release
           
           cd release
           sha256sum * | grep -v checksums.sha256 > checksums.sha256
