@@ -22,6 +22,8 @@ package io.github.kgbis.remotecontrol.tray.ioc;
 
 import com.google.inject.AbstractModule;
 import io.github.kgbis.remotecontrol.tray.RemoteControl;
+import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
+import io.github.kgbis.remotecontrol.tray.autostart.AutoStartControllerImpl;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
@@ -47,6 +49,7 @@ public class RemoteControlModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
+		bind(AutoStartController.class).to(AutoStartControllerImpl.class).in(Singleton.class);
 		bind(DeviceIdProvider.class).in(Singleton.class);
 		bind(InformationScreen.class).in(Singleton.class);
 		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);

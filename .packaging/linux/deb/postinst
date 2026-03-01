@@ -1,0 +1,48 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  configure|upgrade)
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+
+APP_NAME=remotecontrol-tray
+APP_BIN=/opt/remotecontrol-tray/bin/$APP_NAME
+LINK=/usr/local/bin/$APP_NAME
+
+echo
+echo "Configuring $APP_NAME..."
+
+# Add to PATH
+if [ ! -L "$LINK" ]; then
+    ln -s "$APP_BIN" "$LINK"
+    echo "✓ Added $APP_NAME to PATH"
+fi
+
+echo "You can run '$APP_NAME --help' from the terminal"
+
+# Refresh application menus
+DESKTOP_FILE_NAME=${APP_NAME}-${APP_NAME}.desktop
+
+DESKTOP_FILE_ORIGIN=/opt/remotecontrol-tray/lib/$DESKTOP_FILE_NAME
+DESKTOP_FILE_DEST=/usr/share/applications/$DESKTOP_FILE_NAME
+
+echo "Copying $DESKTOP_FILE_ORIGIN to $DESKTOP_FILE_DEST"
+
+cp $DESKTOP_FILE_ORIGIN $DESKTOP_FILE_DEST
+
+if [ -f "$DESKTOP_FILE_DEST" ]; then
+  sed -i \
+    -e 's/^Name=.*/Name=Remote Control Tray/' \
+    -e 's/^Comment=.*/Comment=Remote shutdown control tray/' \
+    -e 's/^Categories=.*/Categories=Utility;Network;/' \
+    "$DESKTOP_FILE_DEST"
+fi
+
+update-desktop-database /usr/share/applications || true
+gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+
+exit 0
