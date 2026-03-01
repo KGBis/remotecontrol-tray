@@ -89,6 +89,8 @@ jobs:
       - name: Generate installer with jpackage
         shell: bash
         run: |
+          set -e
+          
           #########
           # Flags #
           #########
@@ -165,7 +167,7 @@ jobs:
             jpackage --type app-image "${MAIN_FLAGS[@]}" $ICON_FLAG
           
             # copy install/uninstall scripts + .desktop
-            cp $PACKAGING_PATH/* $INSTALLER_PATH
+            cp -r "$PACKAGING_PATH/linux/app-image/"* "$INSTALLER_PATH/"
           
             # create version file
             echo "$APP_VERSION" > "$INSTALLER_PATH/VERSION"
