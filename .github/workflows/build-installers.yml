@@ -29,8 +29,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          name: RemoteControlTray v${{ steps.version.outputs.version }}
-          body: "Release of RemoteControlTray version ${{ steps.version.outputs.version }}"
+          name: "{{ steps.artifact.outputs.artifact }} v${{ steps.version.outputs.version }}"
+          body: "Release of Remote PC Control Tray version ${{ steps.version.outputs.version }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -199,7 +199,15 @@ jobs:
         shell: bash
         run: |
           cd "$RELEASE_PATH"
-          sha256sum * | grep -v checksums.sha256 >> checksums.sha256
+          ls -l
+          
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            sha256sum *.msi > "checksum-$ARTIFACT-windows-x64.sha256"
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            sha256sum *.dmg > "checksum-$ARTIFACT-macos.sha256"
+          else 
+            sha256sum *.run > "checksum-$ARTIFACT-linux.sha256" 
+          fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
