@@ -1,4 +1,4 @@
-name: Build installers
+name: Build Installers
 
 on:
   push:
@@ -36,6 +36,14 @@ jobs:
 
   # Job 2: Build installers for each OS
   build-installers:
+    env:
+      DIST_PATH: dist
+      # DIST_APP_PATH: dist/app
+      INSTALLERS_PATH: installers
+      # INSTALLERS_APP_PATH: installers/app
+      RELEASE_PATH: release
+      PACKAGING_PATH: .packaging
+      # ICONS_PATH: .packaging/icons
     needs: create-release
     strategy:
       fail-fast: true
@@ -56,7 +64,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repository
+      - name: Define Derived Paths
+        run: |
+          echo "DIST_APP_PATH=$DIST_PATH/app" >> $GITHUB_ENV
+          echo "INSTALLERS_APP_PATH=$INSTALLERS_PATH/app" >> $GITHUB_ENV
+          echo "ICONS_PATH=$PACKAGING_PATH/icons" >> $GITHUB_ENV
+
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -74,9 +88,9 @@ jobs:
       - name: Distribution Folder
         shell: bash
         run: |
-          rm -rf dist
-          mkdir -p dist/app
-          cp target/${{ needs.create-release.outputs.artifact }}.jar dist/app/
+          rm -rf "$DIST_PATH"
+          mkdir -p "$DIST_APP_PATH"
+          cp target/${{ needs.create-release.outputs.artifact }}.jar "$DIST_APP_PATH"/
 
       - name: Compute Windows MSI version
         if: matrix.os == 'windows-latest'
@@ -91,24 +105,11 @@ jobs:
         run: |
           set -e
           
-          #########
-          # Flags #
-          #########
-          
           # Artifact name
           ARTIFACT=${{ needs.create-release.outputs.artifact }}
           
           # jar name
           JAR_NAME="$ARTIFACT.jar"
-          
-          # Distribution and installer paths
-          DIST_PATH=dist/app
-          INSTALLER_PATH=installer
-          
-          # .packaging path
-          PACKAGING_PATH=.packaging
-          ICONS_PATH="$PACKAGING_PATH/icons"
-          
           
           # default version (from pom.xml)
           APP_VERSION="${{ needs.create-release.outputs.version }}"
@@ -122,10 +123,10 @@ jobs:
           
           # Common flags for jpackage
           MAIN_FLAGS=(
-            --name $ARTIFACT
-            --input $DIST_PATH
-            --main-jar $JAR_NAME
-            --dest $INSTALLER_PATH/app
+            --name "$ARTIFACT"
+            --input "$DIST_PATH"
+            --main-jar "$JAR_NAME"
+            --dest "$INSTALLERS_APP_PATH"
             --app-version "$APP_VERSION"
             --copyright "Copyright © 2026 Enrique García (KGBis)"
             --vendor "KGBis"
@@ -150,7 +151,7 @@ jobs:
             ICON_FLAG="--icon $ICONS_PATH/computer.png"
           fi
           
-          mkdir -p $INSTALLER_PATH
+          mkdir -p $INSTALLERS_PATH
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             jpackage --type msi "${MAIN_FLAGS[@]}" "${NON_LINUX_FLAGS[@]}" $ICON_FLAG $WIN_FLAGS
@@ -167,61 +168,55 @@ jobs:
             jpackage --type app-image "${MAIN_FLAGS[@]}" $ICON_FLAG
           
             # copy install/uninstall scripts + .desktop
-            cp -r "$PACKAGING_PATH/linux/app-image/"* "$INSTALLER_PATH/"
+            cp -r "$PACKAGING_PATH/linux/app-image/"* "$INSTALLERS_PATH/"
           
             # create version file
-            echo "$APP_VERSION" > "$INSTALLER_PATH/VERSION"
+            echo "$APP_VERSION" > "$INSTALLERS_PATH/VERSION"
           
             # create self installer
             makeself \
               --xz \
               --needroot \
-              $INSTALLER_PATH \
+              $INSTALLERS_PATH \
               "$ARTIFACT-linux.run" \
               "Remote Control Tray installer" \
               ./install.sh
           fi
 
-      - name: Normalize installer name
+      - name: Normalize Installer Name
         shell: bash
         run: |
           # Artifact name
           ARTIFACT=${{ needs.create-release.outputs.artifact }}
           
           # create release directory
-          mkdir -p release
+          mkdir -p "$RELEASE_PATH"
           
           # move and rename installers to release
-          # cd installer/app
-
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mv installer/app/*.msi release/$ARTIFACT-windows-x64.msi
+            mv "$INSTALLERS_APP_PATH/*.msi" "$RELEASE_PATH/$ARTIFACT-windows-x64.msi"
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            mv installer/app/*.dmg release/$ARTIFACT-macos.dmg
+            mv "$INSTALLERS_APP_PATH/*.dmg" "$RELEASE_PATH/$ARTIFACT-macos.dmg"
+          else 
+            mv *.run "$RELEASE_PATH"/ || true # Linux 
           fi
 
-      - name: Generate checksums
+      - name: Generate Checksums
         shell: bash
         run: |
-          # mkdir -p release
-          # mv installer/app/* release/ || true
-          mv *.run release/ || true
-          
-          ls -la release
-          
-          cd release
-          sha256sum * | grep -v checksums.sha256 > checksums.sha256
+          cd "$RELEASE_PATH"
+          sha256sum * | grep -v checksums.sha256 >> checksums.sha256
 
-      - name: Upload artifact (optional)
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: remotecontrol-tray-${{ matrix.artifact }}
-          path: release/*
+          path: ${{ env.RELEASE_PATH }}/*
 
-      - name: Upload assets to Release
+      - name: Upload Assets to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: release/*
+          files: ${{ env.RELEASE_PATH }}/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
