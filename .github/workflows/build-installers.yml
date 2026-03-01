@@ -123,11 +123,11 @@ jobs:
           
           # Common flags for jpackage
           MAIN_FLAGS=(
-            --name "$ARTIFACT"
-            --input "$DIST_PATH"
-            --main-jar "$JAR_NAME"
-            --dest "$INSTALLERS_APP_PATH"
-            --app-version "$APP_VERSION"
+            --name $ARTIFACT
+            --input $DIST_PATH
+            --main-jar $JAR_NAME
+            --dest $INSTALLERS_APP_PATH
+            --app-version $APP_VERSION
             --copyright "Copyright © 2026 Enrique García (KGBis)"
             --vendor "KGBis"
           )
