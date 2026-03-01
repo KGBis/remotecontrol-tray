@@ -200,7 +200,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p release
-          mv installer/* release/ || true
+          mv installer/app/* release/ || true
           mv *.run release/ || true
           
           cd release
