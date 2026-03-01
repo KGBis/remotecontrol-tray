@@ -91,6 +91,7 @@ jobs:
           rm -rf "$DIST_PATH"
           mkdir -p "$DIST_APP_PATH"
           cp target/${{ needs.create-release.outputs.artifact }}.jar "$DIST_APP_PATH"/
+          ls -la "$DIST_APP_PATH"
 
       - name: Compute Windows MSI version
         if: matrix.os == 'windows-latest'
