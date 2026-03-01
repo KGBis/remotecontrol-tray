@@ -188,9 +188,9 @@ jobs:
           
           # move and rename installers to release
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mv "$INSTALLERS_APP_PATH/*.msi" "$RELEASE_PATH/$ARTIFACT-windows-x64.msi"
+            mv "$INSTALLERS_APP_PATH"/*.msi "$RELEASE_PATH/$ARTIFACT-windows-x64.msi"
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            mv "$INSTALLERS_APP_PATH/*.dmg" "$RELEASE_PATH/$ARTIFACT-macos.dmg"
+            mv "$INSTALLERS_APP_PATH"/*.dmg "$RELEASE_PATH/$ARTIFACT-macos.dmg"
           else 
             mv *.run "$RELEASE_PATH"/ || true # Linux 
           fi
