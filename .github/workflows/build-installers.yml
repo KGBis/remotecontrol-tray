@@ -25,7 +25,7 @@ jobs:
         run: |
           echo "artifact=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_OUTPUT
 
-      - name: Create or update GitHub Release
+      - name: Create or update GitHub release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.version }}
@@ -64,7 +64,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -79,7 +79,7 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean package
 
-      - name: Distribution Folder
+      - name: Copy jar to distribution folder
         shell: bash
         run: |
           rm -rf "$DIST_PATH"
@@ -94,7 +94,7 @@ jobs:
           YEAR=$(date +%y)
           echo "msi_version=1.${YEAR}.${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
 
-      - name: Generate Installer With Jpackage
+      - name: Generate installer With jpackage
         shell: bash
         run: |
           set -e
@@ -177,7 +177,7 @@ jobs:
               ./install.sh
           fi
 
-      - name: Normalize Installer Name
+      - name: Normalize installer name
         shell: bash
         run: |
           # Artifact name
@@ -195,27 +195,30 @@ jobs:
             mv *.run "$RELEASE_PATH"/ || true # Linux 
           fi
 
-      - name: Generate Checksums
+      - name: Generate checksum
         shell: bash
         run: |
+          # Artifact name
+          ARTIFACT=${{ needs.create-release.outputs.artifact }}
+          
           cd "$RELEASE_PATH"
           ls -l
           
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            sha256sum *.msi > "checksum-$ARTIFACT-windows-x64.sha256"
+            sha256sum *.msi > "$ARTIFACT-windows-x64.sha256"
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            sha256sum *.dmg > "checksum-$ARTIFACT-macos.sha256"
+            sha256sum *.dmg > "$ARTIFACT-macos.sha256"
           else 
-            sha256sum *.run > "checksum-$ARTIFACT-linux.sha256" 
+            sha256sum *.run > "$ARTIFACT-linux.sha256" 
           fi
 
-      - name: Upload Artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: remotecontrol-tray-${{ matrix.artifact }}
           path: ${{ env.RELEASE_PATH }}/*
 
-      - name: Upload Assets to Release
+      - name: Upload assets to release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
