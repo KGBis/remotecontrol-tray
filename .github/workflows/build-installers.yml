@@ -101,7 +101,7 @@ jobs:
           YEAR=$(date +%y)
           echo "msi_version=1.${YEAR}.${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
 
-      - name: Generate installer with jpackage
+      - name: Generate Installer With Jpackage
         shell: bash
         run: |
           set -e
@@ -125,7 +125,7 @@ jobs:
           # Common flags for jpackage
           MAIN_FLAGS=(
             --name $ARTIFACT
-            --input $DIST_PATH
+            --input $DIST_APP_PATH
             --main-jar $JAR_NAME
             --dest $INSTALLERS_APP_PATH
             --app-version $APP_VERSION
