@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=RemoteControlTray
-Exec=/opt/remotecontroltray/bin/RemoteControlTray
-Icon=computer
-X-GNOME-Autostart-enabled=true

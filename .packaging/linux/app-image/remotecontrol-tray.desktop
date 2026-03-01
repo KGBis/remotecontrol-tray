@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Remote Control Tray
+Comment=Remote shutdown control tray
+Exec=/opt/remotecontrol-tray/bin/remotecontrol-tray
+Icon=remotecontrol-tray
+Terminal=false
+Type=Application
+Categories=Utility;Network;
+MimeType=
+StartupNotify=true
+
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel
