@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      artifact: ${{ steps.artifact.outputs.artifact }}
     steps:
       - uses: actions/checkout@v4
 
@@ -18,6 +19,11 @@ jobs:
         id: version
         run: |
           echo "version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+
+      - name: Get project artifactId
+        id: artifact
+        run: |
+          echo "artifact=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Create or update GitHub Release
         uses: softprops/action-gh-release@v1
@@ -38,9 +44,11 @@ jobs:
           - os: windows-latest
             installer: msi
             artifact: windows
+
           - os: ubuntu-latest
             installer: linux
             artifact: linux
+
           - os: macos-latest
             installer: dmg
             artifact: macos
@@ -68,7 +76,7 @@ jobs:
         run: |
           rm -rf dist
           mkdir -p dist/app
-          cp target/RemoteControlTray.jar dist/app/
+          cp target/${{ needs.create-release.outputs.artifact }}.jar dist/app/
 
       - name: Compute Windows MSI version
         if: matrix.os == 'windows-latest'
@@ -81,91 +89,131 @@ jobs:
       - name: Generate installer with jpackage
         shell: bash
         run: |
-          mkdir -p build/installer
-
-          # default version (pom.xml)
+          #########
+          # Flags #
+          #########
+          
+          # Artifact name
+          ARTIFACT=${{ needs.create-release.outputs.artifact }}
+          
+          # jar name
+          JAR_NAME="$ARTIFACT.jar"
+          
+          # Distribution and installer paths
+          DIST_PATH=dist/app
+          INSTALLER_PATH=installer
+          
+          # .packaging path
+          PACKAGING_PATH=.packaging
+          ICONS_PATH="$PACKAGING_PATH/icons"
+          
+          
+          # default version (from pom.xml)
           APP_VERSION="${{ needs.create-release.outputs.version }}"
 
-          # MSI version 
+          # Windows MSI 'hacked' version as it does not like YYYY.MM.revision format 
           WIN_FLAGS=""
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             APP_VERSION="${{ steps.winver.outputs.msi_version }}"
             WIN_FLAGS="--win-menu --win-shortcut --win-per-user-install"
           fi
           
-          # Linux flags
-          LINUX_FLAGS="--linux-shortcut"
+          # Common flags for jpackage
+          MAIN_FLAGS=(
+            --name $ARTIFACT
+            --input $DIST_PATH
+            --main-jar $JAR_NAME
+            --dest $INSTALLER_PATH/app
+            --app-version "$APP_VERSION"
+            --copyright "Copyright © 2026 Enrique García (KGBis)"
+            --vendor "KGBis"
+          )
           
-          # Debian
-          chmod +x .packaging/linux/deb/postinst
-          DEB_FLAGS="--linux-package-deps debconf --resource-dir .packaging/linux/deb/"
-          
-          # icon
+          # for Windows and macOS
+          NON_LINUX_FLAGS=(
+            --about-url "https://github.com/KGBis/remotecontrol-tray"
+            --license-file LICENSE
+          )
+                    
+          # icons
           ICON_FLAG=""
           
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            ICON_FLAG="--icon .packaging/icons/computer.ico"
+            ICON_FLAG="--icon $ICONS_PATH/computer.ico"
           
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            ICON_FLAG="--icon .packaging/icons/computer.icns"
+            ICON_FLAG="--icon $ICONS_PATH/computer.icns"
           
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            ICON_FLAG="--icon .packaging/icons/computer.png"
+            ICON_FLAG="--icon $ICONS_PATH/computer.png"
           fi
-
-          MAIN_FLAGS=(
-            --name RemoteControlTray
-            --input dist/app
-            --main-jar RemoteControlTray.jar
-            --dest build/installer
-            --app-version "$APP_VERSION"
-            --about-url "https://github.com/KGBis/remotecontrol-tray"
-            --copyright "Copyright © 2026 Enrique García (KGBis)"
-            --vendor "KGBis"
-            --license-file LICENSE
-            )
+          
+          mkdir -p $INSTALLER_PATH
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            jpackage --type msi "${MAIN_FLAGS[@]}" $ICON_FLAG $WIN_FLAGS
+            jpackage --type msi "${MAIN_FLAGS[@]}" "${NON_LINUX_FLAGS[@]}" $ICON_FLAG $WIN_FLAGS
 
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            jpackage --type dmg "${MAIN_FLAGS[@]}" $ICON_FLAG
+            jpackage --type dmg "${MAIN_FLAGS[@]}" "${NON_LINUX_FLAGS[@]}" $ICON_FLAG
 
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            jpackage --type deb "${MAIN_FLAGS[@]}" $ICON_FLAG $LINUX_FLAGS $DEB_FLAGS
-            jpackage --type rpm "${MAIN_FLAGS[@]}" $ICON_FLAG $LINUX_FLAGS
+            # install makeself
+            sudo apt-get update
+            sudo apt-get install -y makeself
+          
+            # execute jpackage
+            jpackage --type app-image "${MAIN_FLAGS[@]}" $ICON_FLAG
+          
+            # copy install/uninstall scripts + .desktop
+            cp $PACKAGING_PATH/* $INSTALLER_PATH
+          
+            # create version file
+            echo "$APP_VERSION" > "$INSTALLER_PATH/VERSION"
+          
+            # create self installer
+            makeself \
+              --xz \
+              --needroot \
+              $INSTALLER_PATH \
+              "$ARTIFACT-linux.run" \
+              "Remote Control Tray installer" \
+              ./install.sh
           fi
 
       - name: Normalize installer name
         shell: bash
         run: |
-          cd build/installer
+          # Artifact name
+          ARTIFACT=${{ needs.create-release.outputs.artifact }}
+          
+          cd installer
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mv *.msi RemoteControlTray-Windows-x64.msi
+            mv *.msi "$ARTIFACT-Windows-x64.msi"
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            mv *.dmg RemoteControlTray-macOS.dmg
-          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            mv *.deb RemoteControlTray-Linux-amd64.deb
-            mv *.rpm RemoteControlTray-Linux-x86_64.rpm
+            mv *.dmg $ARTIFACT-macOS.dmg
           fi
 
       - name: Generate checksums
         shell: bash
         run: |
-          cd build/installer
-          sha256sum * > checksums-${{ matrix.artifact }}.sha256
+          mkdir -p release
+          mv installer/* release/ || true
+          mv *.run release/ || true
+  
+          cd release
+          sha256sum * | grep -v checksums.sha256 > checksums.sha256
 
       - name: Upload artifact (optional)
         uses: actions/upload-artifact@v4
         with:
-          name: RemoteControlTray-${{ matrix.artifact }}
-          path: build/installer/*
+          name: remotecontrol-tray-${{ matrix.artifact }}
+          path: release/*
 
       - name: Upload assets to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
-          files: build/installer/*
+          files: release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
