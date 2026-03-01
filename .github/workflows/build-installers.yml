@@ -38,12 +38,12 @@ jobs:
   build-installers:
     env:
       DIST_PATH: dist
-      # DIST_APP_PATH: dist/app
+      DIST_APP_PATH: dist/app
       INSTALLERS_PATH: installers
-      # INSTALLERS_APP_PATH: installers/app
+      INSTALLERS_APP_PATH: installers/app
       RELEASE_PATH: release
       PACKAGING_PATH: .packaging
-      # ICONS_PATH: .packaging/icons
+      ICONS_PATH: .packaging/icons
     needs: create-release
     strategy:
       fail-fast: true
@@ -64,12 +64,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Define Derived Paths
-        run: |
-          echo "DIST_APP_PATH=$DIST_PATH/app" >> $GITHUB_ENV
-          echo "INSTALLERS_APP_PATH=$INSTALLERS_PATH/app" >> $GITHUB_ENV
-          echo "ICONS_PATH=$PACKAGING_PATH/icons" >> $GITHUB_ENV
-
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
@@ -91,7 +85,6 @@ jobs:
           rm -rf "$DIST_PATH"
           mkdir -p "$DIST_APP_PATH"
           cp target/${{ needs.create-release.outputs.artifact }}.jar "$DIST_APP_PATH"/
-          ls -la "$DIST_APP_PATH"
 
       - name: Compute Windows MSI version
         if: matrix.os == 'windows-latest'
