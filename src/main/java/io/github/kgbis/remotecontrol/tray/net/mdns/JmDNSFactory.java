@@ -31,6 +31,7 @@ import java.util.Map;
 /**
  * @noinspection RedundantThrows
  */
+@SuppressWarnings("Deprecated")
 public interface JmDNSFactory {
 
 	JmDNS create(InetAddress inetAddress) throws IOException;
@@ -137,6 +138,7 @@ public interface JmDNSFactory {
 				return false;
 			}
 
+			@SuppressWarnings("Deprecated")
 			@Override
 			public void printServices() {
 				// Not implemented

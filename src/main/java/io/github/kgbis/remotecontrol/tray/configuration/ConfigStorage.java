@@ -20,33 +20,14 @@
  */
 package io.github.kgbis.remotecontrol.tray.configuration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.io.IOException;
 
-@EqualsAndHashCode
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Config {
+public interface ConfigStorage {
 
-	@Getter
-	@Setter
-	@Builder.Default
-	private int onboardingVersion = 0;
+	boolean exists() throws IOException;
 
-	@Getter
-	@Setter
-	@Builder.Default
-	private boolean appAutoStartOnLogin = false;
+	Config read() throws IOException;
 
-	public boolean isInitialized(int expectedVersion) {
-		return onboardingVersion == expectedVersion;
-	}
+	void write(Config config) throws IOException;
 
 }

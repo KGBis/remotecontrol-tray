@@ -11,7 +11,7 @@ echo "Program version -> $APP_VERSION"
 # Paths
 TARGET_PATH=./target
 DIST_PATH="$TARGET_PATH/dist/app"
-PACKAGING_PATH=./.packaging/linux/app-image
+PACKAGING_PATH=./.packaging/linux
 INSTALLER_PATH="$TARGET_PATH/installer"
 
 # Clean and create directories
