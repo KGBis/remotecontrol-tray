@@ -25,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static io.github.kgbis.remotecontrol.tray.RemoteControl.APP_NAME;
+
 public class MacOSAutoStartManager implements AutoStartManager {
 
 	private final Path plist = Paths.get(System.getProperty("user.home"), "Library", "LaunchAgents",
@@ -74,7 +76,7 @@ public class MacOSAutoStartManager implements AutoStartManager {
 	}
 
 	private String locateExecutable() {
-		return Paths.get(System.getProperty("user.dir"), "RemoteControlTray").toString();
+		return Paths.get(System.getProperty("user.dir"), APP_NAME).toString();
 	}
 
 }

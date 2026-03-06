@@ -75,7 +75,7 @@ public class WindowsAutoStartManager implements AutoStartManager {
 	}
 
 	private Path locateInstalledExe() {
-		return Paths.get(System.getenv("LOCALAPPDATA"), APP_NAME, "RemoteControlTray.exe");
+		return Paths.get(System.getenv("LOCALAPPDATA"), APP_NAME, APP_NAME + ".exe");
 	}
 
 }

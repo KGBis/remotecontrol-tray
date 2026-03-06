@@ -164,6 +164,10 @@ jobs:
             # copy install/uninstall scripts + .desktop
             cp -r "$PACKAGING_PATH/linux/"* "$INSTALLERS_PATH/"
           
+            # ensure installer/uninstaller scripts executable
+            chmod +x $INSTALLER_PATH/install.sh
+            chmod +x $INSTALLER_PATH/uninstall.sh
+          
             # create version file
             echo "$APP_VERSION" > "$INSTALLERS_PATH/VERSION"
           

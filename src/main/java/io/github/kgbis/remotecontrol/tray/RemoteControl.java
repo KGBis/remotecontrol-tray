@@ -50,7 +50,7 @@ public class RemoteControl {
 
 	public static final String REMOTE_PC_CONTROL = "Remote PC Control Tray";
 
-	public static final String APP_NAME = "RemoteControlTray";
+	public static final String APP_NAME = "remotecontrol-tray"; // same as artifactId
 
 	private final Bootstrap bootstrap;
 
