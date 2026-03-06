@@ -48,7 +48,7 @@ public class LogbackConfiguration {
 
 	private static final String GZ_FILE_NAME = LOG_FILE_NAME + "-%d{yyyy-MM-dd}.gz";
 
-	private static final String LOGGING_PATTERN = "%date{ISO8601} %-25(%-5p [%t]) %logger{1} - %m%n";
+	private static final String LOGGING_PATTERN = "%date{ISO8601} %-26(%-5p [%t]) %logger{1} - %m%n";
 
 	public static void configure(Level rootLevel, boolean logToConsole) {
 		Path logDir = getOSLogDirectory();

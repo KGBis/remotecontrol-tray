@@ -162,7 +162,11 @@ jobs:
             jpackage --type app-image "${MAIN_FLAGS[@]}" $ICON_FLAG
           
             # copy install/uninstall scripts + .desktop
-            cp -r "$PACKAGING_PATH/linux/app-image/"* "$INSTALLERS_PATH/"
+            cp -r "$PACKAGING_PATH/linux/"* "$INSTALLERS_PATH/"
+          
+            # ensure installer/uninstaller scripts executable
+            chmod +x "$INSTALLERS_PATH/install.sh"
+            chmod +x "$INSTALLERS_PATH/uninstall.sh"
           
             # create version file
             echo "$APP_VERSION" > "$INSTALLERS_PATH/VERSION"

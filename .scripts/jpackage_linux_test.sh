@@ -11,12 +11,12 @@ echo "Program version -> $APP_VERSION"
 # Paths
 TARGET_PATH=./target
 DIST_PATH="$TARGET_PATH/dist/app"
-PACKAGING_PATH=./.packaging/linux/app-image
-INSTALLER_PATH="$TARGET_PATH/installer"
+PACKAGING_PATH=./.packaging/linux
+INSTALLERS_PATH="$TARGET_PATH/installer"
 
 # Clean and create directories
-rm -rf "$DIST_PATH" "$INSTALLER_PATH"
-mkdir -p "$DIST_PATH" "$INSTALLER_PATH"
+rm -rf "$DIST_PATH" "$INSTALLERS_PATH"
+mkdir -p "$DIST_PATH" "$INSTALLERS_PATH"
 
 JAR_NAME="$ARTIFACT.jar"
 
@@ -30,7 +30,7 @@ MAIN_FLAGS=(
   --name "$ARTIFACT"
   --input "$DIST_PATH"
   --main-jar "$JAR_NAME"
-  --dest "$INSTALLER_PATH/app"
+  --dest "$INSTALLERS_PATH/app"
   --app-version "$APP_VERSION"
   --copyright "Copyright © 2026 Enrique García (KGBis)"
   --vendor "KGBis"
@@ -42,17 +42,21 @@ jpackage --type app-image "${MAIN_FLAGS[@]}" $ICON_FLAG
 
 # Copy scripts, .desktop files, etc.
 echo "Copying additional packaging files..."
-cp -r "$PACKAGING_PATH/"* "$INSTALLER_PATH/"
+cp -r "$PACKAGING_PATH/"* "$INSTALLERS_PATH/"
+
+# ensure installer/uninstaller scripts executable
+chmod +x $INSTALLERS_PATH/install.sh
+chmod +x $INSTALLERS_PATH/uninstall.sh
 
 # Create version file
-echo "$APP_VERSION" > "$INSTALLER_PATH/VERSION"
+echo "$APP_VERSION" > "$INSTALLERS_PATH/VERSION"
 
 # Generate self-extracting installer with makeself
 echo "Creating self-extracting installer..."
 makeself \
   --xz \
   --needroot \
-  "$INSTALLER_PATH" \
+  "$INSTALLERS_PATH" \
   remotecontrol-tray-linux.run \
   "Remote Control Tray installer" \
   ./install.sh

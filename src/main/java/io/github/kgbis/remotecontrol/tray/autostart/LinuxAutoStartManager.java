@@ -27,43 +27,45 @@ import java.nio.file.Paths;
 
 public class LinuxAutoStartManager implements AutoStartManager {
 
-    private final Path desktopFile = Paths.get(System.getProperty("user.home"), ".config", "autostart",
-            "remotecontrol-tray.desktop");
+	private static final String DESKTOP_ENTRY = """
+			[Desktop Entry]
+			Name=Remote Control Tray
+			Comment=Remote shutdown control tray
+			Exec=/opt/remotecontrol-tray/bin/remotecontrol-tray
+			Icon=remotecontrol-tray
+			Terminal=false
+			Type=Application
+			Categories=Utility;Network;
+			MimeType=
+			StartupNotify=true
+			Hidden=false
+			NoDisplay=false
+			X-GNOME-Autostart-enabled=true
+			X-KDE-autostart-after=panel
+			""";
 
-    private static final String DESKTOP_ENTRY = """
-            [Desktop Entry]
-            Name=Remote Control Tray
-            Comment=Remote shutdown control tray
-            Exec=/opt/remotecontrol-tray/bin/remotecontrol-tray
-            Icon=remotecontrol-tray
-            Terminal=false
-            Type=Application
-            Categories=Utility;Network;
-            MimeType=
-            StartupNotify=true
-            X-GNOME-Autostart-enabled=true
-            X-KDE-autostart-after=panel
-            """;
+	private final Path desktopFile = Paths.get(System.getProperty("user.home"), ".config", "autostart",
+			"remotecontrol-tray.desktop");
 
-    @Override
-    public boolean isSupported() {
-        return true;
-    }
+	@Override
+	public boolean isSupported() {
+		return true;
+	}
 
-    @Override
-    public boolean isEnabled() {
-        return Files.exists(desktopFile);
-    }
+	@Override
+	public boolean isEnabled() {
+		return Files.exists(desktopFile);
+	}
 
-    @Override
-    public void enable() throws IOException {
-        Files.createDirectories(desktopFile.getParent());
-        Files.writeString(desktopFile, DESKTOP_ENTRY);
-    }
+	@Override
+	public void enable() throws IOException {
+		Files.createDirectories(desktopFile.getParent());
+		Files.writeString(desktopFile, DESKTOP_ENTRY);
+	}
 
-    @Override
-    public void disable() throws IOException {
-        Files.deleteIfExists(desktopFile);
-    }
+	@Override
+	public void disable() throws IOException {
+		Files.deleteIfExists(desktopFile);
+	}
 
 }

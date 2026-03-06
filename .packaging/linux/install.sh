@@ -36,7 +36,11 @@ mkdir -p "$INSTALL_DIR"
 chmod -R a+rX "$INSTALL_DIR"
 
 # copy application to /opt
-cp -r "app/$APP_NAME/." "$INSTALL_DIR"
+if [ ! -d "app/$APP_NAME" ]; then
+  echo "Application bundle not found"
+  exit 1
+fi
+cp -r "app/$APP_NAME"/* "$INSTALL_DIR"
 
 # fix permissions
 chmod 755 "$INSTALL_DIR/bin/$APP_NAME"
@@ -64,7 +68,9 @@ chmod 644 "$ICON_DST"
 update-desktop-database /usr/share/applications || true
 gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
 
-# autostart option
+# autostart option (disabled as new bootstrap option in code)
+
+: <<'DISABLED'
 printf "Start app automatically on login? [y/N] "
 read -r ans
 
@@ -94,6 +100,7 @@ case "$ans" in
     fi
     ;;
 esac
+DISABLED
 
 # install uninstall script
 cp uninstall.sh "$INSTALL_DIR/uninstall.sh"
