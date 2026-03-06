@@ -44,6 +44,10 @@ jpackage --type app-image "${MAIN_FLAGS[@]}" $ICON_FLAG
 echo "Copying additional packaging files..."
 cp -r "$PACKAGING_PATH/"* "$INSTALLER_PATH/"
 
+# ensure installer/uninstaller scripts executable
+chmod +x $INSTALLER_PATH/install.sh
+chmod +x $INSTALLER_PATH/uninstall.sh
+
 # Create version file
 echo "$APP_VERSION" > "$INSTALLER_PATH/VERSION"
 
