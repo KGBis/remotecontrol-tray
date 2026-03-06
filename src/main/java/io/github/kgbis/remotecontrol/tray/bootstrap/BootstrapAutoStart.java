@@ -18,35 +18,7 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.configuration;
+package io.github.kgbis.remotecontrol.tray.bootstrap;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@EqualsAndHashCode
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Config {
-
-	@Getter
-	@Setter
-	@Builder.Default
-	private int onboardingVersion = 0;
-
-	@Getter
-	@Setter
-	@Builder.Default
-	private boolean appAutoStartOnLogin = false;
-
-	public boolean isInitialized(int expectedVersion) {
-		return onboardingVersion == expectedVersion;
-	}
-
+public record BootstrapAutoStart(boolean autoStart) {
 }

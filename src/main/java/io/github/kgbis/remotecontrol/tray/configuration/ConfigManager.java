@@ -1,41 +1,77 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Singleton
+@Slf4j
 public final class ConfigManager {
 
-	private static final ObjectMapper MAPPER = new ObjectMapper();
+	private final ConfigStorage configStorage;
 
-	private static Config currentConfig;
+	private Config currentConfig;
 
-	public static Config load() throws IOException {
-		Path configFile = ResourcesHelper.getConfigFile();
-
-		if (!Files.exists(configFile)) {
-			currentConfig = Config.builder().build();
-			save(currentConfig);
-			return currentConfig;
-		}
-
-		currentConfig = MAPPER.readValue(configFile.toFile(), Config.class);
-		return currentConfig;
+	@Inject
+	public ConfigManager(ConfigStorage configStorage) {
+		this.configStorage = configStorage;
 	}
 
-	public static void save(Config config) throws IOException {
-		Path configFile = ResourcesHelper.getConfigFile();
-		MAPPER.writerWithDefaultPrettyPrinter().writeValue(configFile.toFile(), config);
+	public synchronized void save(Config config) {
+		try {
+			configStorage.write(config);
+		}
+		catch (IOException e) {
+			log.error("Error writting configuration.", e);
+		}
 		currentConfig = config;
 	}
 
-	public static Config current() {
+	public synchronized Config current() throws IOException {
+		if (currentConfig == null) {
+			currentConfig = load();
+		}
+
+		return currentConfig;
+	}
+
+	private Config load() throws IOException {
+		if (!configStorage.exists()) {
+			currentConfig = Config.builder().build();
+			configStorage.write(currentConfig);
+			return currentConfig;
+		}
+
+		// Return a default configuration if read fails
+		try {
+			currentConfig = configStorage.read();
+		}
+		catch (IOException e) {
+			log.error("Error reading configuration.", e);
+			currentConfig = Config.builder().build();
+		}
 		return currentConfig;
 	}
 

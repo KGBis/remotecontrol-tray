@@ -20,33 +20,36 @@
  */
 package io.github.kgbis.remotecontrol.tray.configuration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
+import jakarta.inject.Singleton;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@EqualsAndHashCode
-@Builder
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Config {
+@Singleton
+public class ConfigStorageImpl implements ConfigStorage {
 
-	@Getter
-	@Setter
-	@Builder.Default
-	private int onboardingVersion = 0;
+	private static final ObjectMapper mapper = new ObjectMapper();
 
-	@Getter
-	@Setter
-	@Builder.Default
-	private boolean appAutoStartOnLogin = false;
+	private static final Path configFile = ResourcesHelper.getConfigFile();
 
-	public boolean isInitialized(int expectedVersion) {
-		return onboardingVersion == expectedVersion;
+	@Override
+	public boolean exists() {
+		return Files.exists(configFile);
+	}
+
+	@Override
+	public Config read() throws IOException {
+		return mapper.readValue(configFile.toFile(), Config.class);
+	}
+
+	@Override
+	public void write(Config config) throws IOException {
+		mapper.writerWithDefaultPrettyPrinter().writeValue(configFile.toFile(), config);
 	}
 
 }

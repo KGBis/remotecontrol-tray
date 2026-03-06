@@ -24,6 +24,12 @@ import com.google.inject.AbstractModule;
 import io.github.kgbis.remotecontrol.tray.RemoteControl;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartControllerImpl;
+import io.github.kgbis.remotecontrol.tray.bootstrap.Bootstrap;
+import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapVersionProvider;
+import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapVersionProviderImpl;
+import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
+import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorage;
+import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
@@ -40,17 +46,24 @@ import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactoryDefaultI
 import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
 import io.github.kgbis.remotecontrol.tray.ui.TrayController;
 import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
+import io.github.kgbis.remotecontrol.tray.ui.support.FirstRunDialogHandler;
+import io.github.kgbis.remotecontrol.tray.ui.support.FirstRunDialogHandlerImpl;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import oshi.SystemInfo;
 
 @Slf4j
-public class RemoteControlModule extends AbstractModule {
+public final class RemoteControlModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
 		bind(AutoStartController.class).to(AutoStartControllerImpl.class).in(Singleton.class);
+		bind(Bootstrap.class).in(Singleton.class);
+		bind(BootstrapVersionProvider.class).to(BootstrapVersionProviderImpl.class).in(Singleton.class);
+		bind(ConfigManager.class).in(Singleton.class);
+		bind(ConfigStorage.class).to(ConfigStorageImpl.class).in(Singleton.class);
 		bind(DeviceIdProvider.class).in(Singleton.class);
+		bind(FirstRunDialogHandler.class).to(FirstRunDialogHandlerImpl.class).in(Singleton.class);
 		bind(InformationScreen.class).in(Singleton.class);
 		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);
 		bind(NetworkActionFactory.class).in(Singleton.class);

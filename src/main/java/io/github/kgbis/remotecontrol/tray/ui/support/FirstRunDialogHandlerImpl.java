@@ -18,35 +18,20 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.configuration;
+package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapAutoStart;
+import io.github.kgbis.remotecontrol.tray.ui.FirstRunDialog;
+import jakarta.inject.Singleton;
 
-@EqualsAndHashCode
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Config {
+@Singleton
+public class FirstRunDialogHandlerImpl implements FirstRunDialogHandler {
 
-	@Getter
-	@Setter
-	@Builder.Default
-	private int onboardingVersion = 0;
-
-	@Getter
-	@Setter
-	@Builder.Default
-	private boolean appAutoStartOnLogin = false;
-
-	public boolean isInitialized(int expectedVersion) {
-		return onboardingVersion == expectedVersion;
+	@Override
+	public BootstrapAutoStart run() {
+		FirstRunDialog dialog = new FirstRunDialog(null);
+		dialog.setVisible(true);
+		return dialog.getResult();
 	}
 
 }
