@@ -37,14 +37,12 @@ public final class InformationModel {
 		addresses.putAll(newData);
 	}
 
-	// @formatter:off
 	public Map<String, String> getAddresses() {
 		return Map.copyOf(addresses);
 	}
-	// @formatter:on
 
 	public Device getDevice() {
-		return device.get();
+		return device.get() == null ? Device.builder().build() : device.get();
 	}
 
 	public int size() {
