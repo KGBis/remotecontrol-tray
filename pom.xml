@@ -41,7 +41,7 @@
         <mockito.version>5.22.0</mockito.version>
 
         <!-- Dependencies -->
-        <lombok.version>1.18.42</lombok.version>
+        <lombok.version>1.18.44</lombok.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback-classic.version>1.5.32</logback-classic.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
