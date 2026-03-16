@@ -40,6 +40,7 @@ That’s all — simple, explicit and enough for the intended use case.
 - Linux Mint 22.2 (LXQt) ✅
 - Linux Mint 22.2 (MATE) ✅
 - Ubuntu MATE ✅
+- Mageia 9 (iceWM) ✅
 
 ### Partially working / limitations
 

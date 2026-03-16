@@ -55,6 +55,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isFullTraySupport;
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isPartialTraySupport;
@@ -66,7 +67,7 @@ public class InformationScreen implements InfoListener {
 	private final JFrame frame;
 
 	@Getter(value = AccessLevel.PROTECTED)
-	private final DefaultTableModel model;
+	private final DefaultTableModel tableModel;
 
 	private final InformationModel infoModel;
 
@@ -75,14 +76,14 @@ public class InformationScreen implements InfoListener {
 	public InformationScreen() {
 		this.infoModel = new InformationModel();
 
-		this.model = new DefaultTableModel(new Object[] { "Type", "IP Address", "MAC" }, 0) {
+		this.tableModel = new DefaultTableModel(new Object[] { "Type", "IP Address", "MAC" }, 0) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		};
 
-		this.renderer = new InformationTableRenderer(model);
+		this.renderer = new InformationTableRenderer(tableModel);
 
 		this.frame = buildFrame();
 	}
@@ -96,10 +97,7 @@ public class InformationScreen implements InfoListener {
 		JPanel headerPanel = buildHeaderPanel();
 		jFrame.add(headerPanel, BorderLayout.NORTH);
 
-		// ------------------------------------
-		// Middle panel (table with MACs & IPs)
-		// ------------------------------------
-		JTable table = new JTable(model);
+		JTable table = new JTable(tableModel);
 		table.setFillsViewportHeight(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setShowHorizontalLines(true);
@@ -206,12 +204,7 @@ public class InformationScreen implements InfoListener {
 			JButton copyBtn = new JButton("Copy All/Selected");
 			copyBtn.addActionListener(e -> {
 				int row = table.getSelectedRow();
-				if (row >= 0) {
-					copyRow(row, table);
-				}
-				else {
-					copyAll();
-				}
+				copyToClipboard(row);
 			});
 			rightPanel.add(copyBtn);
 		}
@@ -243,26 +236,44 @@ public class InformationScreen implements InfoListener {
 		onChange(infoModel.getDevice());
 	}
 
-	// Copy all to clipboard
-	private void copyAll() {
-		String toCopy = infoModel.getAddresses()
-			.entrySet()
-			.stream()
-			.map(e -> e.getKey() + " -> " + e.getValue())
-			.collect(Collectors.joining("\n"));
-
-		StringSelection selection = new StringSelection(toCopy);
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
-		log.debug("Copied all to clipboard:\n{}", toCopy);
+	// Copy all or selected row to clipboard as csv
+	private void copyToClipboard(int row) {
+		String toCopy = tableToCsv(row);
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(toCopy.trim()), null);
+		log.debug("Copied {} to clipboard:\n{}", row == -1 ? "all rows" : "row #" + row, toCopy);
 	}
 
-	private void copyRow(int row, JTable table) {
-		StringBuilder sb = new StringBuilder();
-		for (int col = 0; col < table.getColumnCount(); col++) {
-			sb.append(table.getValueAt(row, col)).append('\t');
+	private String tableToCsv(int rowNumber) {
+		// header
+		String header = IntStream.range(0, tableModel.getColumnCount())
+				.mapToObj(tableModel::getColumnName)
+				.collect(Collectors.joining(","));
+
+		// rows
+		String rows;
+
+		if(rowNumber == -1) {
+			rows = IntStream.range(0, tableModel.getRowCount())
+				.mapToObj(row ->
+						IntStream.range(0, tableModel.getColumnCount())
+								.mapToObj(col -> {
+									Object value = tableModel.getValueAt(row, col);
+									return value == null ? "" : value.toString();
+								})
+								.collect(Collectors.joining(","))
+				)
+				.collect(Collectors.joining("\n"));
+		} else {
+			rows = IntStream.range(0, tableModel.getColumnCount())
+					.mapToObj(col -> {
+						Object value = tableModel.getValueAt(rowNumber, col);
+						return value == null ? "" : value.toString();
+					})
+					.collect(Collectors.joining(","));
+
 		}
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(sb.toString().trim()), null);
-		log.debug("Copied selected row to clipboard:\n{}", sb);
+
+		return header + "\n" + rows;
 	}
 
 	@Override
