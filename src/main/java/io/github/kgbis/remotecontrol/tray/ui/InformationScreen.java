@@ -22,7 +22,6 @@ package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
-import io.github.kgbis.remotecontrol.tray.ui.support.InformationModel;
 import io.github.kgbis.remotecontrol.tray.ui.support.InformationTableRenderer;
 import jakarta.inject.Singleton;
 import lombok.AccessLevel;
@@ -54,8 +53,11 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isFullTraySupport;
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isPartialTraySupport;
@@ -69,12 +71,12 @@ public class InformationScreen implements InfoListener {
 	@Getter(value = AccessLevel.PROTECTED)
 	private final DefaultTableModel tableModel;
 
-	private final InformationModel infoModel;
+	private final InformationHolder informationHolder;
 
 	private final InformationTableRenderer renderer;
 
 	public InformationScreen() {
-		this.infoModel = new InformationModel();
+		this.informationHolder = new InformationHolder();
 
 		this.tableModel = new DefaultTableModel(new Object[] { "Type", "IP Address", "MAC" }, 0) {
 			@Override
@@ -233,7 +235,7 @@ public class InformationScreen implements InfoListener {
 
 	// Load IPs and MACs to table
 	private void loadData() {
-		onChange(infoModel.getDevice());
+		onChange(informationHolder.get());
 	}
 
 	// Copy all or selected row to clipboard as csv
@@ -246,40 +248,51 @@ public class InformationScreen implements InfoListener {
 	private String tableToCsv(int rowNumber) {
 		// header
 		String header = IntStream.range(0, tableModel.getColumnCount())
-				.mapToObj(tableModel::getColumnName)
-				.collect(Collectors.joining(","));
+			.mapToObj(tableModel::getColumnName)
+			.collect(Collectors.joining(","));
+
+		// common function for rows
+		IntFunction<Stream<String>> streamIntFunction = row -> IntStream.range(0, tableModel.getColumnCount())
+			.mapToObj(col -> {
+				Object value = tableModel.getValueAt(row, col);
+				return value == null ? "" : value.toString();
+			});
 
 		// rows
-		String rows;
-
-		if(rowNumber == -1) {
-			rows = IntStream.range(0, tableModel.getRowCount())
-				.mapToObj(row ->
-						IntStream.range(0, tableModel.getColumnCount())
-								.mapToObj(col -> {
-									Object value = tableModel.getValueAt(row, col);
-									return value == null ? "" : value.toString();
-								})
-								.collect(Collectors.joining(","))
-				)
-				.collect(Collectors.joining("\n"));
-		} else {
-			rows = IntStream.range(0, tableModel.getColumnCount())
-					.mapToObj(col -> {
-						Object value = tableModel.getValueAt(rowNumber, col);
-						return value == null ? "" : value.toString();
-					})
-					.collect(Collectors.joining(","));
-
-		}
+		String rows = (rowNumber == -1)
+				? IntStream.range(0, tableModel.getRowCount())
+					.mapToObj(row -> streamIntFunction.apply(row).collect(Collectors.joining(",")))
+					.collect(Collectors.joining("\n"))
+				: streamIntFunction.apply(rowNumber).collect(Collectors.joining(","));
 
 		return header + "\n" + rows;
 	}
 
 	@Override
 	public void onChange(Device device) {
-		infoModel.update(device);
+		informationHolder.set(device);
 		renderer.render(device.getInterfaces());
+	}
+
+	static final class InformationHolder {
+
+		private final AtomicReference<Device> device = new AtomicReference<>();
+
+		public synchronized Device get() {
+			log.debug("Retrieving information for {}", device.get());
+			if (device.get() == null) {
+				log.error("Device has not been set. Null");
+				device.set(Device.builder().build());
+			}
+
+			return device.get();
+		}
+
+		public synchronized void set(Device device) {
+			log.debug("Setting information for {}", device);
+			this.device.set(device);
+		}
+
 	}
 
 }
