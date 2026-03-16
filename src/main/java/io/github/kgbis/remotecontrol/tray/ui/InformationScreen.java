@@ -22,7 +22,6 @@ package io.github.kgbis.remotecontrol.tray.ui;
 
 import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
-import io.github.kgbis.remotecontrol.tray.ui.support.InformationModel;
 import io.github.kgbis.remotecontrol.tray.ui.support.InformationTableRenderer;
 import jakarta.inject.Singleton;
 import lombok.AccessLevel;
@@ -54,7 +53,11 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isFullTraySupport;
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isPartialTraySupport;
@@ -66,23 +69,23 @@ public class InformationScreen implements InfoListener {
 	private final JFrame frame;
 
 	@Getter(value = AccessLevel.PROTECTED)
-	private final DefaultTableModel model;
+	private final DefaultTableModel tableModel;
 
-	private final InformationModel infoModel;
+	private final InformationHolder informationHolder;
 
 	private final InformationTableRenderer renderer;
 
 	public InformationScreen() {
-		this.infoModel = new InformationModel();
+		this.informationHolder = new InformationHolder();
 
-		this.model = new DefaultTableModel(new Object[] { "Type", "IP Address", "MAC" }, 0) {
+		this.tableModel = new DefaultTableModel(new Object[] { "Type", "IP Address", "MAC" }, 0) {
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		};
 
-		this.renderer = new InformationTableRenderer(model);
+		this.renderer = new InformationTableRenderer(tableModel);
 
 		this.frame = buildFrame();
 	}
@@ -96,10 +99,7 @@ public class InformationScreen implements InfoListener {
 		JPanel headerPanel = buildHeaderPanel();
 		jFrame.add(headerPanel, BorderLayout.NORTH);
 
-		// ------------------------------------
-		// Middle panel (table with MACs & IPs)
-		// ------------------------------------
-		JTable table = new JTable(model);
+		JTable table = new JTable(tableModel);
 		table.setFillsViewportHeight(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setShowHorizontalLines(true);
@@ -206,12 +206,7 @@ public class InformationScreen implements InfoListener {
 			JButton copyBtn = new JButton("Copy All/Selected");
 			copyBtn.addActionListener(e -> {
 				int row = table.getSelectedRow();
-				if (row >= 0) {
-					copyRow(row, table);
-				}
-				else {
-					copyAll();
-				}
+				copyToClipboard(row);
 			});
 			rightPanel.add(copyBtn);
 		}
@@ -240,35 +235,64 @@ public class InformationScreen implements InfoListener {
 
 	// Load IPs and MACs to table
 	private void loadData() {
-		onChange(infoModel.getDevice());
+		onChange(informationHolder.get());
 	}
 
-	// Copy all to clipboard
-	private void copyAll() {
-		String toCopy = infoModel.getAddresses()
-			.entrySet()
-			.stream()
-			.map(e -> e.getKey() + " -> " + e.getValue())
-			.collect(Collectors.joining("\n"));
-
-		StringSelection selection = new StringSelection(toCopy);
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, null);
-		log.debug("Copied all to clipboard:\n{}", toCopy);
+	// Copy all or selected row to clipboard as csv
+	private void copyToClipboard(int row) {
+		String toCopy = tableToCsv(row);
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(toCopy.trim()), null);
+		log.debug("Copied {} to clipboard:\n{}", row == -1 ? "all rows" : "row #" + row, toCopy);
 	}
 
-	private void copyRow(int row, JTable table) {
-		StringBuilder sb = new StringBuilder();
-		for (int col = 0; col < table.getColumnCount(); col++) {
-			sb.append(table.getValueAt(row, col)).append('\t');
-		}
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(sb.toString().trim()), null);
-		log.debug("Copied selected row to clipboard:\n{}", sb);
+	private String tableToCsv(int rowNumber) {
+		// header
+		String header = IntStream.range(0, tableModel.getColumnCount())
+			.mapToObj(tableModel::getColumnName)
+			.collect(Collectors.joining(","));
+
+		// common function for rows
+		IntFunction<Stream<String>> streamIntFunction = row -> IntStream.range(0, tableModel.getColumnCount())
+			.mapToObj(col -> {
+				Object value = tableModel.getValueAt(row, col);
+				return value == null ? "" : value.toString();
+			});
+
+		// rows
+		String rows = (rowNumber == -1)
+				? IntStream.range(0, tableModel.getRowCount())
+					.mapToObj(row -> streamIntFunction.apply(row).collect(Collectors.joining(",")))
+					.collect(Collectors.joining("\n"))
+				: streamIntFunction.apply(rowNumber).collect(Collectors.joining(","));
+
+		return header + "\n" + rows;
 	}
 
 	@Override
 	public void onChange(Device device) {
-		infoModel.update(device);
+		informationHolder.set(device);
 		renderer.render(device.getInterfaces());
+	}
+
+	static final class InformationHolder {
+
+		private final AtomicReference<Device> device = new AtomicReference<>();
+
+		public synchronized Device get() {
+			log.debug("Retrieving information for {}", device.get());
+			if (device.get() == null) {
+				log.error("Device has not been set. Null");
+				device.set(Device.builder().build());
+			}
+
+			return device.get();
+		}
+
+		public synchronized void set(Device device) {
+			log.debug("Setting information for {}", device);
+			this.device.set(device);
+		}
+
 	}
 
 }

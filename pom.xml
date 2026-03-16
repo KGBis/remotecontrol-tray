@@ -8,7 +8,7 @@
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
     <!-- yyyy.MM.commit-number -->
-    <version>2026.03.22</version>
+    <version>2026.03.24</version>
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
@@ -33,15 +33,15 @@
 
         <!-- Plugins -->
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
-        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <maven-dependency-plugin.version>3.10.0</maven-dependency-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
-        <mockito.version>5.22.0</mockito.version>
+        <mockito.version>5.23.0</mockito.version>
 
         <!-- Dependencies -->
-        <lombok.version>1.18.42</lombok.version>
+        <lombok.version>1.18.44</lombok.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback-classic.version>1.5.32</logback-classic.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>

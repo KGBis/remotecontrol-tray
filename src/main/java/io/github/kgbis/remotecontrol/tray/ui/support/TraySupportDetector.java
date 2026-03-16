@@ -103,6 +103,11 @@ public final class TraySupportDetector {
 			return TraySupport.FULL;
 		}
 
+		// --- iceWM ---
+		if (desktop.contains("icewm")) {
+			return TraySupport.FULL;
+		}
+
 		// Fallback to nnne
 		return TraySupport.NONE;
 	}
