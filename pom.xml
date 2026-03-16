@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
-    <version>2026.02.11</version> <!-- yyyy.MM.commit-number -->
+    <!-- yyyy.MM.commit-number -->
+    <version>2026.03.22</version>
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
@@ -32,26 +33,26 @@
 
         <!-- Plugins -->
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
-        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
-        <maven-dependency-plugin.version>3.7.0</maven-dependency-plugin.version>
+        <maven-dependency-plugin.version>3.10.0</maven-dependency-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
-        <mockito.version>5.21.0</mockito.version>
+        <mockito.version>5.23.0</mockito.version>
 
         <!-- Dependencies -->
-        <lombok.version>1.18.42</lombok.version>
+        <lombok.version>1.18.44</lombok.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
-        <logback-classic.version>1.5.25</logback-classic.version>
+        <logback-classic.version>1.5.32</logback-classic.version>
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <commons-collections4.version>4.5.0</commons-collections4.version>
-        <oshi.version>6.9.1</oshi.version>
+        <oshi.version>6.10.0</oshi.version>
         <jcommander.version>1.82</jcommander.version>
         <SystemTray.version>4.4</SystemTray.version>
         <guice.version>7.0.0</guice.version>
         <guava.version>33.5.0-jre</guava.version>
         <jmdns.version>3.6.3</jmdns.version>
-        <jackson-databind.version>2.21.0</jackson-databind.version>
+        <jackson-databind.version>2.21.1</jackson-databind.version>
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
     </properties>
 
@@ -230,7 +231,7 @@
                     </descriptorRefs>
 
                     <!-- Overrides the default naming -->
-                    <finalName>RemoteControlTray</finalName>
+                    <finalName>${project.artifactId}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
 
                     <archive>

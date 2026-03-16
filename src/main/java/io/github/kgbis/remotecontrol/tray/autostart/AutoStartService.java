@@ -18,42 +18,38 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.autostart;
 
-import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
 @Slf4j
-public final class InformationModel {
+public class AutoStartService {
 
-	private final Map<String, String> addresses = new LinkedHashMap<>();
+	private final AutoStartManager manager;
 
-	private final AtomicReference<Device> device = new AtomicReference<>();
-
-	public void update(Map<String, String> newData) {
-		addresses.clear();
-		addresses.putAll(newData);
+	public AutoStartService(AutoStartManager manager) {
+		this.manager = manager;
 	}
 
-	public Map<String, String> getAddresses() {
-		return Map.copyOf(addresses);
-	}
+	public void syncAutoStart(boolean appAutoStartOnLogin) {
+		if (!manager.isSupported()) {
+			return;
+		}
 
-	public Device getDevice() {
-		return device.get() == null ? Device.builder().build() : device.get();
-	}
+		try {
+			boolean enabled = manager.isEnabled();
 
-	public int size() {
-		return addresses.size();
-	}
+			if (appAutoStartOnLogin && !enabled) {
+				manager.enable();
+			}
+			else if (!appAutoStartOnLogin && enabled) {
+				manager.disable();
+			}
 
-	public void update(Device device) {
-		log.debug("update(device) ->  {}", device);
-		this.device.set(device);
+		}
+		catch (Exception e) { // NOSONAR
+			log.warn("Autostart sync failed", e);
+		}
 	}
 
 }

@@ -23,10 +23,13 @@ package io.github.kgbis.remotecontrol.tray;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import io.github.kgbis.remotecontrol.tray.bootstrap.Bootstrap;
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
 import io.github.kgbis.remotecontrol.tray.cli.CliParser;
 import io.github.kgbis.remotecontrol.tray.ioc.RemoteControlModule;
+import io.github.kgbis.remotecontrol.tray.lock.SingleInstanceLock;
 import io.github.kgbis.remotecontrol.tray.logging.LogbackConfiguration;
+import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
 import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
 import jakarta.inject.Inject;
@@ -37,6 +40,7 @@ import org.apache.commons.lang3.SystemUtils;
 import javax.swing.UIManager;
 import java.io.IOException;
 import java.net.BindException;
+import java.nio.file.Path;
 
 import static io.github.kgbis.remotecontrol.tray.net.server.NetworkServer.PORT;
 
@@ -46,21 +50,48 @@ public class RemoteControl {
 
 	public static final String REMOTE_PC_CONTROL = "Remote PC Control Tray";
 
-	public static final String APP_NAME = "RemoteControlTray";
+	public static final String APP_NAME = "remotecontrol-tray"; // same as artifactId
+
+	private final Bootstrap bootstrap;
 
 	private final NetworkServer networkServer;
 
 	private final TrayManager trayManager;
 
 	@Inject
-	public RemoteControl(NetworkServer networkServer, TrayManager trayManager) {
+	public RemoteControl(Bootstrap bootstrap, NetworkServer networkServer, TrayManager trayManager) {
+		this.bootstrap = bootstrap;
 		this.networkServer = networkServer;
 		this.trayManager = trayManager;
 	}
 
 	public void start(CliArguments cliArgs) throws IOException {
+		if (!manageLock()) {
+			System.exit(0);
+		}
+
+		bootstrap.execute();
 		networkServer.arguments(cliArgs).start();
 		trayManager.initializeTray();
+	}
+
+	private boolean manageLock() {
+		// try to adquire lock
+		Path lockPath = ResourcesHelper.getOSConfigDirectory().resolve("remotecontrol.lock");
+
+		SingleInstanceLock instanceLock = new SingleInstanceLock();
+		boolean locked = instanceLock.tryLock(lockPath);
+
+		if (!locked) {
+			return false;
+		}
+
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			log.debug("Shutdown hook triggered");
+			instanceLock.release();
+		}, "main-shutdown-hook"));
+
+		return true;
 	}
 
 	public static void main(String[] args) {
@@ -93,17 +124,17 @@ public class RemoteControl {
 		}
 		catch (BindException be) {
 			log.error("Error while binding port to " + PORT + ". Check if already in use!");
-			System.exit(1);
+			System.exit(69); // EX_UNAVAILABLE
 		}
 		catch (IOException e) {
 			log.error("Something bad happened. Please report the following error: ", e);
 			Thread.currentThread().interrupt();
-			System.exit(-1);
+			System.exit(74); // EX_IOERR
 		}
 		catch (ParameterException parameterException) {
 			System.err.println(parameterException.getMessage()); // NOSONAR
 			parameterException.getJCommander().usage();
-			System.exit(-2);
+			System.exit(64); // EX_USAGE
 		}
 	}
 

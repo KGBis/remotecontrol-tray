@@ -20,40 +20,18 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import io.github.kgbis.remotecontrol.tray.net.info.Device;
-import lombok.extern.slf4j.Slf4j;
+import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapAutoStart;
+import io.github.kgbis.remotecontrol.tray.ui.FirstRunDialog;
+import jakarta.inject.Singleton;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+@Singleton
+public class FirstRunDialogHandlerImpl implements FirstRunDialogHandler {
 
-@Slf4j
-public final class InformationModel {
-
-	private final Map<String, String> addresses = new LinkedHashMap<>();
-
-	private final AtomicReference<Device> device = new AtomicReference<>();
-
-	public void update(Map<String, String> newData) {
-		addresses.clear();
-		addresses.putAll(newData);
-	}
-
-	public Map<String, String> getAddresses() {
-		return Map.copyOf(addresses);
-	}
-
-	public Device getDevice() {
-		return device.get() == null ? Device.builder().build() : device.get();
-	}
-
-	public int size() {
-		return addresses.size();
-	}
-
-	public void update(Device device) {
-		log.debug("update(device) ->  {}", device);
-		this.device.set(device);
+	@Override
+	public BootstrapAutoStart run() {
+		FirstRunDialog dialog = new FirstRunDialog(null);
+		dialog.setVisible(true);
+		return dialog.getResult();
 	}
 
 }

@@ -20,7 +20,6 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui;
 
-import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
 import io.github.kgbis.remotecontrol.tray.ui.support.InformationModel;
@@ -31,7 +30,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -43,14 +41,11 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
@@ -62,7 +57,6 @@ import java.awt.event.WindowEvent;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isFullTraySupport;
 import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.isPartialTraySupport;
 
@@ -94,17 +88,12 @@ public class InformationScreen implements InfoListener {
 		this.frame = buildFrame();
 	}
 
-	private JFrame buildFrame() {
-		JFrame jFrame = new JFrame(REMOTE_PC_CONTROL);
-		jFrame.setIconImage(ResourcesHelper.getIcon());
-		jFrame.setLayout(new BorderLayout(10, 10));
-		jFrame.setAlwaysOnTop(false);
-		jFrame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
-		jFrame.setExtendedState(Frame.NORMAL);
+	JFrame buildFrame() {
+		JFrame jFrame = CommonUI.windowJFrame(false);
 
-		// ---------------------
-		// Header panel (text)
-		// ---------------------
+		// ---------------------------------
+		// Header panel (app name & version)
+		// ---------------------------------
 		JPanel headerPanel = buildHeaderPanel();
 		jFrame.add(headerPanel, BorderLayout.NORTH);
 
@@ -170,17 +159,10 @@ public class InformationScreen implements InfoListener {
 	/* private methods */
 
 	private JPanel buildHeaderPanel() {
-		JPanel headerPanel = new JPanel();
-		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
-		headerPanel.setBorder(new EmptyBorder(5, 5, 5, 5)); // margen abajo
+		JPanel headerPanel = CommonUI.createHeaderPanel();
 
 		// Line 1: Title
-		JPanel versionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel versionStr = new JLabel(REMOTE_PC_CONTROL + " - Version:", SwingConstants.LEADING);
-		JLabel versionVal = new JLabel(ResourcesHelper.getVersion(), SwingConstants.LEADING);
-		versionVal.setFont(versionVal.getFont().deriveFont(Font.BOLD));
-		versionPanel.add(versionStr);
-		versionPanel.add(versionVal);
+		JPanel versionPanel = CommonUI.createVersionPanel();
 
 		// Line 2: Description
 		JPanel descPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
