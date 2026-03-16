@@ -21,13 +21,11 @@
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
 import io.github.kgbis.remotecontrol.tray.net.info.Device;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-@Slf4j
 public final class InformationModel {
 
 	private final Map<String, String> addresses = new LinkedHashMap<>();
@@ -52,7 +50,6 @@ public final class InformationModel {
 	}
 
 	public void update(Device device) {
-		log.debug("update(device) ->  {}", device);
 		this.device.set(device);
 	}
 
