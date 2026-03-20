@@ -40,16 +40,11 @@ public final class ConfigManager {
 	}
 
 	public synchronized void save(Config config) {
-		try {
-			configStorage.write(config);
-		}
-		catch (IOException e) {
-			log.error("Error writting configuration.", e);
-		}
+		configStorage.write(config);
 		currentConfig = config;
 	}
 
-	public synchronized Config current() throws IOException {
+	public synchronized Config current() {
 		if (currentConfig == null) {
 			currentConfig = load();
 		}
@@ -57,7 +52,7 @@ public final class ConfigManager {
 		return currentConfig;
 	}
 
-	private Config load() throws IOException {
+	private Config load() {
 		if (!configStorage.exists()) {
 			currentConfig = Config.builder().build();
 			configStorage.write(currentConfig);

@@ -20,15 +20,27 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
+import io.github.kgbis.remotecontrol.tray.autostart.AutoStartControllerImpl;
+import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
+import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
+import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
+import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
+import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandlerImpl;
+import io.github.kgbis.remotecontrol.tray.ui.support.DialogMode;
 import io.github.kgbis.remotecontrol.tray.ui.support.InformationTableRenderer;
+import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactory;
+import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactoryImpl;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -39,20 +51,26 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
@@ -75,7 +93,11 @@ public class InformationScreen implements InfoListener {
 
 	private final InformationTableRenderer renderer;
 
-	public InformationScreen() {
+	private final DialogHandler dialogHandler;
+
+	@Inject
+	public InformationScreen(DialogHandler dialogHandler) {
+		this.dialogHandler = dialogHandler;
 		this.informationHolder = new InformationHolder();
 
 		this.tableModel = new DefaultTableModel(new Object[] { "Type", "IP Address", "MAC" }, 0) {
@@ -163,12 +185,31 @@ public class InformationScreen implements InfoListener {
 	private JPanel buildHeaderPanel() {
 		JPanel headerPanel = CommonUI.createHeaderPanel();
 
-		// Line 1: Title
-		JPanel versionPanel = CommonUI.createVersionPanel();
+		// Line 1 - Left: Empty
+		JPanel versionPanel = new JPanel(new BorderLayout());
+		JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		versionPanel.add(leftPanel, BorderLayout.WEST);
+
+		// Line 1 - Right: Settings button
+		JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		ImageIcon settings = new ImageIcon(ResourcesHelper.getImage("settings"));
+		JButton settingsButton = new JButton(settings);
+		settingsButton.setToolTipText("Settings");
+		settingsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		settingsButton.setBorderPainted(false);
+		settingsButton.setContentAreaFilled(false);
+		settingsButton.setFocusPainted(false);
+		settingsButton.setMargin(new Insets(0, 0, 0, 0));
+		settingsButton.setPreferredSize(new Dimension(16, 16));
+		settingsButton.addActionListener(e -> dialogHandler.run(frame, DialogMode.SETTINGS));
+		settingsPanel.add(settingsButton);
+
+		versionPanel.add(settingsPanel, BorderLayout.EAST);
 
 		// Line 2: Description
-		JPanel descPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel descLabel = new JLabel("Detected local IP and MAC addresses", SwingConstants.LEADING);
+		JPanel descPanel = new JPanel();
+		JLabel descLabel = new JLabel("Detected local network interfaces", SwingConstants.LEADING);
+		descLabel.setFont(descLabel.getFont().deriveFont(Font.BOLD));
 		descPanel.add(descLabel);
 
 		// Add to panel
@@ -289,10 +330,34 @@ public class InformationScreen implements InfoListener {
 		}
 
 		public synchronized void set(Device device) {
-			log.debug("Setting information for {}", device);
 			this.device.set(device);
 		}
 
+	}
+
+	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
+				| IllegalAccessException e) {
+			throw new RuntimeException(); // NOSONAR
+		}
+
+		ConfigManager manager = new ConfigManager(new ConfigStorageImpl());
+		AutoStartController autoStartController = new AutoStartControllerImpl();
+		SettingsDialogFactory factory = new SettingsDialogFactoryImpl();
+		DialogHandler handler = new DialogHandlerImpl(manager, autoStartController, factory);
+		InformationScreen dialog = new InformationScreen(handler);
+		dialog.onChange(Device.builder()
+			.interfaces(Set.of(Device.DeviceInterface.builder()
+				.type(Device.InterfaceType.WIFI)
+				.ip("192.168.1.66")
+				.mac("01:23:34:56:78:9A")
+				.build()))
+			.build());
+
+		dialog.show();
 	}
 
 }

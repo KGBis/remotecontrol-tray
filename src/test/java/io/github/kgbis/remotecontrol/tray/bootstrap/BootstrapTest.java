@@ -1,21 +1,37 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.bootstrap;
 
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.configuration.Config;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
-import io.github.kgbis.remotecontrol.tray.ui.support.FirstRunDialogHandler;
+import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -31,7 +47,7 @@ class BootstrapTest {
 	AutoStartController autoStartController;
 
 	@Mock
-	FirstRunDialogHandler firstRunHandler;
+	DialogHandler dialogHandler;
 
 	@Mock
 	BootstrapVersionProvider versionProvider;
@@ -41,51 +57,44 @@ class BootstrapTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
-	void no_config_firstRun_accepts_autostart(boolean value) throws Exception {
-		ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
-
+	void no_config_firstRun_accepts_autostart(boolean value) {
 		Config config = new Config();
 
 		when(configManager.current()).thenReturn(config);
-		when(firstRunHandler.run()).thenReturn(new BootstrapAutoStart(value));
 		when(versionProvider.current()).thenReturn(1);
+		when(dialogHandler.run(1)).thenReturn(Config.builder().appAutoStartOnLogin(value).onboardingVersion(1).build());
 
 		bootstrap.execute();
 
-		verify(configManager).save(any(Config.class));
+		verify(dialogHandler).run(1);
 		verify(autoStartController).syncAutoStart(value);
-
-		verify(configManager).save(captor.capture());
-		Config saved = captor.getValue();
-		assertEquals(value, saved.isAppAutoStartOnLogin());
-		assertEquals(1, saved.getOnboardingVersion());
 	}
 
 	@Test
-	void upToDate_config_does_not_run_autostart() throws IOException {
-		Config config = Config.builder().onboardingVersion(3).build();
+	void upToDate_config_does_not_run_autostart() {
+		Config config = Config.builder().onboardingVersion(0).build();
 
 		when(configManager.current()).thenReturn(config);
-		when(versionProvider.current()).thenReturn(3);
+		when(versionProvider.current()).thenReturn(0);
 
 		bootstrap.execute();
 
-		verify(firstRunHandler, never()).run();
+		verify(dialogHandler, never()).run(0);
 		verify(configManager, never()).save(any());
 		verify(autoStartController).syncAutoStart(config.isAppAutoStartOnLogin());
 	}
 
 	@Test
-	void version_change_runs_onBoarding() throws IOException {
-		Config config = Config.builder().onboardingVersion(2).build();
+	void version_change_runs_onBoarding() {
+		Config config = Config.builder().onboardingVersion(0).build();
 
 		when(configManager.current()).thenReturn(config);
-		when(versionProvider.current()).thenReturn(3);
-		when(firstRunHandler.run()).thenReturn(new BootstrapAutoStart(true));
+		when(versionProvider.current()).thenReturn(1);
+		when(dialogHandler.run(1)).thenReturn(Config.builder().appAutoStartOnLogin(true).onboardingVersion(1).build());
 
 		bootstrap.execute();
 
-		verify(firstRunHandler).run();
+		verify(dialogHandler).run(1);
 	}
 
 }

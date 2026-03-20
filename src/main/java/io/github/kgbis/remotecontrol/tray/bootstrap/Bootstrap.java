@@ -23,16 +23,14 @@ package io.github.kgbis.remotecontrol.tray.bootstrap;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.configuration.Config;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
-import io.github.kgbis.remotecontrol.tray.ui.support.FirstRunDialogHandler;
+import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-
-import java.io.IOException;
 
 @Singleton
 public class Bootstrap {
 
-	private final FirstRunDialogHandler dialogHandler;
+	private final DialogHandler dialogHandler;
 
 	private final ConfigManager configManager;
 
@@ -41,7 +39,7 @@ public class Bootstrap {
 	private final BootstrapVersionProvider versionProvider;
 
 	@Inject
-	public Bootstrap(FirstRunDialogHandler dialogHandler, ConfigManager configManager,
+	public Bootstrap(DialogHandler dialogHandler, ConfigManager configManager,
 			AutoStartController autoStartManagerFactory, BootstrapVersionProvider versionProvider) {
 		this.dialogHandler = dialogHandler;
 		this.configManager = configManager;
@@ -49,17 +47,13 @@ public class Bootstrap {
 		this.versionProvider = versionProvider;
 	}
 
-	public void execute() throws IOException {
+	public void execute() {
 		Config config = configManager.current();
-		int bootstrapVersion = versionProvider.current();
+		int appVersionLevel = versionProvider.current();
 
 		// check if configuration exists and is up-to-date
-		if (!config.isInitialized(bootstrapVersion)) {
-			BootstrapAutoStart result = dialogHandler.run();
-			config.setAppAutoStartOnLogin(result.autoStart());
-			config.setOnboardingVersion(bootstrapVersion);
-			configManager.save(config);
-
+		if (!config.isInitialized(appVersionLevel)) {
+			config = dialogHandler.run(appVersionLevel);
 		}
 
 		// Syncronize auto start on login

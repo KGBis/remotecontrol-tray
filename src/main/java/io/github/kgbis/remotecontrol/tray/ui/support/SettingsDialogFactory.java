@@ -18,16 +18,15 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.configuration;
+package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import java.io.IOException;
+import io.github.kgbis.remotecontrol.tray.configuration.Config;
+import io.github.kgbis.remotecontrol.tray.ui.SettingsDialog;
 
-public interface ConfigStorage {
+import javax.swing.JFrame;
 
-	boolean exists();
+public interface SettingsDialogFactory {
 
-	Config read() throws IOException;
-
-	void write(Config config);
+	SettingsDialog create(JFrame parent, DialogMode mode, Config config, int versionLevel);
 
 }

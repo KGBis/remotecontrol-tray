@@ -20,10 +20,13 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapAutoStart;
+import io.github.kgbis.remotecontrol.tray.configuration.Config;
+import javax.swing.JFrame;
 
-public interface FirstRunDialogHandler {
+public interface DialogHandler {
 
-	BootstrapAutoStart run();
+	Config run(int appVersionLevel);
+
+	Config run(JFrame parent, DialogMode mode);
 
 }

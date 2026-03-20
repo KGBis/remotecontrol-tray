@@ -38,7 +38,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.APP_NAME;
@@ -75,20 +77,21 @@ public class ResourcesHelper {
 
 	private static final String CONFIG_FILE = "device.id";
 
-	private static volatile UUID systemId;
+	private static final Map<String, Image> icons = new HashMap<>();
 
 	/* application resources */
-
-	private static Image image;
+	private static volatile UUID systemId;
 
 	private static String version;
 
-	public static Image getIcon() {
-		if (image == null) {
-			URL resource = ResourcesHelper.class.getClassLoader().getResource("computer.png");
-			image = resource != null ? Toolkit.getDefaultToolkit().getImage(resource) : createFallbackIcon();
+	public static Image getImage(String name) {
+		if (icons.get(name) == null) {
+			URL resource = ResourcesHelper.class.getClassLoader().getResource(name + ".png");
+			Image image = resource != null ? Toolkit.getDefaultToolkit().getImage(resource) : createFallbackIcon();
+			icons.put(name, image);
 		}
-		return image;
+
+		return icons.get(name);
 	}
 
 	public static String getVersion() {

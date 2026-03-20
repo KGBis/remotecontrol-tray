@@ -18,7 +18,10 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.bootstrap;
+package io.github.kgbis.remotecontrol.tray.ui.support;
 
-public record BootstrapAutoStart(boolean autoStart) {
+public enum DialogMode {
+
+	ONBOARDING, SETTINGS
+
 }
