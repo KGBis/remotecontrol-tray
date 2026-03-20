@@ -18,20 +18,7 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.configuration;
 
-import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapAutoStart;
-import io.github.kgbis.remotecontrol.tray.ui.FirstRunDialog;
-import jakarta.inject.Singleton;
-
-@Singleton
-public class FirstRunDialogHandlerImpl implements FirstRunDialogHandler {
-
-	@Override
-	public BootstrapAutoStart run() {
-		FirstRunDialog dialog = new FirstRunDialog(null);
-		dialog.setVisible(true);
-		return dialog.getResult();
-	}
-
+public record Settings(boolean autoStart) {
 }

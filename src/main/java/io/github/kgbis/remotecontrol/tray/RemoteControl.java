@@ -67,6 +67,7 @@ public class RemoteControl {
 
 	public void start(CliArguments cliArgs) throws IOException {
 		if (!manageLock()) {
+			log.debug("Cannot get lock. Another program instance is running.");
 			System.exit(0);
 		}
 

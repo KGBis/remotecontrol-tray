@@ -26,13 +26,9 @@ import lombok.NoArgsConstructor;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.Frame;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
@@ -40,9 +36,11 @@ import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonUI {
 
+	protected static final String TITLE = REMOTE_PC_CONTROL + " v" + ResourcesHelper.getVersion();
+
 	public static JFrame windowJFrame(boolean alwaysOnTop) {
-		JFrame jFrame = new JFrame(REMOTE_PC_CONTROL);
-		jFrame.setIconImage(ResourcesHelper.getIcon());
+		JFrame jFrame = new JFrame(TITLE);
+		jFrame.setIconImage(ResourcesHelper.getImage("computer"));
 		jFrame.setLayout(new BorderLayout(10, 10));
 		jFrame.setAlwaysOnTop(alwaysOnTop);
 		jFrame.getRootPane().setBorder(new EmptyBorder(10, 10, 0, 10));
@@ -57,17 +55,6 @@ public class CommonUI {
 		headerPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		return headerPanel;
-	}
-
-	public static JPanel createVersionPanel() {
-		JPanel versionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel versionStr = new JLabel(REMOTE_PC_CONTROL + " - Version:", SwingConstants.LEADING);
-		JLabel versionVal = new JLabel(ResourcesHelper.getVersion(), SwingConstants.LEADING);
-		versionVal.setFont(versionVal.getFont().deriveFont(Font.BOLD));
-		versionPanel.add(versionStr);
-		versionPanel.add(versionVal);
-
-		return versionPanel;
 	}
 
 }

@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) Enrique García
+ *
+ * This file is part of RemoteControlTray.
+ *
+ * RemoteControlTray is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * RemoteControlTray is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with RemoteControlTray.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: LGPL-3.0-or-later
+ */
 package io.github.kgbis.remotecontrol.tray.configuration;
 
 import org.junit.jupiter.api.Test;
@@ -24,7 +44,7 @@ class ConfigManagerTest {
 	ConfigManager configManager;
 
 	@Test
-	void create_configuration_file_if_does_not_exist() throws IOException {
+	void create_configuration_file_if_does_not_exist() {
 		Config createdConfig = Config.builder().build();
 
 		when(configStorage.exists()).thenReturn(false);
@@ -63,14 +83,14 @@ class ConfigManagerTest {
 	}
 
 	@Test
-	void save_configuration() throws IOException {
+	void save_configuration() {
 		Config config = Config.builder().build();
 		configManager.save(config);
 		verify(configStorage).write(config);
 	}
 
 	@Test
-	void save_updates_cache() throws IOException {
+	void save_updates_cache() {
 		Config config = Config.builder().build();
 
 		configManager.save(config);
