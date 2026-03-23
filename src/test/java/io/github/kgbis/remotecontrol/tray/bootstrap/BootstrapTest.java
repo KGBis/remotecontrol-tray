@@ -23,7 +23,6 @@ package io.github.kgbis.remotecontrol.tray.bootstrap;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.configuration.Config;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
-import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,9 +54,6 @@ class BootstrapTest {
 	@Mock
 	BootstrapVersionProvider versionProvider;
 
-	@Mock
-	I18nService i18nService;
-
 	@InjectMocks
 	Bootstrap bootstrap;
 
@@ -68,7 +64,6 @@ class BootstrapTest {
 
 		when(configManager.current()).thenReturn(config);
 		when(versionProvider.current()).thenReturn(1);
-		when(i18nService.getLocale()).thenReturn(Locale.ENGLISH);
 		when(dialogHandler.run(1)).thenReturn(Config.builder().appAutoStartOnLogin(value).onboardingVersion(1).build());
 
 		bootstrap.execute();
