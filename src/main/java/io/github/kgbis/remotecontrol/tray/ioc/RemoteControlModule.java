@@ -30,6 +30,7 @@ import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapVersionProviderImpl
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorage;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
+import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
@@ -66,6 +67,7 @@ public final class RemoteControlModule extends AbstractModule {
 		bind(ConfigStorage.class).to(ConfigStorageImpl.class).in(Singleton.class);
 		bind(DeviceIdProvider.class).in(Singleton.class);
 		bind(DialogHandler.class).to(DialogHandlerImpl.class).in(Singleton.class);
+		bind(I18nService.class).in(Singleton.class);
 		bind(InformationScreen.class).in(Singleton.class);
 		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);
 		bind(NetworkActionFactory.class).in(Singleton.class);

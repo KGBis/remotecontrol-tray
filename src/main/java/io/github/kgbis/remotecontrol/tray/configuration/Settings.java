@@ -20,5 +20,7 @@
  */
 package io.github.kgbis.remotecontrol.tray.configuration;
 
-public record Settings(boolean autoStart) {
+import java.util.Locale;
+
+public record Settings(boolean autoStart, Locale language) {
 }

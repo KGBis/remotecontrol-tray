@@ -23,6 +23,7 @@ package io.github.kgbis.remotecontrol.tray.bootstrap;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.configuration.Config;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
+import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -52,6 +55,9 @@ class BootstrapTest {
 	@Mock
 	BootstrapVersionProvider versionProvider;
 
+	@Mock
+	I18nService i18nService;
+
 	@InjectMocks
 	Bootstrap bootstrap;
 
@@ -62,6 +68,7 @@ class BootstrapTest {
 
 		when(configManager.current()).thenReturn(config);
 		when(versionProvider.current()).thenReturn(1);
+		when(i18nService.getLocale()).thenReturn(Locale.ENGLISH);
 		when(dialogHandler.run(1)).thenReturn(Config.builder().appAutoStartOnLogin(value).onboardingVersion(1).build());
 
 		bootstrap.execute();
@@ -87,14 +94,16 @@ class BootstrapTest {
 	@Test
 	void version_change_runs_onBoarding() {
 		Config config = Config.builder().onboardingVersion(0).build();
+		int version = 2;
 
 		when(configManager.current()).thenReturn(config);
-		when(versionProvider.current()).thenReturn(1);
-		when(dialogHandler.run(1)).thenReturn(Config.builder().appAutoStartOnLogin(true).onboardingVersion(1).build());
+		when(versionProvider.current()).thenReturn(version);
+		when(dialogHandler.run(version)).thenReturn(
+				Config.builder().appAutoStartOnLogin(true).onboardingVersion(version).locale(Locale.ENGLISH).build());
 
 		bootstrap.execute();
 
-		verify(dialogHandler).run(1);
+		verify(dialogHandler).run(version);
 	}
 
 }

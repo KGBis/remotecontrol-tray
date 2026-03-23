@@ -20,26 +20,22 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import org.junit.jupiter.api.Test;
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 
 import javax.swing.table.DefaultTableModel;
-import java.util.Map;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public final class InformationTableModelUpdater {
 
-class InformationTableRendererTest {
+	private final DefaultTableModel model;
 
-	@Test
-	void render_updatesTableModel() {
-		DefaultTableModel table = new DefaultTableModel(new Object[] { "IP", "MAC" }, 0);
+	public InformationTableModelUpdater(DefaultTableModel model) {
+		this.model = model;
+	}
 
-		InformationTableRenderer renderer = new InformationTableRenderer(table);
-
-		renderer.render(Map.of("192.168.1.10", "00:11:22"));
-
-		assertEquals(1, table.getRowCount());
-		assertEquals("192.168.1.10", table.getValueAt(0, 0));
-		assertEquals("00:11:22", table.getValueAt(0, 1));
+	public void render(Set<Device.DeviceInterface> interfaces) {
+		model.setRowCount(0);
+		interfaces.forEach(iface -> model.addRow(new Object[] { iface.getType(), iface.getIp(), iface.getMac() }));
 	}
 
 }

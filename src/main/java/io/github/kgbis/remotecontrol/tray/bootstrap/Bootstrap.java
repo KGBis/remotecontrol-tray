@@ -58,7 +58,6 @@ public class Bootstrap {
 
 		// Syncronize auto start on login
 		autoStartManagerFactory.syncAutoStart(config.isAppAutoStartOnLogin());
-
 	}
 
 }

@@ -29,6 +29,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Locale;
+
 @EqualsAndHashCode
 @Builder
 @NoArgsConstructor
@@ -46,6 +48,11 @@ public class Config {
 	@Setter
 	@Builder.Default
 	private boolean appAutoStartOnLogin = false;
+
+	@Getter
+	@Setter
+	@Builder.Default
+	private Locale locale = Locale.ENGLISH;
 
 	public boolean isInitialized(int expectedVersion) {
 		return onboardingVersion == expectedVersion;
