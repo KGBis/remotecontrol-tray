@@ -32,6 +32,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Locale;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -87,14 +89,16 @@ class BootstrapTest {
 	@Test
 	void version_change_runs_onBoarding() {
 		Config config = Config.builder().onboardingVersion(0).build();
+		int version = 2;
 
 		when(configManager.current()).thenReturn(config);
-		when(versionProvider.current()).thenReturn(1);
-		when(dialogHandler.run(1)).thenReturn(Config.builder().appAutoStartOnLogin(true).onboardingVersion(1).build());
+		when(versionProvider.current()).thenReturn(version);
+		when(dialogHandler.run(version)).thenReturn(
+				Config.builder().appAutoStartOnLogin(true).onboardingVersion(version).locale(Locale.ENGLISH).build());
 
 		bootstrap.execute();
 
-		verify(dialogHandler).run(1);
+		verify(dialogHandler).run(version);
 	}
 
 }

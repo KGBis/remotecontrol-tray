@@ -21,27 +21,33 @@
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
 import io.github.kgbis.remotecontrol.tray.net.info.Device;
+import org.junit.jupiter.api.Test;
 
 import javax.swing.table.DefaultTableModel;
-import java.util.Map;
 import java.util.Set;
 
-public final class InformationTableRenderer {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-	private final DefaultTableModel model;
+class InformationTableModelUpdaterTest {
 
-	public InformationTableRenderer(DefaultTableModel model) {
-		this.model = model;
-	}
+	@Test
+	void render_updatesTableModel() {
+		DefaultTableModel table = new DefaultTableModel(new Object[] { "TYPE", "IP", "MAC" }, 0);
 
-	public void render(Map<String, String> data) {
-		model.setRowCount(0);
-		data.forEach((ip, mac) -> model.addRow(new Object[] { ip, mac }));
-	}
+		InformationTableModelUpdater renderer = new InformationTableModelUpdater(table);
 
-	public void render(Set<Device.DeviceInterface> interfaces) {
-		model.setRowCount(0);
-		interfaces.forEach(iface -> model.addRow(new Object[] { iface.getType(), iface.getIp(), iface.getMac() }));
+		Device.DeviceInterface deviceInterface = Device.DeviceInterface.builder()
+			.type(Device.InterfaceType.ETHERNET)
+			.ip("192.168.1.10")
+			.mac("00:11:22:33:44:55")
+			.build();
+
+		renderer.render(Set.of(deviceInterface));
+
+		assertEquals(1, table.getRowCount());
+		assertEquals(Device.InterfaceType.ETHERNET, table.getValueAt(0, 0));
+		assertEquals("192.168.1.10", table.getValueAt(0, 1));
+		assertEquals("00:11:22:33:44:55", table.getValueAt(0, 2));
 	}
 
 }

@@ -24,13 +24,15 @@ import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartControllerImpl;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
+import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandlerImpl;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogMode;
-import io.github.kgbis.remotecontrol.tray.ui.support.InformationTableRenderer;
+import io.github.kgbis.remotecontrol.tray.ui.support.InformationTableModelUpdater;
+import io.github.kgbis.remotecontrol.tray.ui.support.Localized;
 import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactory;
 import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactoryImpl;
 import jakarta.inject.Inject;
@@ -54,6 +56,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -70,6 +73,9 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
@@ -84,6 +90,8 @@ import static io.github.kgbis.remotecontrol.tray.ui.support.TraySupportDetector.
 @Slf4j
 public class InformationScreen implements InfoListener {
 
+	private final List<Localized> components = new ArrayList<>();
+
 	private final JFrame frame;
 
 	@Getter(value = AccessLevel.PROTECTED)
@@ -91,24 +99,34 @@ public class InformationScreen implements InfoListener {
 
 	private final InformationHolder informationHolder;
 
-	private final InformationTableRenderer renderer;
+	private final InformationTableModelUpdater renderer;
 
 	private final DialogHandler dialogHandler;
 
+	private final I18nService i18nService;
+
 	@Inject
-	public InformationScreen(DialogHandler dialogHandler) {
+	public InformationScreen(DialogHandler dialogHandler, I18nService i18nService) {
 		this.dialogHandler = dialogHandler;
+		this.i18nService = i18nService;
 		this.informationHolder = new InformationHolder();
 
-		this.tableModel = new DefaultTableModel(new Object[] { "Type", "IP Address", "MAC" }, 0) {
+		i18nService.addListener(this::refreshTexts);
+
+		this.tableModel = new DefaultTableModel(new Object[] { "type", "ip", "mac" }, 0) {
+
+			@Override
+			public String getColumnName(int column) {
+				return i18nService.get("mainScreen.table.column." + column);
+			}
+
 			@Override
 			public boolean isCellEditable(int row, int column) {
 				return false;
 			}
 		};
 
-		this.renderer = new InformationTableRenderer(tableModel);
-
+		this.renderer = new InformationTableModelUpdater(tableModel);
 		this.frame = buildFrame();
 	}
 
@@ -126,6 +144,17 @@ public class InformationScreen implements InfoListener {
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setShowHorizontalLines(true);
 		table.setShowVerticalLines(false);
+		table.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+			@Override
+			protected void setValue(Object value) {
+				if (value instanceof Device.InterfaceType type) {
+					value = i18nService.get("mainScreen.table.content." + type.name());
+				}
+				super.setValue(value);
+			}
+		});
+		components.add(Localized.tableHeaders(table, "mainScreen.table.column.", i18nService));
+		components.add(Localized.tableRepaint(table));
 
 		JScrollPane scroll = new JScrollPane(table);
 		int preferredHeight = table.getRowHeight() * 5 + table.getTableHeader().getPreferredSize().height;
@@ -180,6 +209,12 @@ public class InformationScreen implements InfoListener {
 		EventQueue.invokeLater(() -> frame.setVisible(false));
 	}
 
+	@Override
+	public void onChange(Device device) {
+		informationHolder.set(device);
+		renderer.render(device.getInterfaces());
+	}
+
 	/* private methods */
 
 	private JPanel buildHeaderPanel() {
@@ -194,7 +229,7 @@ public class InformationScreen implements InfoListener {
 		JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 		ImageIcon settings = new ImageIcon(ResourcesHelper.getImage("settings"));
 		JButton settingsButton = new JButton(settings);
-		settingsButton.setToolTipText("Settings");
+		settingsButton.setToolTipText(i18nService.get("mainScreen.button.settings.tooltip"));
 		settingsButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		settingsButton.setBorderPainted(false);
 		settingsButton.setContentAreaFilled(false);
@@ -202,19 +237,22 @@ public class InformationScreen implements InfoListener {
 		settingsButton.setMargin(new Insets(0, 0, 0, 0));
 		settingsButton.setPreferredSize(new Dimension(16, 16));
 		settingsButton.addActionListener(e -> dialogHandler.run(frame, DialogMode.SETTINGS));
+		components.add(Localized.tooltip(settingsButton, "mainScreen.button.settings.tooltip", i18nService));
 		settingsPanel.add(settingsButton);
 
 		versionPanel.add(settingsPanel, BorderLayout.EAST);
 
 		// Line 2: Description
 		JPanel descPanel = new JPanel();
-		JLabel descLabel = new JLabel("Detected local network interfaces", SwingConstants.LEADING);
+		JLabel descLabel = new JLabel(i18nService.get("mainScreen.label.detected"), SwingConstants.LEADING);
 		descLabel.setFont(descLabel.getFont().deriveFont(Font.BOLD));
+		components.add(Localized.text(descLabel, "mainScreen.label.detected", i18nService));
 		descPanel.add(descLabel);
 
 		// Add to panel
 		headerPanel.add(versionPanel);
 		headerPanel.add(descPanel);
+
 		return headerPanel;
 	}
 
@@ -226,8 +264,9 @@ public class InformationScreen implements InfoListener {
 
 		// do not show exit button with Partial Support
 		if (!isPartialTraySupport()) {
-			JButton exitBtn = new JButton("Exit Program");
+			JButton exitBtn = new JButton(i18nService.get("mainScreen.button.exit"));
 			exitBtn.addActionListener(e -> System.exit(0));
+			components.add(Localized.text(exitBtn, "mainScreen.button.exit", i18nService));
 			leftPanel.add(exitBtn);
 		}
 
@@ -244,19 +283,21 @@ public class InformationScreen implements InfoListener {
 		JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		// Copy only if not partial tray support
 		if (!isPartialTraySupport()) {
-			JButton copyBtn = new JButton("Copy All/Selected");
+			JButton copyBtn = new JButton(i18nService.get("mainScreen.button.copy"));
 			copyBtn.addActionListener(e -> {
 				int row = table.getSelectedRow();
 				copyToClipboard(row);
 			});
+			components.add(Localized.text(copyBtn, "mainScreen.button.copy", i18nService));
 			rightPanel.add(copyBtn);
 		}
 
 		// Close button only available with full Tray support
 		// Windows OK, Cinnamon OK, Mate OK, XFCE OK, KDE OK, LXQt OK, Gnome OK
 		if (isFullTraySupport()) {
-			JButton closeBtn = new JButton("Close this window");
+			JButton closeBtn = new JButton(i18nService.get("mainScreen.button.close"));
 			closeBtn.addActionListener(e -> frame.setVisible(false));
+			components.add(Localized.text(closeBtn, "mainScreen.button.close", i18nService));
 			rightPanel.add(closeBtn);
 		}
 		return rightPanel;
@@ -309,10 +350,10 @@ public class InformationScreen implements InfoListener {
 		return header + "\n" + rows;
 	}
 
-	@Override
-	public void onChange(Device device) {
-		informationHolder.set(device);
-		renderer.render(device.getInterfaces());
+	private void refreshTexts(PropertyChangeEvent evt) {
+		if ("locale".equals(evt.getPropertyName())) {
+			components.forEach(component -> component.applier().accept(component.value().get()));
+		}
 	}
 
 	static final class InformationHolder {
@@ -345,10 +386,11 @@ public class InformationScreen implements InfoListener {
 		}
 
 		ConfigManager manager = new ConfigManager(new ConfigStorageImpl());
+		I18nService i18nService = new I18nService(manager);
 		AutoStartController autoStartController = new AutoStartControllerImpl();
-		SettingsDialogFactory factory = new SettingsDialogFactoryImpl();
+		SettingsDialogFactory factory = new SettingsDialogFactoryImpl(i18nService);
 		DialogHandler handler = new DialogHandlerImpl(manager, autoStartController, factory);
-		InformationScreen dialog = new InformationScreen(handler);
+		InformationScreen dialog = new InformationScreen(handler, i18nService);
 		dialog.onChange(Device.builder()
 			.interfaces(Set.of(Device.DeviceInterface.builder()
 				.type(Device.InterfaceType.WIFI)

@@ -87,6 +87,9 @@ public class DialogHandlerImpl implements DialogHandler {
 		}
 
 		config.setAppAutoStartOnLogin(settings.autoStart());
+		config.setLocale(settings.language());
+
+		// If coming from onboarding, save app version level
 		if (mode.equals(DialogMode.ONBOARDING)) {
 			config.setOnboardingVersion(appVersionLevel);
 		}

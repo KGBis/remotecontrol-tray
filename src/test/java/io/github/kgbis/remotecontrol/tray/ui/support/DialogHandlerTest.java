@@ -32,6 +32,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,20 +65,21 @@ class DialogHandlerTest {
 		ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
 
 		SettingsDialog dialog = mock(SettingsDialog.class);
-		when(dialog.getSettings()).thenReturn(new Settings(true));
+		when(dialog.getSettings()).thenReturn(new Settings(true, Locale.of("es")));
 		doNothing().when(dialog).setVisible(true);
 
 		when(configManager.current()).thenReturn(new Config());
 		when(dialogFactory.create(any(), any(), any(), anyInt())).thenReturn(dialog);
 		doNothing().when(autoStartController).syncAutoStart(anyBoolean());
 
-		dialogHandler.run(1);
+		dialogHandler.run(2);
 
 		verify(configManager).save(captor.capture());
 
 		Config saved = captor.getValue();
 		assertTrue(saved.isAppAutoStartOnLogin());
-		assertEquals(1, saved.getOnboardingVersion());
+		assertEquals(Locale.of("es"), saved.getLocale());
+		assertEquals(2, saved.getOnboardingVersion());
 	}
 
 	@Test
