@@ -24,11 +24,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import jakarta.inject.Singleton;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Slf4j
 @NoArgsConstructor
 @Singleton
 public class ConfigStorageImpl implements ConfigStorage {
@@ -48,8 +50,13 @@ public class ConfigStorageImpl implements ConfigStorage {
 	}
 
 	@Override
-	public void write(Config config) throws IOException {
-		mapper.writerWithDefaultPrettyPrinter().writeValue(configFile.toFile(), config);
+	public void write(Config config) {
+		try {
+			mapper.writerWithDefaultPrettyPrinter().writeValue(configFile.toFile(), config);
+		}
+		catch (IOException e) {
+			log.error("Error writting config file", e);
+		}
 	}
 
 }

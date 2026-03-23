@@ -30,6 +30,7 @@ import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapVersionProviderImpl
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorage;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
+import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
@@ -46,8 +47,10 @@ import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactoryDefaultI
 import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
 import io.github.kgbis.remotecontrol.tray.ui.TrayController;
 import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
-import io.github.kgbis.remotecontrol.tray.ui.support.FirstRunDialogHandler;
-import io.github.kgbis.remotecontrol.tray.ui.support.FirstRunDialogHandlerImpl;
+import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
+import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandlerImpl;
+import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactory;
+import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactoryImpl;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import oshi.SystemInfo;
@@ -63,7 +66,8 @@ public final class RemoteControlModule extends AbstractModule {
 		bind(ConfigManager.class).in(Singleton.class);
 		bind(ConfigStorage.class).to(ConfigStorageImpl.class).in(Singleton.class);
 		bind(DeviceIdProvider.class).in(Singleton.class);
-		bind(FirstRunDialogHandler.class).to(FirstRunDialogHandlerImpl.class).in(Singleton.class);
+		bind(DialogHandler.class).to(DialogHandlerImpl.class).in(Singleton.class);
+		bind(I18nService.class).in(Singleton.class);
 		bind(InformationScreen.class).in(Singleton.class);
 		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);
 		bind(NetworkActionFactory.class).in(Singleton.class);
@@ -75,6 +79,7 @@ public final class RemoteControlModule extends AbstractModule {
 		bind(RemoteControl.class).in(Singleton.class);
 		bind(ServerLoopRunner.class).to(ServerLoopRunnerDefaultImpl.class).in(Singleton.class);
 		bind(ServerSocketFactory.class).to(ServerSocketFactoryDefaultImpl.class).in(Singleton.class);
+		bind(SettingsDialogFactory.class).to(SettingsDialogFactoryImpl.class).in(Singleton.class);
 		bind(SystemInfo.class).in(Singleton.class);
 		bind(TrayController.class).in(Singleton.class);
 		bind(TrayManager.class).in(Singleton.class);

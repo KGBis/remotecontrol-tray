@@ -20,42 +20,7 @@
  */
 package io.github.kgbis.remotecontrol.tray.configuration;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
 import java.util.Locale;
 
-@EqualsAndHashCode
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Config {
-
-	@Getter
-	@Setter
-	@Builder.Default
-	private int onboardingVersion = 0;
-
-	@Getter
-	@Setter
-	@Builder.Default
-	private boolean appAutoStartOnLogin = false;
-
-	@Getter
-	@Setter
-	@Builder.Default
-	private Locale locale = Locale.ENGLISH;
-
-	public boolean isInitialized(int expectedVersion) {
-		return onboardingVersion == expectedVersion;
-	}
-
+public record Settings(boolean autoStart, Locale language) {
 }

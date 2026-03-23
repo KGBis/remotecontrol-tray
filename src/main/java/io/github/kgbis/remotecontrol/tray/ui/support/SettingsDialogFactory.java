@@ -18,44 +18,15 @@
  *
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.configuration;
+package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import io.github.kgbis.remotecontrol.tray.configuration.Config;
+import io.github.kgbis.remotecontrol.tray.ui.SettingsDialog;
 
-import java.util.Locale;
+import javax.swing.JFrame;
 
-@EqualsAndHashCode
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class Config {
+public interface SettingsDialogFactory {
 
-	@Getter
-	@Setter
-	@Builder.Default
-	private int onboardingVersion = 0;
-
-	@Getter
-	@Setter
-	@Builder.Default
-	private boolean appAutoStartOnLogin = false;
-
-	@Getter
-	@Setter
-	@Builder.Default
-	private Locale locale = Locale.ENGLISH;
-
-	public boolean isInitialized(int expectedVersion) {
-		return onboardingVersion == expectedVersion;
-	}
+	SettingsDialog create(JFrame parent, DialogMode mode, Config config, int versionLevel);
 
 }

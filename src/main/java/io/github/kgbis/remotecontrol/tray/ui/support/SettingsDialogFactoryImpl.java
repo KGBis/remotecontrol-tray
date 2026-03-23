@@ -20,10 +20,27 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapAutoStart;
+import io.github.kgbis.remotecontrol.tray.configuration.Config;
+import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
+import io.github.kgbis.remotecontrol.tray.ui.SettingsDialog;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-public interface FirstRunDialogHandler {
+import javax.swing.JFrame;
 
-	BootstrapAutoStart run();
+@Singleton
+public class SettingsDialogFactoryImpl implements SettingsDialogFactory {
+
+	private final I18nService i18nService;
+
+	@Inject
+	public SettingsDialogFactoryImpl(I18nService i18nService) {
+		this.i18nService = i18nService;
+	}
+
+	@Override
+	public SettingsDialog create(JFrame parent, DialogMode mode, Config config, int versionLevel) {
+		return new SettingsDialog(parent, mode, config, versionLevel, i18nService);
+	}
 
 }

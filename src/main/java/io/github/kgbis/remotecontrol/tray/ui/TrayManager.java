@@ -83,7 +83,7 @@ public class TrayManager {
 	private void useAwtSystemTray() {
 		final java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
 
-		TrayIcon trayIcon = new TrayIcon(ResourcesHelper.getIcon(), REMOTE_PC_CONTROL);
+		TrayIcon trayIcon = new TrayIcon(ResourcesHelper.getImage("computer"), REMOTE_PC_CONTROL);
 		trayIcon.setImageAutoSize(true);
 		trayIcon.addMouseListener(new MouseAdapter() {
 			@Override
@@ -113,7 +113,7 @@ public class TrayManager {
 			return;
 		}
 
-		systemTray.setImage(ResourcesHelper.getIcon());
+		systemTray.setImage(ResourcesHelper.getImage("computer"));
 		Menu menu;
 		try {
 			menu = systemTray.setStatus(REMOTE_PC_CONTROL);

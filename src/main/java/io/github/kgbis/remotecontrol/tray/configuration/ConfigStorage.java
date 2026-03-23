@@ -24,10 +24,10 @@ import java.io.IOException;
 
 public interface ConfigStorage {
 
-	boolean exists() throws IOException;
+	boolean exists();
 
 	Config read() throws IOException;
 
-	void write(Config config) throws IOException;
+	void write(Config config);
 
 }

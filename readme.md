@@ -160,7 +160,7 @@ The application is written entirely in **Java** and currently targets **Java 21*
 ## Dependencies
 
 - **Google Guice** — Lightweight DI container for IoC
-- **Google Guava** — Utility libraries and classpath scanning
+- **Google Guava** — Utility libraries and classpath scanning (used by Guice)
 - **JCommander** — Command-line argument parsing
 - **SLF4J + Logback** — Logging
 - **Apache Commons Lang 3**

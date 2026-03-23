@@ -20,18 +20,22 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapAutoStart;
-import io.github.kgbis.remotecontrol.tray.ui.FirstRunDialog;
-import jakarta.inject.Singleton;
+import io.github.kgbis.remotecontrol.tray.net.info.Device;
 
-@Singleton
-public class FirstRunDialogHandlerImpl implements FirstRunDialogHandler {
+import javax.swing.table.DefaultTableModel;
+import java.util.Set;
 
-	@Override
-	public BootstrapAutoStart run() {
-		FirstRunDialog dialog = new FirstRunDialog(null);
-		dialog.setVisible(true);
-		return dialog.getResult();
+public final class InformationTableModelUpdater {
+
+	private final DefaultTableModel model;
+
+	public InformationTableModelUpdater(DefaultTableModel model) {
+		this.model = model;
+	}
+
+	public void render(Set<Device.DeviceInterface> interfaces) {
+		model.setRowCount(0);
+		interfaces.forEach(iface -> model.addRow(new Object[] { iface.getType(), iface.getIp(), iface.getMac() }));
 	}
 
 }
