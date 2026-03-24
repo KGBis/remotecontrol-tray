@@ -7,7 +7,7 @@ on:
 
 jobs:
   bump-version:
-    # Solo se ejecuta si la etiqueta es una de las de versión
+    # It only runs if the label is one of the following
     if: contains(fromJSON('["major", "minor", "patch"]'), github.event.label.name)
     runs-on: ubuntu-latest
     permissions:
