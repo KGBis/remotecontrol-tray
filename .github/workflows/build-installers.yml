@@ -178,6 +178,9 @@ jobs:
           # Artifact name
           ARTIFACT=${{ needs.create-release.outputs.artifact }}
           
+          # default version (from pom.xml)
+          APP_VERSION="${{ needs.create-release.outputs.version }}"
+          
           # create release directory
           mkdir -p "$RELEASE_PATH"
           
@@ -195,6 +198,9 @@ jobs:
         run: |
           # Artifact name
           ARTIFACT=${{ needs.create-release.outputs.artifact }}
+          
+          # default version (from pom.xml)
+          APP_VERSION="${{ needs.create-release.outputs.version }}"
           
           cd "$RELEASE_PATH"
           ls -l
