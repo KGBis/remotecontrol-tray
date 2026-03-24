@@ -86,14 +86,6 @@ jobs:
           mkdir -p "$DIST_APP_PATH"
           cp target/${{ needs.create-release.outputs.artifact }}.jar "$DIST_APP_PATH"/
 
-      - name: Compute Windows MSI version
-        if: matrix.os == 'windows-latest'
-        id: winver
-        shell: bash
-        run: |
-          YEAR=$(date +%y)
-          echo "msi_version=1.${YEAR}.${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
-
       - name: Generate installer With jpackage
         shell: bash
         run: |
@@ -108,10 +100,9 @@ jobs:
           # default version (from pom.xml)
           APP_VERSION="${{ needs.create-release.outputs.version }}"
 
-          # Windows MSI 'hacked' version as it does not like YYYY.MM.revision format 
+          # Windows flags 
           WIN_FLAGS=""
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            APP_VERSION="${{ steps.winver.outputs.msi_version }}"
             WIN_FLAGS="--win-menu --win-shortcut --win-per-user-install"
           fi
           
@@ -123,7 +114,7 @@ jobs:
             --dest $INSTALLERS_APP_PATH
             --app-version $APP_VERSION
             --copyright "Copyright © 2026 Enrique García (KGBis)"
-            --vendor "KGBis"
+            --vendor "Enrique García (KGBis)"
           )
           
           # for Windows and macOS
@@ -176,7 +167,7 @@ jobs:
               --xz \
               --needroot \
               $INSTALLERS_PATH \
-              "$ARTIFACT-linux.run" \
+              "$ARTIFACT-$APP_VERSION-linux.run" \
               "Remote Control Tray installer" \
               ./install.sh
           fi
@@ -192,9 +183,9 @@ jobs:
           
           # move and rename installers to release
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mv "$INSTALLERS_APP_PATH"/*.msi "$RELEASE_PATH/$ARTIFACT-windows-x64.msi"
+            mv "$INSTALLERS_APP_PATH"/*.msi "$RELEASE_PATH/$ARTIFACT-$APP_VERSION-windows-x64.msi"
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            mv "$INSTALLERS_APP_PATH"/*.dmg "$RELEASE_PATH/$ARTIFACT-macos.dmg"
+            mv "$INSTALLERS_APP_PATH"/*.dmg "$RELEASE_PATH/$ARTIFACT-$APP_VERSION-macos.dmg"
           else 
             mv *.run "$RELEASE_PATH"/ || true # Linux 
           fi
@@ -209,11 +200,11 @@ jobs:
           ls -l
           
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            sha256sum *.msi > "$ARTIFACT-windows-x64.sha256"
+            sha256sum *.msi > "$ARTIFACT-$APP_VERSION-windows-x64.sha256"
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            sha256sum *.dmg > "$ARTIFACT-macos.sha256"
+            sha256sum *.dmg > "$ARTIFACT-$APP_VERSION-macos.sha256"
           else 
-            sha256sum *.run > "$ARTIFACT-linux.sha256" 
+            sha256sum *.run > "$ARTIFACT-$APP_VERSION-linux.sha256" 
           fi
 
       - name: Upload artifact
