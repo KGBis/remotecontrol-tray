@@ -140,10 +140,14 @@ If you find a bug or have suggestions, feel free to:
 
 ---
 
-## License
+## 📄 License
 
-RemoteControlTray is licensed under the **GNU Lesser General Public License v3.0 (LGPL-3.0)**
-(or later). See the `LICENSE` file for details.
+This project is licensed under the GNU General Public License v3.0.
+
+You are free to use, modify and distribute this software under the terms of the GPLv3.  
+Any distributed modifications must also be released under the same license.
+
+See the [LICENSE](LICENSE) file for details.
 
 ---
 
