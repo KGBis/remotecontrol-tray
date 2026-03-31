@@ -45,8 +45,7 @@ public abstract class NetworkAction<R> {
 	protected abstract R parseArguments();
 
 	protected int execute(String[] cmdLine) {
-		@SuppressWarnings("ConfusingArgumentToVarargsMethod")
-		String strCommandLine = StringUtils.joinWith(" ", cmdLine);
+		String strCommandLine = StringUtils.joinWith(" ", (Object[]) cmdLine);
 
 		int exitCode = 0;
 
@@ -67,7 +66,7 @@ public abstract class NetworkAction<R> {
 
 			// Wait for the process to complete and get the exit code
 			exitCode = process.waitFor();
-			log.debug("shutdown exit code: {}", exitCode);
+			log.debug("Command '{}' executed. Exit code: {}", strCommandLine, exitCode);
 		}
 		catch (IOException e) {
 			log.error("Error executing '{}' command", strCommandLine, e);
