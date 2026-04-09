@@ -56,7 +56,6 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 import java.text.MessageFormat;
@@ -69,8 +68,6 @@ import static io.github.kgbis.remotecontrol.tray.ui.settings.SettingsModel.NOTIF
 
 @Slf4j
 public final class SettingsDialog extends JDialog {
-
-	private static final int DIALOG_WIDTH = 510;
 
 	private final I18nService i18nService;
 
@@ -134,10 +131,6 @@ public final class SettingsDialog extends JDialog {
 
 		pack();
 		setResizable(false);
-
-		// To have a fixed width. Comment or delete if resizable is preferred
-		setPreferredSize(new Dimension(DIALOG_WIDTH, getHeight()));
-		setSize(DIALOG_WIDTH, getHeight());
 
 		if (owner == null) {
 			setLocationRelativeTo(getOwner()); // Centered on screen
