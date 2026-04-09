@@ -19,6 +19,9 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
+import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
+import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
+import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -42,6 +45,15 @@ class CancelShutdownNetworkActionTest {
 	@Mock
 	Socket socket;
 
+	@Mock
+	ConfigManager configManager;
+
+	@Mock
+	I18nService i18nService;
+
+	@Mock
+	ActionDesktopNotifier actionDesktopNotifier;
+
 	CancelShutdownNetworkAction cancelShutdownNetworkAction;
 
 	@Test
@@ -50,7 +62,8 @@ class CancelShutdownNetworkActionTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
 
-		cancelShutdownNetworkAction = new CancelShutdownNetworkAction(socket, new String[] { "CANCEL_SHUTDOWN" });
+		cancelShutdownNetworkAction = new CancelShutdownNetworkAction(
+				/* configManager, i18nService, */ actionDesktopNotifier, socket, new String[] { "CANCEL_SHUTDOWN" });
 		cancelShutdownNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -64,7 +77,8 @@ class CancelShutdownNetworkActionTest {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		when(socket.getOutputStream()).thenReturn(outputStream);
 
-		cancelShutdownNetworkAction = new CancelShutdownNetworkAction(socket,
+		cancelShutdownNetworkAction = new CancelShutdownNetworkAction(
+				/* configManager, i18nService, */ actionDesktopNotifier, socket,
 				new String[] { "CANCEL_SHUTDOWN", "10", "KILOS" });
 		cancelShutdownNetworkAction.execute();
 
@@ -75,14 +89,16 @@ class CancelShutdownNetworkActionTest {
 
 	@Test
 	void testParseArguments() {
-		cancelShutdownNetworkAction = new CancelShutdownNetworkAction(socket, new String[] { "CANCEL_SHUTDOWN" });
+		cancelShutdownNetworkAction = new CancelShutdownNetworkAction(
+				/* configManager, i18nService, */ actionDesktopNotifier, socket, new String[] { "CANCEL_SHUTDOWN" });
 		String[] parsedArguments = cancelShutdownNetworkAction.parseArguments();
 		Assertions.assertEquals(2, parsedArguments.length);
 	}
 
 	@Test
 	void testParseArguments_invalidNumberOfArguments() {
-		cancelShutdownNetworkAction = new CancelShutdownNetworkAction(socket,
+		cancelShutdownNetworkAction = new CancelShutdownNetworkAction(
+				/* configManager, i18nService, */ actionDesktopNotifier, socket,
 				new String[] { "CANCEL_SHUTDOWN", "NEVER", "HAPPENS" });
 		String[] parsedArguments = cancelShutdownNetworkAction.parseArguments();
 		Assertions.assertEquals(2, parsedArguments.length);

@@ -77,7 +77,7 @@ public class RemoteControl {
 
 	private boolean manageLock() {
 		// try to adquire lock
-		Path lockPath = ResourcesHelper.getOSConfigDirectory().resolve("remotecontrol.lock");
+		Path lockPath = ResourcesHelper.getOSConfigDirectory().resolve("remoteshutdown.lock");
 
 		SingleInstanceLock instanceLock = new SingleInstanceLock();
 		boolean locked = instanceLock.tryLock(lockPath);
@@ -96,7 +96,7 @@ public class RemoteControl {
 
 	public static void main(String[] args) {
 		// To fix blurry fonts on Linux
-		if (SystemUtils.IS_OS_UNIX) {
+		if (SystemUtils.IS_OS_LINUX) {
 			System.setProperty("awt.useSystemAAFontSettings", "on");
 			System.setProperty("swing.aatext", "true");
 		}

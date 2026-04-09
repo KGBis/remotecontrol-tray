@@ -19,21 +19,24 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui;
 
+import com.jthemedetecor.OsThemeDetector;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartControllerImpl;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
 import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
+import io.github.kgbis.remotecontrol.tray.misc.RuntimeConfig;
 import io.github.kgbis.remotecontrol.tray.net.info.Device;
 import io.github.kgbis.remotecontrol.tray.net.internal.InfoListener;
+import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsDialog;
+import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandlerImpl;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogMode;
 import io.github.kgbis.remotecontrol.tray.ui.support.InformationTableModelUpdater;
 import io.github.kgbis.remotecontrol.tray.ui.support.Localized;
 import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactory;
-import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactoryImpl;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.AccessLevel;
@@ -385,12 +388,8 @@ public class InformationScreen implements InfoListener {
 		}
 
 		ConfigManager manager = new ConfigManager(new ConfigStorageImpl());
-		I18nService i18nService = new I18nService(manager);
-		AutoStartController autoStartController = new AutoStartControllerImpl();
-		SettingsDialogFactory factory = new SettingsDialogFactoryImpl(i18nService);
-		DialogHandler handler = new DialogHandlerImpl(manager, autoStartController, factory);
-		InformationScreen dialog = new InformationScreen(handler, i18nService);
-		dialog.onChange(Device.builder()
+		InformationScreen informationScreen = getInformationScreen(manager);
+		informationScreen.onChange(Device.builder()
 			.interfaces(Set.of(Device.DeviceInterface.builder()
 				.type(Device.InterfaceType.WIFI)
 				.ip("192.168.1.66")
@@ -398,7 +397,25 @@ public class InformationScreen implements InfoListener {
 				.build()))
 			.build());
 
-		dialog.show();
+		informationScreen.show();
+	}
+
+	private static @NonNull InformationScreen getInformationScreen(ConfigManager manager) {
+		I18nService i18nService = new I18nService(manager);
+		AutoStartController autoStartController = new AutoStartControllerImpl();
+
+		RuntimeConfig runtimeConfig = new RuntimeConfig();
+		runtimeConfig.setDryRun(true);
+
+		OsThemeDetector osThemeDetector = OsThemeDetector.getDetector();
+		ActionDesktopNotifier desktopNotifier = new ActionDesktopNotifier(i18nService, manager, runtimeConfig,
+				osThemeDetector);
+
+		SettingsDialogFactory factory = (parent, mode, versionLevel) -> new SettingsDialog(i18nService, manager,
+				desktopNotifier, parent, mode, versionLevel);
+
+		DialogHandler handler = new DialogHandlerImpl(manager, autoStartController, factory);
+		return new InformationScreen(handler, i18nService);
 	}
 
 }

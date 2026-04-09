@@ -30,7 +30,8 @@ import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemProperties;
+import org.apache.commons.lang3.SystemUtils;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
@@ -59,6 +60,14 @@ public class NetworkMulticastManager {
 
 	public static final String RPCCTL = "rpcctl";
 
+	// Map of active Multicast per address
+	final Map<InetAddress, JmDNS> activeMdns = new ConcurrentHashMap<>();
+
+	// Map of NetworkIF per address, just for the UI
+	final Map<InetAddress, String> addresses = new ConcurrentHashMap<>();
+
+	final AtomicReference<Device> device = new AtomicReference<>();
+
 	private final NetworkInterfaces networkInterfaces;
 
 	private final JmDNSFactory jmDNSFactory;
@@ -69,19 +78,11 @@ public class NetworkMulticastManager {
 
 	private final NetworkInterfaceProvider networkInterfaceProvider;
 
+	private final Object lock = new Object();
+
 	private Thread monitorThread;
 
 	private volatile boolean running = false;
-
-	private final Object lock = new Object();
-
-	// Map of active Multicast per address
-	final Map<InetAddress, JmDNS> activeMdns = new ConcurrentHashMap<>();
-
-	// Map of NetworkIF per address, just for the UI
-	final Map<InetAddress, String> addresses = new ConcurrentHashMap<>();
-
-	final AtomicReference<Device> device = new AtomicReference<>();
 
 	@Inject
 	public NetworkMulticastManager(NetworkInterfaces networkInterfaces, JmDNSFactory jmDNSFactory,
@@ -119,7 +120,7 @@ public class NetworkMulticastManager {
 	private void monitorLoop() {
 		int pollIntervalMs = (int) (POLL_INTERVAL_MS * 7.5);
 
-		if (isWindows7()) {
+		if (SystemUtils.IS_OS_WINDOWS_7) {
 			log.warn("Windows 7 is not supported. mDNS disabled.");
 		}
 		else {
@@ -168,7 +169,7 @@ public class NetworkMulticastManager {
 			String serviceName = getServiceName(inetAddress);
 
 			Map<String, String> props = setProperties(inetAddress);
-			if (!isWindows7()) {
+			if (!SystemUtils.IS_OS_WINDOWS_7) {
 				ServiceInfo service = ServiceInfo.create(RPCCTL_TCP_LOCAL, serviceName, PORT, 0, 0, true, props);
 				JmDNS jmdns = jmDNSFactory.create(inetAddress); // NOSONAR
 				jmdns.registerService(service);
@@ -196,7 +197,7 @@ public class NetworkMulticastManager {
 				try {
 					jmDNS.close();
 					result = activeMdns.remove(inetAddress, jmDNS);
-					if (isWindows7())
+					if (SystemUtils.IS_OS_WINDOWS_7)
 						log.info("Windows 7: Interface for {} removed", hostAddress);
 					else
 						log.info("mDNS service shutdown at {}", hostAddress);
@@ -209,16 +210,11 @@ public class NetworkMulticastManager {
 		}
 	}
 
-	boolean isWindows7() {
-		return Strings.CI.startsWith(System.getProperty("os.name"), "Windows")
-				&& System.getProperty("os.version").startsWith("6.1");
-	}
-
 	private Map<String, String> setProperties(InetAddress inetAddress) throws IOException {
 		Map<String, String> props = new HashMap<>();
 		props.put("device-id", deviceIdProvider.getDeviceId().toString());
-		props.put("os-name", System.getProperty("os.name"));
-		props.put("os-version", System.getProperty("os.version"));
+		props.put("os-name", SystemProperties.getOsName());
+		props.put("os-version", SystemProperties.getOsVersion());
 		props.put("host-name", InetAddress.getLocalHost().getHostName());
 		props.put("host-ip-address", inetAddress.getHostAddress());
 		props.put("host-mac-address", addresses.get(inetAddress));
@@ -275,7 +271,6 @@ public class NetworkMulticastManager {
 
 			log.debug("store device interface {}", device);
 		}
-
 	}
 
 	private String getInterfaceType(InetAddress inetAddress) {

@@ -23,7 +23,7 @@ import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaceProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
-import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -73,17 +73,12 @@ class NetworkMulticastManagerTest {
 	@InjectMocks
 	NetworkMulticastManager networkMulticastManager;
 
-	boolean isWindows7() {
-		return Strings.CI.startsWith(System.getProperty("os.name"), "Windows")
-				&& System.getProperty("os.version").startsWith("6.1");
-	}
-
 	@Test
 	void start_callsRegister() throws IOException {
 		InetAddress address = InetAddress.getByName("192.168.1.144");
 
 		when(infoProvider.getHostName(any())).thenReturn("my-host");
-		if (isWindows7())
+		if (SystemUtils.IS_OS_WINDOWS_7)
 			when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
 		else
 			when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
@@ -93,7 +88,7 @@ class NetworkMulticastManagerTest {
 
 		networkMulticastManager.startMdns(address);
 
-		if (isWindows7())
+		if (SystemUtils.IS_OS_WINDOWS_7)
 			verify(jmDNS, times(0)).registerService(any());
 		else
 			verify(jmDNS, times(1)).registerService(any());
@@ -103,7 +98,7 @@ class NetworkMulticastManagerTest {
 	void stop_callsShutdownMdns() throws IOException {
 		InetAddress address = InetAddress.getByName("192.168.1.144");
 
-		if (isWindows7())
+		if (SystemUtils.IS_OS_WINDOWS_7)
 			when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
 		else
 			when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
@@ -127,7 +122,7 @@ class NetworkMulticastManagerTest {
 	void shutdown_CallsShutdownMdns() throws IOException {
 		InetAddress address = InetAddress.getByName("192.168.1.144");
 
-		if (isWindows7())
+		if (SystemUtils.IS_OS_WINDOWS_7)
 			when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
 		else
 			when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
@@ -154,7 +149,7 @@ class NetworkMulticastManagerTest {
 		Map<InetAddress, String> map = Map.of(address, "00:11:22:33:44:55");
 
 		when(interfaces.getValidAddressesWithInterface()).thenReturn(map);
-		if (isWindows7())
+		if (SystemUtils.IS_OS_WINDOWS_7)
 			when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
 		else
 			when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
@@ -175,7 +170,7 @@ class NetworkMulticastManagerTest {
 		Map<InetAddress, String> second = Map.of();
 
 		when(interfaces.getValidAddressesWithInterface()).thenReturn(first).thenReturn(second);
-		if (isWindows7())
+		if (SystemUtils.IS_OS_WINDOWS_7)
 			when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
 		else
 			when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);
@@ -196,7 +191,7 @@ class NetworkMulticastManagerTest {
 		Map<InetAddress, String> map = Map.of(address, "00:11:22:33:44:55");
 
 		when(interfaces.getValidAddressesWithInterface()).thenReturn(map).thenReturn(map);
-		if (isWindows7())
+		if (SystemUtils.IS_OS_WINDOWS_7)
 			when(jmDNSFactory.createDummy(any(InetAddress.class))).thenReturn(jmDNS);
 		else
 			when(jmDNSFactory.create(any(InetAddress.class))).thenReturn(jmDNS);

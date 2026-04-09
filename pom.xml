@@ -14,11 +14,18 @@
 
     <licenses>
         <license>
-            <name>GNU Lesser General Public License v3.0 or later</name>
-            <url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
+            <name>GNU General Public License v3.0 or later</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
 
     <properties>
@@ -48,12 +55,14 @@
         <commons-collections4.version>4.5.0</commons-collections4.version>
         <oshi.version>6.10.0</oshi.version>
         <jcommander.version>1.82</jcommander.version>
-        <SystemTray.version>4.4</SystemTray.version>
+        <systemTray.version>4.4</systemTray.version>
         <guice.version>7.0.0</guice.version>
         <guava.version>33.5.0-jre</guava.version>
         <jmdns.version>3.6.3</jmdns.version>
         <jackson-databind.version>2.21.2</jackson-databind.version>
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
+        <notify.version>4.5</notify.version>
+        <jSystemThemeDetector.version>3.9.1</jSystemThemeDetector.version>
     </properties>
 
     <dependencies>
@@ -71,10 +80,23 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-assistedinject</artifactId>
+            <version>${guice.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+
 
         <!-- CLI -->
         <dependency>
@@ -96,7 +118,7 @@
             <version>${logback-classic.version}</version>
         </dependency>
 
-        <!-- Apache Commons Lang 3 -->
+        <!-- Apache Commons -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -121,13 +143,26 @@
         </dependency>
 
         <!--
-            Cross-platform SystemTray support for Swing/AWT,
-            GtkStatusIcon, and AppIndicator on Java 8+
+            Cross-platform SystemTray support for Swing/AWT, GtkStatusIcon, and AppIndicator on Java 8+
         -->
         <dependency>
             <groupId>com.dorkbox</groupId>
             <artifactId>SystemTray</artifactId>
-            <version>${SystemTray.version}</version>
+            <version>${systemTray.version}</version>
+        </dependency>
+
+        <!-- Desktop and app notifications -->
+        <dependency>
+            <groupId>com.dorkbox</groupId>
+            <artifactId>Notify</artifactId>
+            <version>${notify.version}</version>
+        </dependency>
+
+        <!-- Theme detector (light / dark) -->
+        <dependency>
+            <groupId>com.github.Dansoftowner</groupId>
+            <artifactId>jSystemThemeDetector</artifactId>
+            <version>${jSystemThemeDetector.version}</version>
         </dependency>
 
         <!-- Lombok -->

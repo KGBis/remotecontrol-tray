@@ -19,11 +19,12 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
+import dorkbox.notify.Position;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.configuration.Config;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
-import io.github.kgbis.remotecontrol.tray.configuration.Settings;
-import io.github.kgbis.remotecontrol.tray.ui.SettingsDialog;
+import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsDialog;
+import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsModel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -63,12 +64,21 @@ class DialogHandlerTest {
 	void should_save_config_when_user_accepts_settings() {
 		ArgumentCaptor<Config> captor = ArgumentCaptor.forClass(Config.class);
 
+		Config config = Config.builder()
+			.onboardingVersion(0)
+			.appAutoStartOnLogin(true)
+			.locale(Locale.of("es"))
+			.showNotifications(true)
+			.notificationDuration(NotificationDuration.SHORT.getTtl())
+			.notificationPosition(Position.BOTTOM_RIGHT)
+			.build();
+
 		SettingsDialog dialog = mock(SettingsDialog.class);
-		when(dialog.getSettings()).thenReturn(new Settings(true, Locale.of("es")));
+		when(dialog.getSettingsModel()).thenReturn(SettingsModel.of(config));
 		doNothing().when(dialog).setVisible(true);
 
 		when(configManager.current()).thenReturn(new Config());
-		when(dialogFactory.create(any(), any(), any(), anyInt())).thenReturn(dialog);
+		when(dialogFactory.create(/* any(), */ any(), any(), anyInt())).thenReturn(dialog);
 		doNothing().when(autoStartController).syncAutoStart(anyBoolean());
 
 		dialogHandler.run(2);
@@ -84,11 +94,11 @@ class DialogHandlerTest {
 	@Test
 	void should_not_save_config_when_user_cancels_settings() {
 		SettingsDialog dialog = mock(SettingsDialog.class);
-		when(dialog.getSettings()).thenReturn(null);
+		when(dialog.getSettingsModel()).thenReturn(null);
 		doNothing().when(dialog).setVisible(true);
 
 		when(configManager.current()).thenReturn(new Config());
-		when(dialogFactory.create(any(), any(), any(), anyInt())).thenReturn(dialog);
+		when(dialogFactory.create(/* any(), */ any(), any(), anyInt())).thenReturn(dialog);
 
 		dialogHandler.run(1);
 

@@ -17,9 +17,19 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.configuration;
+package io.github.kgbis.remotecontrol.tray.misc;
 
-import java.util.Locale;
+import jakarta.inject.Singleton;
+import lombok.Data;
 
-public record Settings(boolean autoStart, Locale language) {
+/**
+ * Support class for runtime configuration unrelated with application config.<br>
+ * Currently it only holds the command arguments' {@code dryRun} flag
+ */
+@Data
+@Singleton
+public class RuntimeConfig {
+
+	private boolean dryRun = false;
+
 }

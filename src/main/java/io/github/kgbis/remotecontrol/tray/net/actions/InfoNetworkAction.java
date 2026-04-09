@@ -20,6 +20,8 @@
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +35,9 @@ public class InfoNetworkAction extends NetworkAction<String> {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
-	public InfoNetworkAction(Socket socket, String[] args, NetworkInfoProvider networkInfoProvider) {
+	@AssistedInject
+	public InfoNetworkAction(NetworkInfoProvider networkInfoProvider, @Assisted Socket socket,
+			@Assisted String[] args) {
 		super(socket, args);
 		this.provider = networkInfoProvider;
 	}

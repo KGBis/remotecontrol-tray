@@ -20,6 +20,9 @@
 package io.github.kgbis.remotecontrol.tray.ioc;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.jthemedetecor.OsThemeDetector;
 import io.github.kgbis.remotecontrol.tray.RemoteControl;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartControllerImpl;
@@ -30,6 +33,8 @@ import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorage;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
 import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
+import io.github.kgbis.remotecontrol.tray.misc.RuntimeConfig;
+import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionDispatcher;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
 import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
@@ -46,10 +51,10 @@ import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactoryDefaultI
 import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
 import io.github.kgbis.remotecontrol.tray.ui.TrayController;
 import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
+import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandlerImpl;
 import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactory;
-import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactoryImpl;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import oshi.SystemInfo;
@@ -59,6 +64,11 @@ public final class RemoteControlModule extends AbstractModule {
 
 	@Override
 	protected void configure() {
+		FactoryModuleBuilder factoryModuleBuilder = new FactoryModuleBuilder();
+		install(factoryModuleBuilder.build(NetworkActionFactory.class));
+		install(factoryModuleBuilder.build(SettingsDialogFactory.class));
+
+		bind(ActionDesktopNotifier.class).asEagerSingleton();
 		bind(AutoStartController.class).to(AutoStartControllerImpl.class).in(Singleton.class);
 		bind(Bootstrap.class).in(Singleton.class);
 		bind(BootstrapVersionProvider.class).to(BootstrapVersionProviderImpl.class).in(Singleton.class);
@@ -69,19 +79,25 @@ public final class RemoteControlModule extends AbstractModule {
 		bind(I18nService.class).in(Singleton.class);
 		bind(InformationScreen.class).in(Singleton.class);
 		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);
-		bind(NetworkActionFactory.class).in(Singleton.class);
+		bind(NetworkActionDispatcher.class).in(Singleton.class);
 		bind(NetworkInfoProvider.class).in(Singleton.class);
 		bind(NetworkInterfaceProvider.class).in(Singleton.class);
 		bind(NetworkInterfaces.class).in(Singleton.class);
 		bind(NetworkMulticastManager.class).in(Singleton.class);
 		bind(NetworkServer.class).in(Singleton.class);
 		bind(RemoteControl.class).in(Singleton.class);
+		bind(RuntimeConfig.class).in(Singleton.class);
 		bind(ServerLoopRunner.class).to(ServerLoopRunnerDefaultImpl.class).in(Singleton.class);
 		bind(ServerSocketFactory.class).to(ServerSocketFactoryDefaultImpl.class).in(Singleton.class);
-		bind(SettingsDialogFactory.class).to(SettingsDialogFactoryImpl.class).in(Singleton.class);
 		bind(SystemInfo.class).in(Singleton.class);
 		bind(TrayController.class).in(Singleton.class);
 		bind(TrayManager.class).in(Singleton.class);
+	}
+
+	@Provides
+	@Singleton
+	public OsThemeDetector provideOsThemeDetector() {
+		return OsThemeDetector.getDetector();
 	}
 
 }
