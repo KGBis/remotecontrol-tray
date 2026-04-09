@@ -77,7 +77,7 @@ public class RemoteControl {
 
 	private boolean manageLock() {
 		// try to adquire lock
-		Path lockPath = ResourcesHelper.getOSConfigDirectory().resolve("remotecontrol.lock");
+		Path lockPath = ResourcesHelper.getOSConfigDirectory().resolve("remoteshutdown.lock");
 
 		SingleInstanceLock instanceLock = new SingleInstanceLock();
 		boolean locked = instanceLock.tryLock(lockPath);
