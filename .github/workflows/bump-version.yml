@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [ labeled ]
     branches: [ develop ]
+  workflow_dispatch:
 
 jobs:
   bump-version:
