@@ -19,13 +19,12 @@
  */
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import io.github.kgbis.remotecontrol.tray.configuration.Config;
-import io.github.kgbis.remotecontrol.tray.ui.SettingsDialog;
+import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsDialog;
 
 import javax.swing.JFrame;
 
 public interface SettingsDialogFactory {
 
-	SettingsDialog create(JFrame parent, DialogMode mode, Config config, int versionLevel);
+	SettingsDialog create(JFrame parent, DialogMode mode, int versionLevel);
 
 }

@@ -17,35 +17,36 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui;
+package io.github.kgbis.remotecontrol.tray.ui.settings;
 
+import com.google.inject.assistedinject.Assisted;
+import com.jthemedetecor.OsThemeDetector;
 import io.github.kgbis.remotecontrol.tray.configuration.Config;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
-import io.github.kgbis.remotecontrol.tray.configuration.Settings;
 import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
 import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
+import io.github.kgbis.remotecontrol.tray.misc.RuntimeConfig;
+import io.github.kgbis.remotecontrol.tray.ui.CommonUI;
+import io.github.kgbis.remotecontrol.tray.ui.settings.panels.AutostartSettingsPanel;
+import io.github.kgbis.remotecontrol.tray.ui.settings.panels.LanguageSettingsPanel;
+import io.github.kgbis.remotecontrol.tray.ui.settings.panels.NotificationsSettingsPanel;
+import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogMode;
-import io.github.kgbis.remotecontrol.tray.ui.support.Languages;
+import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Range;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
@@ -53,25 +54,26 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
 
 import static io.github.kgbis.remotecontrol.tray.ui.CommonUI.TITLE;
+import static io.github.kgbis.remotecontrol.tray.ui.settings.SettingsModel.AUTOSTART_FEATURE;
+import static io.github.kgbis.remotecontrol.tray.ui.settings.SettingsModel.LANGUAGE_FEATURE;
+import static io.github.kgbis.remotecontrol.tray.ui.settings.SettingsModel.NOTIFICATIONS_FEATURE;
 
 @Slf4j
 public final class SettingsDialog extends JDialog {
 
-	private final transient Config config;
+	private static final int DIALOG_WIDTH = 510;
 
-	private final transient I18nService i18nService;
+	private final I18nService i18nService;
+
+	private final ActionDesktopNotifier actionDesktopNotifier;
 
 	private final boolean isOnboarding;
 
@@ -80,31 +82,28 @@ public final class SettingsDialog extends JDialog {
 	private final transient Range<Integer> range;
 
 	@Getter
-	private transient Settings settings;
+	private transient SettingsModel settingsModel;
 
-	/* Fields from which to take settings values */
-	private JCheckBox autostartCheck;
-
-	private JComboBox<Languages> langComboBox;
-
-	public SettingsDialog(JFrame owner, DialogMode mode, Config config, int versionLevel, I18nService i18nService) {
+	@Inject
+	public SettingsDialog(I18nService i18nService, ConfigManager configManager,
+			ActionDesktopNotifier actionDesktopNotifier, @Assisted JFrame owner, @Assisted DialogMode mode,
+			@Assisted int versionLevel) {
 		super(owner,
 				mode.equals(DialogMode.ONBOARDING)
 						? MessageFormat.format(i18nService.get("settingsDialog.title.welcome"), TITLE)
 						: MessageFormat.format(i18nService.get("settingsDialog.title.settings"), TITLE),
 				true);
-
-		this.config = config;
 		this.i18nService = i18nService;
-
+		this.actionDesktopNotifier = actionDesktopNotifier;
 		this.isSettings = mode == DialogMode.SETTINGS;
 		this.isOnboarding = mode == DialogMode.ONBOARDING;
 
+		Config config = configManager.current();
 		this.range = Range.of(config.getOnboardingVersion() + 1, versionLevel);
+		this.settingsModel = SettingsModel.of(config);
 
 		configureDialog();
-
-		buildUI();
+		buildUI(owner);
 	}
 
 	private void configureDialog() {
@@ -125,7 +124,7 @@ public final class SettingsDialog extends JDialog {
 		registerEscapeKey();
 	}
 
-	private void buildUI() {
+	private void buildUI(JFrame owner) {
 		setLayout(new BorderLayout());
 
 		add(header(), BorderLayout.NORTH);
@@ -133,8 +132,28 @@ public final class SettingsDialog extends JDialog {
 		add(button(), BorderLayout.SOUTH);
 
 		pack();
-		setResizable(true);
-		setLocationRelativeTo(getOwner());
+		setResizable(false);
+
+		// To have a fixed width. Comment or delete if resizable is preferred
+		setPreferredSize(new Dimension(DIALOG_WIDTH, getHeight()));
+		setSize(DIALOG_WIDTH, getHeight());
+
+		if (owner == null) {
+			setLocationRelativeTo(getOwner()); // Centered on screen
+		}
+		else {
+			int dialogWidth = getWidth();
+			int dialogHeight = getHeight();
+			int parentX = owner.getX();
+			int parentY = owner.getY();
+			int parentWidth = owner.getWidth();
+			int parentHeight = owner.getHeight();
+
+			int dialogX = parentX + (parentWidth - dialogWidth) / 2;
+			int dialogY = parentY - dialogHeight + parentHeight - 1;
+
+			setLocation(dialogX, dialogY); // adjusted to the bottom of the app's - 1px
+		}
 	}
 
 	private JPanel header() {
@@ -159,18 +178,9 @@ public final class SettingsDialog extends JDialog {
 	}
 
 	/**
-	 * All the options that are to be rendered in the panel, separated by a JSeparator.
-	 * <p/>
-	 * <b>NOTE:</b> If more settings are added in the future, consider extracting each
-	 * option into its own component (SettingsItem pattern).
-	 * @param panel Parent panel
+	 * Text before settings' options
+	 * @param panel parent panel
 	 */
-	private void addOptions(JPanel panel) {
-		addLanguagePanel(panel); // Language
-		panel.add(new JSeparator());
-		addAutoStartCheckbox(panel); // Application start on login
-	}
-
 	private void addMainText(JPanel panel) {
 		String key = isOnboarding ? "settingsDialog.mainText.welcome" : "settingsDialog.mainText.settings";
 		JLabel label = new JLabel(i18nService.get(key), SwingConstants.LEADING);
@@ -180,88 +190,33 @@ public final class SettingsDialog extends JDialog {
 		panel.add(Box.createVerticalStrut(10));
 	}
 
-	private void addLanguagePanel(JPanel panel) {
-		JPanel langPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-		langPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-		String key = "settingsDialog.lang.text";
-		JLabel langLabel = new JLabel(i18nService.get(key));
-		langLabel.setFont(langLabel.getFont().deriveFont(Font.BOLD));
-
-		langComboBox = new JComboBox<>();
-		Arrays.stream(Languages.values()).forEach(langComboBox::addItem);
-		langComboBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-		langComboBox.setMaximumSize(langComboBox.getPreferredSize());
-		langComboBox.setRenderer(new DefaultListCellRenderer() {
-			@Override
-			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-					boolean cellHasFocus) {
-
-				super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-				if (value instanceof Languages lang) {
-					setText(lang.getText());
-				}
-				else {
-					setText("");
-				}
-
-				return this;
-			}
-		});
-		langComboBox.setSelectedItem(Languages.fromLocale(config.getLocale()));
-		langComboBox.addActionListener(e -> {
-			log.debug("Language selected: {}", StringUtils
-				.capitalize(Objects.requireNonNull(langComboBox.getSelectedItem()).toString().toLowerCase()));
-			i18nService.setLocale(((Languages) Objects.requireNonNull(langComboBox.getSelectedItem())).getLocale());
-		});
-
-		langPanel.add(langLabel);
-		langPanel.add(langComboBox);
-
-		markIfNewFeature(langPanel, 2);
-
-		String descKey = "settingsDialog.lang.description";
-		JLabel description = new JLabel(i18nService.get(descKey));
-		description.setForeground(Color.DARK_GRAY);
-		description.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-		int indent = langComboBox.getInsets().left + 18;
-		description.setBorder(BorderFactory.createEmptyBorder(0, indent, 0, 0));
-
-		panel.add(langPanel);
-		panel.add(description);
+	/**
+	 * All the options that are to be rendered in the panel, separated by a JSeparator.
+	 * @param panel Parent panel
+	 */
+	private void addOptions(JPanel panel) {
+		// Language
+		LanguageSettingsPanel languagePanel = new LanguageSettingsPanel(settingsModel, i18nService,
+				isNewFeature(LANGUAGE_FEATURE));
+		panel.add(languagePanel);
+		panel.add(new JSeparator());
 		panel.add(Box.createVerticalStrut(10));
+
+		// Application start on login
+		AutostartSettingsPanel autostartPanel = new AutostartSettingsPanel(settingsModel, i18nService,
+				isNewFeature(AUTOSTART_FEATURE));
+		panel.add(autostartPanel);
+		panel.add(new JSeparator());
+		panel.add(Box.createVerticalStrut(10));
+
+		// Shutdown and Cancel notifications
+		NotificationsSettingsPanel notificationsPanel = new NotificationsSettingsPanel(i18nService,
+				actionDesktopNotifier, settingsModel, isNewFeature(NOTIFICATIONS_FEATURE));
+		panel.add(notificationsPanel);
 	}
 
-	/**
-	 * compose the "Autostart" checkbox.
-	 * @param panel parent
-	 */
-	private void addAutoStartCheckbox(JPanel panel) {
-		JPanel checkPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		checkPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-		String checkKey = "settingsDialog.autostart.text";
-		autostartCheck = new JCheckBox(i18nService.get(checkKey));
-		autostartCheck.setAlignmentX(Component.LEFT_ALIGNMENT);
-		autostartCheck.setFont(autostartCheck.getFont().deriveFont(Font.BOLD));
-		autostartCheck.setHorizontalTextPosition(SwingConstants.LEFT);
-		autostartCheck.setSelected(config.isAppAutoStartOnLogin());
-
-		String descKey = "settingsDialog.autostart.description";
-		JLabel description = new JLabel(i18nService.get(descKey));
-		description.setForeground(Color.DARK_GRAY);
-		description.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-		int indent = autostartCheck.getInsets().left + 18;
-		description.setBorder(BorderFactory.createEmptyBorder(0, indent, 0, 0));
-
-		checkPanel.add(autostartCheck);
-		markIfNewFeature(checkPanel, 1);
-		panel.add(checkPanel);
-		panel.add(description);
-
+	private boolean isNewFeature(int wantedVersion) {
+		return isOnboarding && range.contains(wantedVersion);
 	}
 
 	private JPanel button() {
@@ -271,7 +226,7 @@ public final class SettingsDialog extends JDialog {
 			cancelPanel.setBorder(BorderFactory.createEmptyBorder(5, 20, 10, 10));
 			JButton cancelBtn = new JButton(i18nService.get("settingsDialog.button.cancel"));
 			cancelBtn.addActionListener(e -> {
-				settings = null;
+				settingsModel = null;
 				dispose();
 			});
 			cancelPanel.add(cancelBtn);
@@ -286,12 +241,7 @@ public final class SettingsDialog extends JDialog {
 
 		JButton acceptBtn = new JButton(i18nService.get(acceptLabelKey));
 		getRootPane().setDefaultButton(acceptBtn);
-		acceptBtn.addActionListener(e -> {
-			boolean autoStart = autostartCheck != null && autostartCheck.isSelected();
-			Locale locale = ((Languages) Objects.requireNonNull(langComboBox.getSelectedItem())).getLocale();
-			settings = new Settings(autoStart, locale);
-			dispose();
-		});
+		acceptBtn.addActionListener(e -> dispose());
 
 		acceptPanel.add(acceptBtn);
 		buttonPanel.add(acceptPanel, BorderLayout.EAST);
@@ -302,19 +252,9 @@ public final class SettingsDialog extends JDialog {
 	private void registerEscapeKey() {
 		if (isSettings) {
 			getRootPane().registerKeyboardAction(e -> {
-				settings = null;
+				settingsModel = null;
 				dispose();
 			}, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-		}
-	}
-
-	private void markIfNewFeature(JPanel panel, int wantedVersion) {
-		// if new feature
-		if (isOnboarding && range.contains(wantedVersion)) {
-			JLabel newFeature = new JLabel(new ImageIcon(ResourcesHelper.getImage("new")));
-			newFeature.setSize(new Dimension(16, 16));
-			newFeature.setAlignmentX(Component.LEFT_ALIGNMENT);
-			panel.add(newFeature);
 		}
 	}
 
@@ -324,7 +264,7 @@ public final class SettingsDialog extends JDialog {
 	 */
 	public static void main(String[] args) {
 		// To fix blurry fonts on Linux
-		if (SystemUtils.IS_OS_UNIX) {
+		if (SystemUtils.IS_OS_LINUX) {
 			System.setProperty("awt.useSystemAAFontSettings", "on");
 			System.setProperty("swing.aatext", "true");
 		}
@@ -336,7 +276,7 @@ public final class SettingsDialog extends JDialog {
 			// don't care about any exception here
 		}
 
-		// app version level from 0 to 1 (Start at logon)
+		// app version level from n to n+x (Start at logon)
 		Config config = Config.builder().locale(Locale.of("es").stripExtensions()).build();
 
 		ConfigManager manager = new ConfigManager(new ConfigStorageImpl());
@@ -345,21 +285,32 @@ public final class SettingsDialog extends JDialog {
 		log.debug("i18n service locale -> {}", i18nService.getLocale());
 		log.debug("config locale -> {}", config.getLocale());
 
-		int versionLevel = 2;
+		RuntimeConfig runtimeConfig = new RuntimeConfig();
+		runtimeConfig.setDryRun(true);
 
-		SettingsDialog dialog = new SettingsDialog(null, DialogMode.ONBOARDING, config, versionLevel, i18nService);
+		OsThemeDetector osThemeDetector = OsThemeDetector.getDetector();
+
+		ActionDesktopNotifier desktopNotifier = new ActionDesktopNotifier(i18nService, manager, runtimeConfig,
+				osThemeDetector);
+
+		int versionLevel = 3;
+
+		SettingsDialog dialog = new SettingsDialog(i18nService, manager, desktopNotifier, null, DialogMode.ONBOARDING,
+				versionLevel);
 		dialog.setVisible(true);
 
-		Settings result = dialog.getSettings();
+		SettingsModel result = dialog.getSettingsModel();
 		log.debug("Result is: {}", result);
 		dialog.dispose();
 
 		// DialogMode.SETTINGS
+		config.setLocale(Locale.of("en"));
+		i18nService.setLocale(config.getLocale());
 		config.setAppAutoStartOnLogin(true);
-		dialog = new SettingsDialog(null, DialogMode.SETTINGS, config, versionLevel, i18nService);
+		dialog = new SettingsDialog(i18nService, manager, desktopNotifier, null, DialogMode.SETTINGS, versionLevel);
 		dialog.setVisible(true);
 
-		result = dialog.getSettings();
+		result = dialog.getSettingsModel();
 		log.debug("Result is: {}", result);
 	}
 

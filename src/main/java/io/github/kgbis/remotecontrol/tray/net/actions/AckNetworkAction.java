@@ -19,6 +19,8 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -28,7 +30,8 @@ import java.util.Arrays;
 @Slf4j
 public class AckNetworkAction extends NetworkAction<Void> {
 
-	public AckNetworkAction(Socket socket, String[] args) {
+	@AssistedInject
+	public AckNetworkAction(@Assisted Socket socket, @Assisted String[] args) {
 		super(socket, args);
 	}
 

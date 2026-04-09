@@ -19,7 +19,11 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
+import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
+import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
+import io.github.kgbis.remotecontrol.tray.misc.RuntimeConfig;
 import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
+import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,53 +33,82 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.net.Socket;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("rawtypes")
 @ExtendWith(MockitoExtension.class)
-class NetworkActionFactoryTest {
+class NetworkActionDispatcherTest {
 
 	@SuppressWarnings("unused")
 	@Mock
 	NetworkInfoProvider networkInfoProvider;
 
 	@Mock
+	ConfigManager configManager;
+
+	@Mock
+	I18nService i18nService;
+
+	@Mock
+	ActionDesktopNotifier actionDesktopNotifier;
+
+	@Mock
+	NetworkActionFactory networkActionFactory;
+
+	@Mock
 	Socket socket;
 
 	@InjectMocks
-	NetworkActionFactory networkActionFactory;
+	NetworkActionDispatcher networkActionDispatcher;
 
 	@Test
 	void testCreateShutdownNetworkAction() {
 		String[] remoteCommand = { "SHUTDOWN", "10", "MINUTES" };
-		NetworkAction result = networkActionFactory.createAction(remoteCommand, socket, false);
+		when(networkActionFactory.createShutdownAction(any(), any(Socket.class)))
+			.thenReturn(new ShutdownNetworkAction(new RuntimeConfig(), actionDesktopNotifier, socket, remoteCommand));
+		NetworkAction result = networkActionDispatcher.createAction(remoteCommand, socket);
 		assertInstanceOf(ShutdownNetworkAction.class, result);
 	}
 
 	@Test
 	void testCreateCancelShutdownNetworkAction() {
 		String[] remoteCommand = { "CANCEL_SHUTDOWN" };
-		NetworkAction result = networkActionFactory.createAction(remoteCommand, socket, false);
+		when(networkActionFactory.createCancelShutdownAction(any(), any(Socket.class)))
+			.thenReturn(new CancelShutdownNetworkAction(/* configManager, i18nService, */ actionDesktopNotifier, socket,
+					remoteCommand));
+
+		NetworkAction result = networkActionDispatcher.createAction(remoteCommand, socket);
 		assertInstanceOf(CancelShutdownNetworkAction.class, result);
 	}
 
 	@Test
 	void testCreateInfoNetworkAction() {
 		String[] remoteCommand = { "INFO", "10.0.0.1" };
-		NetworkAction result = networkActionFactory.createAction(remoteCommand, socket, false);
+		when(networkActionFactory.createInfoAction(any(), any(Socket.class)))
+			.thenReturn(new InfoNetworkAction(networkInfoProvider, socket, remoteCommand));
+
+		NetworkAction result = networkActionDispatcher.createAction(remoteCommand, socket);
 		assertInstanceOf(InfoNetworkAction.class, result);
 	}
 
 	@Test
 	void testCreateAckNetworkAction() {
 		String[] remoteCommand = { "ACK" };
-		NetworkAction result = networkActionFactory.createAction(remoteCommand, socket, false);
+		when(networkActionFactory.createAckAction(any(), any(Socket.class)))
+			.thenReturn(new AckNetworkAction(socket, remoteCommand));
+
+		NetworkAction result = networkActionDispatcher.createAction(remoteCommand, socket);
 		assertInstanceOf(AckNetworkAction.class, result);
 	}
 
 	@Test
 	void testCreateAckNetworkAction_withEmptyRemoteCommand() {
 		String[] remoteCommand = {};
-		NetworkAction result = networkActionFactory.createAction(remoteCommand, socket, false);
+		when(networkActionFactory.createAckAction(any(), any(Socket.class)))
+			.thenReturn(new AckNetworkAction(socket, remoteCommand));
+
+		NetworkAction result = networkActionDispatcher.createAction(remoteCommand, socket);
 		assertInstanceOf(AckNetworkAction.class, result);
 	}
 

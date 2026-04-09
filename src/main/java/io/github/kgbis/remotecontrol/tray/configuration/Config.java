@@ -20,6 +20,8 @@
 package io.github.kgbis.remotecontrol.tray.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import dorkbox.notify.Position;
+import io.github.kgbis.remotecontrol.tray.ui.support.NotificationDuration;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -27,6 +29,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.util.Locale;
 
@@ -52,6 +55,21 @@ public class Config {
 	@Setter
 	@Builder.Default
 	private Locale locale = Locale.ENGLISH;
+
+	@Getter
+	@Setter
+	@Builder.Default
+	private boolean showNotifications = !SystemUtils.IS_OS_WINDOWS;
+
+	@Getter
+	@Setter
+	@Builder.Default
+	private int notificationDuration = NotificationDuration.MEDIUM.getTtl(); // millis
+
+	@Getter
+	@Setter
+	@Builder.Default
+	private Position notificationPosition = Position.BOTTOM_RIGHT;
 
 	public boolean isInitialized(int expectedVersion) {
 		return onboardingVersion == expectedVersion;

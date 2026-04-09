@@ -22,6 +22,8 @@ package io.github.kgbis.remotecontrol.tray.misc;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.SystemProperties;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
@@ -38,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,7 +50,7 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResourcesHelper {
 
-	public static final String OS_NAME = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+	private static final String UNSUPPORTED = "Unsupported OS: %s";
 
 	private static final String USER_HOME = System.getProperty("user.home");
 
@@ -79,6 +80,7 @@ public class ResourcesHelper {
 	private static final Map<String, Image> icons = new HashMap<>();
 
 	/* application resources */
+
 	private static volatile UUID systemId;
 
 	private static String version;
@@ -113,16 +115,18 @@ public class ResourcesHelper {
 
 	public static Path getOSLogDirectory() {
 		Path logDir;
-		if (OS_NAME.contains("win")) {
+		if (SystemUtils.IS_OS_WINDOWS) {
 			String logFolder = System.getenv(WIN_LOG_FOLDER);
 			logDir = logFolder != null ? Path.of(logFolder, APP_NAME, "logs") : Path.of(USER_HOME, APP_NAME, "logs");
 		}
-		else if (OS_NAME.contains("mac")) {
+		else if (SystemUtils.IS_OS_MAC) {
 			logDir = Path.of(USER_HOME, MACOS_LIB_FOLDER, MACOS_LOG_FOLDER, APP_NAME);
 		}
-		else {
-			// Linux/Unix
+		else if (SystemUtils.IS_OS_LINUX) {
 			logDir = Path.of(USER_HOME, LINUX_LOG_FOLDER, APP_NAME, "logs");
+		}
+		else {
+			throw new UnsupportedOperationException(String.format(UNSUPPORTED, SystemProperties.getOsName()));
 		}
 
 		createDir(logDir);
@@ -158,12 +162,12 @@ public class ResourcesHelper {
 
 	public static Path getOSConfigDirectory() {
 		Path configDir;
-		if (OS_NAME.contains("win")) {
+		if (SystemUtils.IS_OS_WINDOWS) {
 			String appData = System.getenv(WIN_CONF_FOLDER);
 			configDir = appData != null ? Path.of(appData, APP_NAME) : Path.of(USER_HOME, APP_NAME);
 
 		}
-		else if (OS_NAME.contains("mac")) {
+		else if (SystemUtils.IS_OS_MAC) {
 			configDir = Path.of(USER_HOME, MACOS_LIB_FOLDER, MACOS_CONF_FOLDER, APP_NAME);
 		}
 		else {

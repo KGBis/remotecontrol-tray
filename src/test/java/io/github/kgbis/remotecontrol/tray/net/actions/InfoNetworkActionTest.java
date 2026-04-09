@@ -76,8 +76,8 @@ class InfoNetworkActionTest {
 		when(socket.getOutputStream()).thenReturn(outputStream);
 		when(networkInfoProvider.getDevice()).thenReturn(device);
 
-		infoNetworkAction = new InfoNetworkAction(socket, new String[] { "INFO", "192.168.1.100" },
-				networkInfoProvider);
+		infoNetworkAction = new InfoNetworkAction(networkInfoProvider, socket,
+				new String[] { "INFO", "192.168.1.100" });
 		infoNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -112,8 +112,8 @@ class InfoNetworkActionTest {
 		when(socket.getOutputStream()).thenReturn(outputStream);
 		when(networkInfoProvider.getDevice()).thenReturn(device);
 
-		infoNetworkAction = new InfoNetworkAction(socket, new String[] { "INFO", "192.168.1.102" },
-				networkInfoProvider);
+		infoNetworkAction = new InfoNetworkAction(networkInfoProvider, socket,
+				new String[] { "INFO", "192.168.1.102" });
 		infoNetworkAction.execute();
 
 		InputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -122,14 +122,14 @@ class InfoNetworkActionTest {
 
 	@Test
 	void testParseArguments() {
-		infoNetworkAction = new InfoNetworkAction(socket, new String[] { "INFO", "192.168.1.100" },
-				networkInfoProvider);
+		infoNetworkAction = new InfoNetworkAction(networkInfoProvider, socket,
+				new String[] { "INFO", "192.168.1.100" });
 		assertEquals("192.168.1.100", infoNetworkAction.parseArguments());
 	}
 
 	@Test
 	void testParseArguments_invalidNumberOfArguments() {
-		infoNetworkAction = new InfoNetworkAction(socket, new String[] { "INFO" }, networkInfoProvider);
+		infoNetworkAction = new InfoNetworkAction(networkInfoProvider, socket, new String[] { "INFO" });
 		assertNull(infoNetworkAction.parseArguments());
 	}
 
