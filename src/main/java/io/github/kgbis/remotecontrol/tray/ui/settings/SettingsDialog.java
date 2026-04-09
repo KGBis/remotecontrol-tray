@@ -33,6 +33,7 @@ import io.github.kgbis.remotecontrol.tray.ui.settings.panels.LanguageSettingsPan
 import io.github.kgbis.remotecontrol.tray.ui.settings.panels.NotificationsSettingsPanel;
 import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogMode;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -86,7 +87,7 @@ public final class SettingsDialog extends JDialog {
 
 	@Inject
 	public SettingsDialog(I18nService i18nService, ConfigManager configManager,
-			ActionDesktopNotifier actionDesktopNotifier, @Assisted JFrame owner, @Assisted DialogMode mode,
+			ActionDesktopNotifier actionDesktopNotifier, @Assisted @Nullable JFrame owner, @Assisted DialogMode mode,
 			@Assisted int versionLevel) {
 		super(owner,
 				mode.equals(DialogMode.ONBOARDING)

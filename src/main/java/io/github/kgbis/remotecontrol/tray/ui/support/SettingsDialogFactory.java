@@ -20,11 +20,12 @@
 package io.github.kgbis.remotecontrol.tray.ui.support;
 
 import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsDialog;
+import jakarta.annotation.Nullable;
 
 import javax.swing.JFrame;
 
 public interface SettingsDialogFactory {
 
-	SettingsDialog create(JFrame parent, DialogMode mode, int versionLevel);
+	SettingsDialog create(@Nullable JFrame parent, DialogMode mode, int versionLevel);
 
 }

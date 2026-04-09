@@ -112,7 +112,7 @@ public class ActionDesktopNotifier {
 			.title(data.title())
 			.text(data.text())
 			.theme(data.theme())
-			.position(Position.BOTTOM_RIGHT)
+			.position(data.position())
 			.hideAfter(data.duration())
 			.show();
 	}
@@ -120,6 +120,7 @@ public class ActionDesktopNotifier {
 	private NotificationData buildShutdownNotification(ShutdownNetworkActionData request) {
 		Theme theme = getTheme();
 		int notificationDuration = configManager.current().getNotificationDuration();
+		Position position = configManager.current().getNotificationPosition();
 
 		String text;
 
@@ -140,7 +141,7 @@ public class ActionDesktopNotifier {
 			}
 		}
 
-		return new NotificationData(REMOTE_PC_CONTROL, text, theme, notificationDuration);
+		return new NotificationData(REMOTE_PC_CONTROL, text, theme, notificationDuration, position);
 	}
 
 	private NotificationData buildCancelShutdownNotification() {
@@ -148,11 +149,12 @@ public class ActionDesktopNotifier {
 				: i18nService.get("notification.cancelShutdown");
 		Theme theme = getTheme();
 		int notificationDuration = configManager.current().getNotificationDuration();
+		Position position = configManager.current().getNotificationPosition();
 
-		return new NotificationData(REMOTE_PC_CONTROL, text, theme, notificationDuration);
+		return new NotificationData(REMOTE_PC_CONTROL, text, theme, notificationDuration, position);
 	}
 
-	record NotificationData(String title, String text, Theme theme, int duration) {
+	record NotificationData(String title, String text, Theme theme, int duration, Position position) {
 
 	}
 
