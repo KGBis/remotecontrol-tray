@@ -7,7 +7,7 @@
 
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
