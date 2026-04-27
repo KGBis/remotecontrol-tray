@@ -17,33 +17,27 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.net.actions;
+package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import com.google.inject.assistedinject.Assisted;
-import com.google.inject.assistedinject.AssistedInject;
-import lombok.extern.slf4j.Slf4j;
+import lombok.Getter;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Arrays;
+import java.awt.Color;
 
-@Slf4j
-public class AckNetworkAction extends NetworkAction<Void> {
+public enum HighlightType {
 
-	@AssistedInject
-	public AckNetworkAction(@Assisted Socket socket, @Assisted String[] args) {
-		super(socket, args);
-	}
+	HOVER(new Color(0, 120, 255, 40), new Color(0, 120, 255, 200)),
+	SELECTED(new Color(0, 120, 25, 40), new Color(0, 120, 25, 200)),
+	DISABLED(new Color(100, 100, 100, 40), new Color(100, 100, 100, 200));
 
-	@Override
-	public void execute() throws IOException {
-		log.debug("ACK sent for args={}", (args != null ? Arrays.toString(args) : ""));
-		writeToSocket(socket, "ACK");
-	}
+	@Getter
+	private final Color light;
 
-	@Override
-	protected Void parseArguments() {
-		return null;
+	@Getter
+	private final Color dark;
+
+	HighlightType(Color light, Color dark) {
+		this.light = light;
+		this.dark = dark;
 	}
 
 }

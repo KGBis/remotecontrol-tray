@@ -22,6 +22,9 @@ package io.github.kgbis.remotecontrol.tray.ui.support;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+
+import java.util.Locale;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TraySupportDetector {
@@ -58,12 +61,12 @@ public final class TraySupportDetector {
 
 	private static TraySupport detect() {
 		// Windows y macOS: always reliable
-		if (isWindows() || isMac()) {
+		if (SystemUtils.IS_OS_WINDOWS || SystemUtils.IS_OS_MAC) {
 			return TraySupport.FULL;
 		}
 
 		// Linux
-		String desktop = getDesktop().toLowerCase();
+		String desktop = getDesktop().toLowerCase(Locale.ROOT);
 
 		// --- GNOME ---
 		if (desktop.contains("gnome")) {
@@ -71,7 +74,7 @@ public final class TraySupportDetector {
 			if (isFedoraGnome()) {
 				return TraySupport.NONE;
 			}
-			// GNOME "normal": visible tray visible, events unrealiable
+			// "regular" GNOME: visible tray visible, events unrealiable
 			return TraySupport.PARTIAL;
 		}
 
@@ -107,7 +110,7 @@ public final class TraySupportDetector {
 			return TraySupport.FULL;
 		}
 
-		// Fallback to nnne
+		// Fallback to none
 		return TraySupport.NONE;
 	}
 
@@ -120,14 +123,6 @@ public final class TraySupportDetector {
 
 	private static boolean hasEnv(String name) {
 		return System.getenv(name) != null;
-	}
-
-	private static boolean isWindows() {
-		return System.getProperty("os.name").toLowerCase().contains("win");
-	}
-
-	private static boolean isMac() {
-		return System.getProperty("os.name").toLowerCase().contains("mac");
 	}
 
 }

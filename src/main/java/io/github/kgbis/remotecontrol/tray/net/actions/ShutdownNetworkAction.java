@@ -19,6 +19,10 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import io.github.kgbis.remotecontrol.tray.misc.RuntimeConfig;
+import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -36,9 +40,14 @@ public class ShutdownNetworkAction extends NetworkAction<ShutdownNetworkActionDa
 
 	private final boolean isDryRun;
 
-	public ShutdownNetworkAction(Socket socket, String[] args, boolean isDryRun) {
+	private final ActionDesktopNotifier desktopNotifier;
+
+	@AssistedInject
+	public ShutdownNetworkAction(RuntimeConfig runtimeConfig, ActionDesktopNotifier desktopNotifier,
+			@Assisted Socket socket, @Assisted String[] args) {
 		super(socket, args);
-		this.isDryRun = isDryRun;
+		this.isDryRun = runtimeConfig.isDryRun();
+		this.desktopNotifier = desktopNotifier;
 	}
 
 	@Override
@@ -56,11 +65,17 @@ public class ShutdownNetworkAction extends NetworkAction<ShutdownNetworkActionDa
 		log.info("Executing shutdown -> {}", StringUtils.join(cmdLine, " "));
 
 		int exitCode = 0;
+
 		if (!isDryRun) {
 			exitCode = execute(cmdLine);
 		}
 		else {
 			log.info("DryRun mode ON: shutdown not executed");
+		}
+
+		// show notification
+		if (exitCode == 0) {
+			desktopNotifier.notifyShutdown(request);
 		}
 
 		writeToSocket(socket, exitCode == 0 ? "ACK" : "ERROR " + exitCode);
@@ -96,7 +111,7 @@ public class ShutdownNetworkAction extends NetworkAction<ShutdownNetworkActionDa
 			cmd.add("-t");
 			cmd.add(String.valueOf(timeInSeconds));
 		}
-		else if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_UNIX) {
+		else if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
 			// cmd.add("sudo"); // using 'sudo' requires human intervention ;)
 			// shutdown command uses time in minutes
 			String sdTime = "now";

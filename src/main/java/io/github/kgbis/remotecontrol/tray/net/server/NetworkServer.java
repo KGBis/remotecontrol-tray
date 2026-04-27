@@ -20,8 +20,9 @@
 package io.github.kgbis.remotecontrol.tray.net.server;
 
 import io.github.kgbis.remotecontrol.tray.cli.CliArguments;
+import io.github.kgbis.remotecontrol.tray.misc.RuntimeConfig;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
-import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
+import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionDispatcher;
 import io.github.kgbis.remotecontrol.tray.net.mdns.NetworkMulticastManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -55,28 +56,30 @@ public class NetworkServer {
 
 	private final ServerLoopRunner loopRunner;
 
-	private final NetworkActionFactory networkActionFactory;
+	private final NetworkActionDispatcher networkActionDispatcher;
 
 	private final NetworkMulticastManager networkMulticastManager;
 
-	private volatile boolean running = false;
+	private final RuntimeConfig runtimeConfig;
 
-	private boolean isDryRun = false;
+	private volatile boolean running = false;
 
 	private ServerSocket serverSocket;
 
 	@Inject
 	public NetworkServer(ServerSocketFactory socketFactory, ServerLoopRunner loopRunner,
-			NetworkActionFactory networkActionFactory, NetworkMulticastManager networkMulticastManager) {
+			NetworkActionDispatcher networkActionDispatcher, NetworkMulticastManager networkMulticastManager,
+			RuntimeConfig runtimeConfig) {
 		this.socketFactory = socketFactory;
 		this.loopRunner = loopRunner;
-		this.networkActionFactory = networkActionFactory;
+		this.networkActionDispatcher = networkActionDispatcher;
 		this.networkMulticastManager = networkMulticastManager;
+		this.runtimeConfig = runtimeConfig;
 	}
 
 	public NetworkServer arguments(CliArguments args) {
-		isDryRun = args.isDryRun();
 		if (args.isDryRun()) {
+			runtimeConfig.setDryRun(true);
 			log.debug("Executing in DryRun mode. No shutdown will be performed!");
 		}
 		return this;
@@ -201,8 +204,7 @@ public class NetworkServer {
 				log.info("Received message: {}", message);
 
 				String[] args = StringUtils.split(message, " ");
-				NetworkAction action = networkActionFactory.createAction(args, socket, isDryRun);
-
+				NetworkAction action = networkActionDispatcher.createAction(args, socket);
 				action.execute();
 			}
 		}

@@ -19,11 +19,14 @@
  */
 package io.github.kgbis.remotecontrol.tray.autostart;
 
-import io.github.kgbis.remotecontrol.tray.misc.ResourcesHelper;
 import jakarta.inject.Singleton;
+import org.apache.commons.lang3.SystemProperties;
+import org.apache.commons.lang3.SystemUtils;
 
 @Singleton
 public class AutoStartControllerImpl implements AutoStartController {
+
+	private static final String UNSUPPORTED = "Unsupported OS: %s";
 
 	private AutoStartService service;
 
@@ -38,20 +41,19 @@ public class AutoStartControllerImpl implements AutoStartController {
 			return;
 		}
 
-		String osName = ResourcesHelper.OS_NAME;
 		AutoStartManager manager;
 
-		if (osName.contains("win")) {
+		if (SystemUtils.IS_OS_WINDOWS) {
 			manager = new WindowsAutoStartManager();
 		}
-		else if (osName.contains("linux")) {
+		else if (SystemUtils.IS_OS_LINUX) {
 			manager = new LinuxAutoStartManager();
 		}
-		else if (osName.contains("mac")) {
+		else if (SystemUtils.IS_OS_MAC) {
 			manager = new MacOSAutoStartManager();
 		}
 		else {
-			throw new UnsupportedOperationException("Unsupported OS: " + osName);
+			throw new UnsupportedOperationException(String.format(UNSUPPORTED, SystemProperties.getOsName()));
 		}
 
 		service = new AutoStartService(manager);

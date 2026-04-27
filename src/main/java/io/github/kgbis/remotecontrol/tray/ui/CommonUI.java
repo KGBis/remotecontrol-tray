@@ -24,10 +24,15 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Frame;
 
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL;
@@ -35,7 +40,7 @@ import static io.github.kgbis.remotecontrol.tray.RemoteControl.REMOTE_PC_CONTROL
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonUI {
 
-	protected static final String TITLE = REMOTE_PC_CONTROL + " v" + ResourcesHelper.getVersion();
+	public static final String TITLE = REMOTE_PC_CONTROL + " v" + ResourcesHelper.getVersion();
 
 	public static JFrame windowJFrame(boolean alwaysOnTop) {
 		JFrame jFrame = new JFrame(TITLE);
@@ -54,6 +59,29 @@ public class CommonUI {
 		headerPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		return headerPanel;
+	}
+
+	public static void markAsNewFeature(JPanel panel) {
+		JLabel newFeature = new JLabel(new ImageIcon(ResourcesHelper.getImage("new")));
+		newFeature.setSize(new Dimension(16, 16));
+		newFeature.setAlignmentX(Component.LEFT_ALIGNMENT);
+		panel.add(newFeature);
+	}
+
+	public static void setEnabledComponents(boolean enabled, JPanel... panels) {
+		for (JPanel panel : panels) {
+			setEnabledRecursively(panel, enabled);
+		}
+	}
+
+	private static void setEnabledRecursively(Component component, boolean enabled) {
+		component.setEnabled(enabled);
+
+		if (component instanceof Container container) {
+			for (Component child : container.getComponents()) {
+				setEnabledRecursively(child, enabled);
+			}
+		}
 	}
 
 }

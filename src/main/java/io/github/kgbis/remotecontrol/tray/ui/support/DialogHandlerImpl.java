@@ -22,8 +22,8 @@ package io.github.kgbis.remotecontrol.tray.ui.support;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.configuration.Config;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
-import io.github.kgbis.remotecontrol.tray.configuration.Settings;
-import io.github.kgbis.remotecontrol.tray.ui.SettingsDialog;
+import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsDialog;
+import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsModel;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -58,35 +58,41 @@ public class DialogHandlerImpl implements DialogHandler {
 		return run(null, DialogMode.ONBOARDING, appVersionLevel);
 	}
 
+	/**
+	 * Convenience method when called from the application's settings button.
+	 * @param parent Application's UI frame
+	 * @param mode currently always {@link DialogMode#SETTINGS}
+	 * @return Settings values
+	 */
 	@Override
 	public Config run(JFrame parent, DialogMode mode) {
-		return run(parent, mode, -1);
+		return run(parent, mode, 0);
 	}
 
+	/*
+	 * Create settings dialog and get its values when closed to update configuration
+	 */
 	private Config run(JFrame parent, DialogMode mode, int versionLevel) {
-		SettingsDialog dialog = settingsDialogFactory.create(parent, mode, getConfiguration(), versionLevel);
+		SettingsDialog dialog = settingsDialogFactory.create(parent, mode, versionLevel);
 		dialog.setVisible(true);
-		Settings settings = dialog.getSettings();
-
-		// update configuration
-		return updateConfig(settings, mode, versionLevel);
+		SettingsModel settingsModel = dialog.getSettingsModel();
+		return updateConfig(settingsModel, mode, versionLevel);
 	}
 
 	private Config getConfiguration() {
 		return configManager.current();
 	}
 
-	private Config updateConfig(Settings settings, DialogMode mode, int appVersionLevel) {
+	private Config updateConfig(SettingsModel settingsModel, DialogMode mode, int appVersionLevel) {
 		// get current config
-		Config config = configManager.current();
+		Config config = getConfiguration();
 
-		// if no changes, return
-		if (settings == null) {
+		if (settingsModel == null) {
 			return config;
 		}
 
-		config.setAppAutoStartOnLogin(settings.autoStart());
-		config.setLocale(settings.language());
+		// apply only if real changes are made (no cancel button or exit clicked)
+		settingsModel.applyTo(config);
 
 		// If coming from onboarding, save app version level
 		if (mode.equals(DialogMode.ONBOARDING)) {

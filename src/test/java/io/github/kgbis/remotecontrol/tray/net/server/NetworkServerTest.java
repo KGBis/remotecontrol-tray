@@ -20,7 +20,7 @@
 package io.github.kgbis.remotecontrol.tray.net.server;
 
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkAction;
-import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
+import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionDispatcher;
 import io.github.kgbis.remotecontrol.tray.net.mdns.NetworkMulticastManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +48,7 @@ class NetworkServerTest {
 	ServerSocketFactory socketFactory;
 
 	@Mock
-	NetworkActionFactory networkActionFactory;
+	NetworkActionDispatcher networkActionDispatcher;
 
 	@Mock
 	ServerSocket serverSocket;
@@ -123,11 +123,11 @@ class NetworkServerTest {
 		NetworkAction action = mock(NetworkAction.class);
 
 		when(socket.getInputStream()).thenReturn(new ByteArrayInputStream("INFO 192.168.1.111\n".getBytes()));
-		when(networkActionFactory.createAction(remoteCommand, socket, false)).thenReturn(action);
+		when(networkActionDispatcher.createAction(remoteCommand, socket)).thenReturn(action);
 
 		networkServer.handleClient(socket);
 
-		verify(networkActionFactory).createAction(remoteCommand, socket, false);
+		verify(networkActionDispatcher).createAction(remoteCommand, socket);
 		verify(action).execute();
 	}
 

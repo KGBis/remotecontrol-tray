@@ -19,6 +19,9 @@
  */
 package io.github.kgbis.remotecontrol.tray.net.actions;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -31,8 +34,15 @@ import java.util.List;
 @Slf4j
 public class CancelShutdownNetworkAction extends NetworkAction<String[]> {
 
-	protected CancelShutdownNetworkAction(Socket socket, String[] args) {
+	private static final int WINDOWS_NO_SHUTDOWN_SCHEDULED = 1116;
+
+	private final ActionDesktopNotifier desktopNotifier;
+
+	@AssistedInject
+	public CancelShutdownNetworkAction(ActionDesktopNotifier desktopNotifier, @Assisted Socket socket,
+			@Assisted String[] args) {
 		super(socket, args);
+		this.desktopNotifier = desktopNotifier;
 	}
 
 	@Override
@@ -40,7 +50,14 @@ public class CancelShutdownNetworkAction extends NetworkAction<String[]> {
 		String[] cmdLine = parseArguments();
 		log.info("Executing cancel shutdown -> {}", StringUtils.join(cmdLine, " "));
 		int exitCode = execute(cmdLine);
-		writeToSocket(socket, (exitCode == 0 || exitCode == 1116) ? "ACK" : "ERROR " + exitCode);
+
+		// show notification even in dryRun mode
+		if (exitCode == 0 || exitCode == WINDOWS_NO_SHUTDOWN_SCHEDULED) {
+			desktopNotifier.notifyCancelShutdown();
+		}
+
+		writeToSocket(socket,
+				(exitCode == 0 || exitCode == WINDOWS_NO_SHUTDOWN_SCHEDULED) ? "ACK" : "ERROR " + exitCode);
 	}
 
 	@Override

@@ -17,29 +17,24 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.support;
+package io.github.kgbis.remotecontrol.tray.ui.settings.panels;
 
-import io.github.kgbis.remotecontrol.tray.configuration.Config;
 import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
-import io.github.kgbis.remotecontrol.tray.ui.SettingsDialog;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsModel;
 
-import javax.swing.JFrame;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import java.awt.Component;
 
-@Singleton
-public class SettingsDialogFactoryImpl implements SettingsDialogFactory {
+public abstract class SettingsPanel extends JPanel {
 
-	private final I18nService i18nService;
+	SettingsPanel(SettingsModel model, I18nService i18nService, boolean markAsNew) {
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		setAlignmentX(Component.LEFT_ALIGNMENT);
 
-	@Inject
-	public SettingsDialogFactoryImpl(I18nService i18nService) {
-		this.i18nService = i18nService;
+		buildPanel(model, i18nService, markAsNew);
 	}
 
-	@Override
-	public SettingsDialog create(JFrame parent, DialogMode mode, Config config, int versionLevel) {
-		return new SettingsDialog(parent, mode, config, versionLevel, i18nService);
-	}
+	abstract void buildPanel(SettingsModel model, I18nService i18nService, boolean markAsNew);
 
 }
