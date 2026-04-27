@@ -7,7 +7,7 @@
 
     <groupId>io.github.kgbis</groupId>
     <artifactId>remotecontrol-tray</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>Remote PC Control Tray</name>
     <description>Remote Wake-on-LAN/Shutdown control for the system tray</description>
     <url>https://github.com/KGBis/remotecontrol-tray</url>
@@ -63,6 +63,7 @@
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
         <notify.version>4.5</notify.version>
         <jSystemThemeDetector.version>3.9.1</jSystemThemeDetector.version>
+        <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
     </properties>
 
     <dependencies>
@@ -94,7 +95,7 @@
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
-            <version>2.1.1</version>
+            <version>${jakarta.annotation-api.version}</version>
         </dependency>
 
 

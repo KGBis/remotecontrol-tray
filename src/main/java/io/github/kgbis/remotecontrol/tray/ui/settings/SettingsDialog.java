@@ -55,8 +55,10 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -118,8 +120,20 @@ public final class SettingsDialog extends JDialog {
 		// Window icon
 		setIconImage(ResourcesHelper.getImage("computer"));
 
+		// Configure tooltips
+		configureTooltips();
+
 		// Register exit by Escape key when in SETTINGS mode
 		registerEscapeKey();
+	}
+
+	private void configureTooltips() {
+		UIManager.put("ToolTip.background", new Color(60, 60, 60));
+		UIManager.put("ToolTip.foreground", Color.WHITE);
+		UIManager.put("ToolTip.border", BorderFactory.createCompoundBorder(
+				BorderFactory.createLineBorder(new Color(80, 80, 80)), BorderFactory.createEmptyBorder(6, 8, 6, 8)));
+
+		UIManager.put("ToolTip.font", new Font("Segoe UI", Font.PLAIN, 12));
 	}
 
 	private void buildUI(JFrame owner) {

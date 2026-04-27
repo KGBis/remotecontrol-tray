@@ -17,24 +17,27 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-package io.github.kgbis.remotecontrol.tray.ui.settings.panels;
+package io.github.kgbis.remotecontrol.tray.ui.support;
 
-import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
-import io.github.kgbis.remotecontrol.tray.ui.settings.SettingsModel;
+import lombok.Getter;
 
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import java.awt.Component;
+import java.awt.Color;
 
-public abstract class SettingsPanel extends JPanel {
+public enum HighlightType {
 
-	SettingsPanel(SettingsModel model, I18nService i18nService, boolean markAsNew) {
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setAlignmentX(Component.LEFT_ALIGNMENT);
+	HOVER(new Color(0, 120, 255, 40), new Color(0, 120, 255, 200)),
+	SELECTED(new Color(0, 120, 25, 40), new Color(0, 120, 25, 200)),
+	DISABLED(new Color(100, 100, 100, 40), new Color(100, 100, 100, 200));
 
-		buildPanel(model, i18nService, markAsNew);
+	@Getter
+	private final Color light;
+
+	@Getter
+	private final Color dark;
+
+	HighlightType(Color light, Color dark) {
+		this.light = light;
+		this.dark = dark;
 	}
-
-	abstract void buildPanel(SettingsModel model, I18nService i18nService, boolean markAsNew);
 
 }
