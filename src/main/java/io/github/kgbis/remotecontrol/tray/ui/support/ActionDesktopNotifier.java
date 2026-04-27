@@ -65,7 +65,14 @@ public class ActionDesktopNotifier {
 		setNotifyFont();
 	}
 
-	public void preview(Position pos, String title) {
+	/**
+	 * Previews notification with a sample text in the position the user selected
+	 * @param pos Area where notification is shown.
+	 * @param time Duration of the notification. When 0, close manually, it's changed to
+	 * {@link NotificationDuration#SHORT} duration.
+	 * @param title internationalized notification text.
+	 */
+	public void preview(Position pos, int time, String title) {
 		String text = """
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit,
 				sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -76,7 +83,7 @@ public class ActionDesktopNotifier {
 			.text(text)
 			.theme(getTheme())
 			.position(pos)
-			.hideAfter(NotificationDuration.SHORT.getTtl())
+			.hideAfter(time == 0 ? NotificationDuration.SHORT.getTtl() : time)
 			.show());
 	}
 
