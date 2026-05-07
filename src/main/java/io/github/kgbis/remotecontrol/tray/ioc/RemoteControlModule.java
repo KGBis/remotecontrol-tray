@@ -23,45 +23,36 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.jthemedetecor.OsThemeDetector;
-import io.github.kgbis.remotecontrol.tray.RemoteControl;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartController;
 import io.github.kgbis.remotecontrol.tray.autostart.AutoStartControllerImpl;
-import io.github.kgbis.remotecontrol.tray.bootstrap.Bootstrap;
 import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapVersionProvider;
 import io.github.kgbis.remotecontrol.tray.bootstrap.BootstrapVersionProviderImpl;
-import io.github.kgbis.remotecontrol.tray.configuration.ConfigManager;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorage;
 import io.github.kgbis.remotecontrol.tray.configuration.ConfigStorageImpl;
-import io.github.kgbis.remotecontrol.tray.i18n.I18nService;
-import io.github.kgbis.remotecontrol.tray.misc.RuntimeConfig;
-import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionDispatcher;
 import io.github.kgbis.remotecontrol.tray.net.actions.NetworkActionFactory;
-import io.github.kgbis.remotecontrol.tray.net.info.NetworkInfoProvider;
-import io.github.kgbis.remotecontrol.tray.net.internal.DeviceIdProvider;
-import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaceProvider;
-import io.github.kgbis.remotecontrol.tray.net.internal.NetworkInterfaces;
 import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactory;
-import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactoryDefaultImpl;
-import io.github.kgbis.remotecontrol.tray.net.mdns.NetworkMulticastManager;
-import io.github.kgbis.remotecontrol.tray.net.server.NetworkServer;
+import io.github.kgbis.remotecontrol.tray.net.mdns.JmDNSFactoryImpl;
 import io.github.kgbis.remotecontrol.tray.net.server.ServerLoopRunner;
-import io.github.kgbis.remotecontrol.tray.net.server.ServerLoopRunnerDefaultImpl;
+import io.github.kgbis.remotecontrol.tray.net.server.ServerLoopRunnerImpl;
 import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactory;
-import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactoryDefaultImpl;
-import io.github.kgbis.remotecontrol.tray.ui.InformationScreen;
-import io.github.kgbis.remotecontrol.tray.ui.TrayController;
-import io.github.kgbis.remotecontrol.tray.ui.TrayManager;
+import io.github.kgbis.remotecontrol.tray.net.server.ServerSocketFactoryImpl;
 import io.github.kgbis.remotecontrol.tray.ui.support.ActionDesktopNotifier;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandler;
 import io.github.kgbis.remotecontrol.tray.ui.support.DialogHandlerImpl;
 import io.github.kgbis.remotecontrol.tray.ui.support.SettingsDialogFactory;
 import jakarta.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import oshi.SystemInfo;
 
 @Slf4j
 public final class RemoteControlModule extends AbstractModule {
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Only Factories, eager singletons and default interface implementations are
+	 * configured here. The rest of {@link Singleton} annotated classes are not set here
+	 * for clarity. Guice scans all them all automatically.
+	 */
 	@Override
 	protected void configure() {
 		FactoryModuleBuilder factoryModuleBuilder = new FactoryModuleBuilder();
@@ -70,28 +61,12 @@ public final class RemoteControlModule extends AbstractModule {
 
 		bind(ActionDesktopNotifier.class).asEagerSingleton();
 		bind(AutoStartController.class).to(AutoStartControllerImpl.class).in(Singleton.class);
-		bind(Bootstrap.class).in(Singleton.class);
 		bind(BootstrapVersionProvider.class).to(BootstrapVersionProviderImpl.class).in(Singleton.class);
-		bind(ConfigManager.class).in(Singleton.class);
 		bind(ConfigStorage.class).to(ConfigStorageImpl.class).in(Singleton.class);
-		bind(DeviceIdProvider.class).in(Singleton.class);
 		bind(DialogHandler.class).to(DialogHandlerImpl.class).in(Singleton.class);
-		bind(I18nService.class).in(Singleton.class);
-		bind(InformationScreen.class).in(Singleton.class);
-		bind(JmDNSFactory.class).to(JmDNSFactoryDefaultImpl.class).in(Singleton.class);
-		bind(NetworkActionDispatcher.class).in(Singleton.class);
-		bind(NetworkInfoProvider.class).in(Singleton.class);
-		bind(NetworkInterfaceProvider.class).in(Singleton.class);
-		bind(NetworkInterfaces.class).in(Singleton.class);
-		bind(NetworkMulticastManager.class).in(Singleton.class);
-		bind(NetworkServer.class).in(Singleton.class);
-		bind(RemoteControl.class).in(Singleton.class);
-		bind(RuntimeConfig.class).in(Singleton.class);
-		bind(ServerLoopRunner.class).to(ServerLoopRunnerDefaultImpl.class).in(Singleton.class);
-		bind(ServerSocketFactory.class).to(ServerSocketFactoryDefaultImpl.class).in(Singleton.class);
-		bind(SystemInfo.class).in(Singleton.class);
-		bind(TrayController.class).in(Singleton.class);
-		bind(TrayManager.class).in(Singleton.class);
+		bind(JmDNSFactory.class).to(JmDNSFactoryImpl.class).in(Singleton.class);
+		bind(ServerLoopRunner.class).to(ServerLoopRunnerImpl.class).in(Singleton.class);
+		bind(ServerSocketFactory.class).to(ServerSocketFactoryImpl.class).in(Singleton.class);
 	}
 
 	@Provides
