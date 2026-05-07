@@ -22,7 +22,7 @@ package io.github.kgbis.remotecontrol.tray.net.server;
 import jakarta.inject.Singleton;
 
 @Singleton
-public class ServerLoopRunnerDefaultImpl implements ServerLoopRunner {
+public class ServerLoopRunnerImpl implements ServerLoopRunner {
 
 	private Thread thread;
 
