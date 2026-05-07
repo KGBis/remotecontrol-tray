@@ -188,6 +188,13 @@
             <version>${jackson-databind.version}</version>
         </dependency>
 
+        <!-- Java Native Access (for Windows Registry) -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.18.1</version>
+        </dependency>
+
         <!-- test -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

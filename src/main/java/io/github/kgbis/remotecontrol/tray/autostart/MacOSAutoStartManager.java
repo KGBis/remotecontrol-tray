@@ -32,11 +32,6 @@ public class MacOSAutoStartManager implements AutoStartManager {
 			"io.github.kgbis.remotecontrol.tray.plist");
 
 	@Override
-	public boolean isSupported() {
-		return true;
-	}
-
-	@Override
 	public boolean isEnabled() {
 		return Files.exists(plist);
 	}

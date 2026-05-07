@@ -44,7 +44,7 @@ public class AutoStartControllerImpl implements AutoStartController {
 		AutoStartManager manager;
 
 		if (SystemUtils.IS_OS_WINDOWS) {
-			manager = new WindowsAutoStartManager();
+			manager = new WindowsRegistryAutoStartManager();
 		}
 		else if (SystemUtils.IS_OS_LINUX) {
 			manager = new LinuxAutoStartManager();

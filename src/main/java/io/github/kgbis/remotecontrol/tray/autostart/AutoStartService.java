@@ -31,10 +31,6 @@ public class AutoStartService {
 	}
 
 	public void syncAutoStart(boolean appAutoStartOnLogin) {
-		if (!manager.isSupported()) {
-			return;
-		}
-
 		try {
 			boolean enabled = manager.isEnabled();
 

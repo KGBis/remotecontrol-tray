@@ -29,17 +29,12 @@ import java.nio.file.Paths;
 import static io.github.kgbis.remotecontrol.tray.RemoteControl.APP_NAME;
 
 @Slf4j
-public class WindowsAutoStartManager implements AutoStartManager {
+public class WindowsLinkAutoStartManager implements AutoStartManager {
 
-	private final Path startupDir = Paths.get(System.getenv("APPDATA"), "Microsoft", "Windows", "Start Menu",
+	protected final Path startupDir = Paths.get(System.getenv("APPDATA"), "Microsoft", "Windows", "Start Menu",
 			"Programs", "Startup");
 
-	private final Path shortcut = startupDir.resolve("RemoteControlTray.lnk");
-
-	@Override
-	public boolean isSupported() {
-		return true;
-	}
+	protected final Path shortcut = startupDir.resolve("RemoteControlTray.lnk");
 
 	@Override
 	public boolean isEnabled() {
@@ -48,10 +43,10 @@ public class WindowsAutoStartManager implements AutoStartManager {
 
 	/**
 	 * Creates a link from<br>
-	 * <i>C:\Users\&lt;user&gt;\AppData\Local\RemoteControlTray\RemoteControlTray.exe</i><br>
+	 * <i>C:\Users\&lt;user&gt;\AppData\Local\remotecontrol-tray\remotecontrol-tray.exe</i><br>
 	 * to user's startup file<br>
 	 * <i>C:\Users\&lt;user&gt;\AppData\Roaming\Microsoft\Windows\Start
-	 * Menu\Programs\Startup\RemoteControlTray.lnk</i>
+	 * Menu\Programs\Startup\remotecontrol-tray.lnk</i>
 	 * @throws IOException if create shortcut process cannot be run
 	 * @throws InterruptedException if create shortcut thread is interrupted while waiting
 	 * for the process to end
@@ -64,7 +59,7 @@ public class WindowsAutoStartManager implements AutoStartManager {
 
 	/**
 	 * Deletes <i>C:\Users\&lt;user&gt;\AppData\Roaming\Microsoft\Windows\Start
-	 * Menu\Programs\Startup\RemoteControlTray.lnk</i> so on next login program will not
+	 * Menu\Programs\Startup\remotecontrol-tray.lnk</i> so on next login program will not
 	 * automatically run
 	 * @throws IOException if an I/O error occurs
 	 */
@@ -73,7 +68,7 @@ public class WindowsAutoStartManager implements AutoStartManager {
 		Files.deleteIfExists(shortcut);
 	}
 
-	private Path locateInstalledExe() {
+	protected Path locateInstalledExe() {
 		return Paths.get(System.getenv("LOCALAPPDATA"), APP_NAME, APP_NAME + ".exe");
 	}
 
