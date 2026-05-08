@@ -47,16 +47,6 @@ public class LinuxAutoStartManager implements AutoStartManager {
 			"remotecontrol-tray.desktop");
 
 	@Override
-	public boolean isSupported() {
-		return true;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return Files.exists(desktopFile);
-	}
-
-	@Override
 	public void enable() throws IOException {
 		Files.createDirectories(desktopFile.getParent());
 		Files.writeString(desktopFile, DESKTOP_ENTRY);

@@ -101,9 +101,15 @@ jobs:
           APP_VERSION="${{ needs.create-release.outputs.version }}"
 
           # Windows flags 
-          WIN_FLAGS=""
+          WIN_FLAGS=()
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            WIN_FLAGS="--win-menu --win-shortcut --win-per-user-install"
+            WIN_FLAGS=(
+              --win-menu
+              --win-menu-group
+              "$ARTIFACT"
+              --win-shortcut
+              --win-per-user-install
+            )
           fi
           
           # Common flags for jpackage
@@ -124,25 +130,25 @@ jobs:
           )
           
           # icons
-          ICON_FLAG=""
+          ICON_FLAG=()
           
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            ICON_FLAG="--icon $ICONS_PATH/computer.ico"
+          ICON_FLAG+=("--icon" "$ICONS_PATH/computer.ico")
           
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            ICON_FLAG="--icon $ICONS_PATH/computer.icns"
+          ICON_FLAG+=("--icon" "$ICONS_PATH/computer.icns")
           
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            ICON_FLAG="--icon $ICONS_PATH/computer.png"
+          ICON_FLAG+=("--icon" "$ICONS_PATH/computer.png")
           fi
           
           mkdir -p $INSTALLERS_PATH
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            jpackage --type msi "${MAIN_FLAGS[@]}" "${NON_LINUX_FLAGS[@]}" $ICON_FLAG $WIN_FLAGS
+            jpackage --type msi "${MAIN_FLAGS[@]}" "${NON_LINUX_FLAGS[@]}" "${ICON_FLAG[@]}" "${WIN_FLAGS[@]}"
 
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            jpackage --type dmg "${MAIN_FLAGS[@]}" "${NON_LINUX_FLAGS[@]}" $ICON_FLAG
+            jpackage --type dmg "${MAIN_FLAGS[@]}" "${NON_LINUX_FLAGS[@]}" "${ICON_FLAG[@]}"
 
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             # install makeself
@@ -150,7 +156,7 @@ jobs:
             sudo apt-get install -y makeself
           
             # execute jpackage
-            jpackage --type app-image "${MAIN_FLAGS[@]}" $ICON_FLAG
+            jpackage --type app-image "${MAIN_FLAGS[@]}" "${ICON_FLAG[@]}"
           
             # copy install/uninstall scripts + .desktop
             cp -r "$PACKAGING_PATH/linux/"* "$INSTALLERS_PATH/"

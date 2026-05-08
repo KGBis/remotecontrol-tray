@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# Maven
+mvn clean package
+
 # Artifact name and version from pom.xml
 ARTIFACT=$(grep -m 1 '<artifactId>' ./pom.xml | sed 's/ *<artifactId>\(.*\)<\/artifactId> */\1/')
 APP_VERSION=$(grep -m 1 '<version>' ./pom.xml | sed 's/ *<version>\(.*\)<\/version> */\1/')
@@ -24,7 +27,7 @@ JAR_NAME="$ARTIFACT.jar"
 cp "$TARGET_PATH/$JAR_NAME" "$DIST_PATH"
 
 # Flags for jpackage
-ICON_FLAG="--icon .packaging/icons/computer.png"
+ICON_FLAG=("--icon" ".packaging/icons/computer.png")
 
 MAIN_FLAGS=(
   --name "$ARTIFACT"
@@ -38,7 +41,7 @@ MAIN_FLAGS=(
 
 # Generate Linux app-image
 echo "Running jpackage app-image..."
-jpackage --type app-image "${MAIN_FLAGS[@]}" "$ICON_FLAG"
+jpackage --type app-image "${MAIN_FLAGS[@]}" "${ICON_FLAG[@]}"
 
 # Copy scripts, .desktop files, etc.
 echo "Copying additional packaging files..."
