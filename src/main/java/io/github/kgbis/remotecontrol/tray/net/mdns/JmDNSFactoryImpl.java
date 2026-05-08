@@ -28,7 +28,7 @@ import java.net.InetAddress;
 
 @Slf4j
 @Singleton
-public class JmDNSFactoryDefaultImpl implements JmDNSFactory {
+public class JmDNSFactoryImpl implements JmDNSFactory {
 
 	@Override
 	public JmDNS create(InetAddress inetAddress) throws IOException {

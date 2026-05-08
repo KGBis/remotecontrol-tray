@@ -31,20 +31,13 @@ public class AutoStartService {
 	}
 
 	public void syncAutoStart(boolean appAutoStartOnLogin) {
-		if (!manager.isSupported()) {
-			return;
-		}
-
 		try {
-			boolean enabled = manager.isEnabled();
-
-			if (appAutoStartOnLogin && !enabled) {
+			if (appAutoStartOnLogin) {
 				manager.enable();
 			}
-			else if (!appAutoStartOnLogin && enabled) {
+			else {
 				manager.disable();
 			}
-
 		}
 		catch (Exception e) { // NOSONAR
 			log.warn("Autostart sync failed", e);
