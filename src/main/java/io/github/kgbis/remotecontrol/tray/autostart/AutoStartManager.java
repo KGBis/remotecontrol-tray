@@ -23,8 +23,6 @@ import java.io.IOException;
 
 public interface AutoStartManager {
 
-	boolean isEnabled();
-
 	void enable() throws IOException, InterruptedException;
 
 	void disable() throws IOException;

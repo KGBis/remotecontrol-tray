@@ -32,11 +32,6 @@ public class MacOSAutoStartManager implements AutoStartManager {
 			"io.github.kgbis.remotecontrol.tray.plist");
 
 	@Override
-	public boolean isEnabled() {
-		return Files.exists(plist);
-	}
-
-	@Override
 	public void enable() throws IOException {
 		Files.createDirectories(plist.getParent());
 		Files.writeString(plist, plistContent());

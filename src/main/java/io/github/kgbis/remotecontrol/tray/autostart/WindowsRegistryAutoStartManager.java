@@ -19,7 +19,6 @@
  */
 package io.github.kgbis.remotecontrol.tray.autostart;
 
-import com.sun.jna.platform.win32.Win32Exception;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,33 +31,23 @@ import java.io.IOException;
 @Slf4j
 public class WindowsRegistryAutoStartManager extends WindowsLinkAutoStartManager {
 
-	@Override
-	public boolean isEnabled() {
-		migrateIfNeeded();
-		return WindowsRegistryOps.exists();
-	}
-
 	/**
-	 * Adds executable to registry's current user run section
+	 * Adds executable to registry's current user run section. <br>
+	 * <i>NOTE:</i> This also removes old startup folder .lnk file if exists
 	 */
 	@Override
 	public void enable() {
+		removeStartupLink();
 		String exePathString = normalizePath();
-		WindowsRegistryOps.set(exePathString);
+		WindowsRegistryRunKeyHelper.addEntry(exePathString);
 	}
 
 	/**
-	 * Removes executable to registry's current user run section
+	 * Removes executable from registry's current user run section
 	 */
 	@Override
 	public void disable() {
-		WindowsRegistryOps.delete();
-	}
-
-	private void migrateIfNeeded() {
-		if (super.isEnabled()) {
-			createAndDelete();
-		}
+		WindowsRegistryRunKeyHelper.removeEntry();
 	}
 
 	/*
@@ -71,14 +60,9 @@ public class WindowsRegistryAutoStartManager extends WindowsLinkAutoStartManager
 	/*
 	 * Create registry entry and delete startup folder link
 	 */
-	private void createAndDelete() {
-		String exePathString = normalizePath();
+	private void removeStartupLink() {
 		try {
-			WindowsRegistryOps.set(exePathString);
 			super.disable();
-		}
-		catch (Win32Exception e) {
-			log.warn("Cannot set Windows registry entry. Win32 error {}: {}", e.getMessage(), e.getErrorCode());
 		}
 		catch (IOException e) {
 			log.warn("Cannot delete link in user's startup folder: {}", e.getMessage());

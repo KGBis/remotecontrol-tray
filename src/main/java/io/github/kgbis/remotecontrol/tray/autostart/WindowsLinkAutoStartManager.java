@@ -36,11 +36,6 @@ public class WindowsLinkAutoStartManager implements AutoStartManager {
 
 	protected final Path shortcut = startupDir.resolve("RemoteControlTray.lnk");
 
-	@Override
-	public boolean isEnabled() {
-		return Files.exists(shortcut);
-	}
-
 	/**
 	 * Creates a link from<br>
 	 * <i>C:\Users\&lt;user&gt;\AppData\Local\remotecontrol-tray\remotecontrol-tray.exe</i><br>

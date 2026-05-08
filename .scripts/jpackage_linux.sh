@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# Maven
+mvn clean package
+
 # Artifact name and version from pom.xml
 ARTIFACT=$(grep -m 1 '<artifactId>' ./pom.xml | sed 's/ *<artifactId>\(.*\)<\/artifactId> */\1/')
 APP_VERSION=$(grep -m 1 '<version>' ./pom.xml | sed 's/ *<version>\(.*\)<\/version> */\1/')

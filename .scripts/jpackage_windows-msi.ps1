@@ -7,10 +7,10 @@ mvn clean package
 $pom = Get-Content "./pom.xml"
 
 $ARTIFACT = ($pom | Select-String "<artifactId>" | Select-Object -First 1).Line `
-        -replace ".*<artifactId>(.*)</artifactId>.*", '$1'
+         -replace ".*<artifactId>(.*)</artifactId>.*", '$1'
 
 $APP_VERSION = ($pom | Select-String "<version>" | Select-Object -First 1).Line `
-        -replace ".*<version>(.*)</version>.*", '$1'
+         -replace ".*<version>(.*)</version>.*", '$1'
 
 Write-Host "Program name  -> $ARTIFACT"
 Write-Host "Program version -> $APP_VERSION"
@@ -42,6 +42,7 @@ $NON_LINUX_FLAGS = @(
 
 $WIN_FLAGS = @(
     "--win-menu",
+    "--win-menu-group", "$ARTIFACT",
     "--win-shortcut",
     "--win-per-user-install"
 )
