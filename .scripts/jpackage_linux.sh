@@ -27,7 +27,7 @@ JAR_NAME="$ARTIFACT.jar"
 cp "$TARGET_PATH/$JAR_NAME" "$DIST_PATH"
 
 # Flags for jpackage
-ICON_FLAG="--icon .packaging/icons/computer.png"
+ICON_FLAG=("--icon" ".packaging/icons/computer.png")
 
 MAIN_FLAGS=(
   --name "$ARTIFACT"
@@ -41,7 +41,7 @@ MAIN_FLAGS=(
 
 # Generate Linux app-image
 echo "Running jpackage app-image..."
-jpackage --type app-image "${MAIN_FLAGS[@]}" "$ICON_FLAG"
+jpackage --type app-image "${MAIN_FLAGS[@]}" "${ICON_FLAG[@]}"
 
 # Copy scripts, .desktop files, etc.
 echo "Copying additional packaging files..."
