@@ -16,7 +16,7 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       artifact: ${{ steps.artifact.outputs.artifact }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Get project version
         id: version
@@ -29,7 +29,7 @@ jobs:
           echo "artifact=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_OUTPUT
 
       - name: Create or update GitHub release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: "${{ steps.artifact.outputs.artifact }} v${{ steps.version.outputs.version }}"
@@ -68,7 +68,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -233,5 +233,6 @@ jobs:
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
           files: ${{ env.RELEASE_PATH }}/*
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
