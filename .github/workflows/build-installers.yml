@@ -5,6 +5,9 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   # Job 1: Gather pom.xml version and create single Release
   create-release:
@@ -46,7 +49,7 @@ jobs:
       ICONS_PATH: .packaging/icons
     needs: create-release
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -220,13 +223,13 @@ jobs:
           fi
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: remotecontrol-tray-${{ matrix.artifact }}
           path: ${{ env.RELEASE_PATH }}/*
 
       - name: Upload assets to release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ needs.create-release.outputs.version }}
           files: ${{ env.RELEASE_PATH }}/*
