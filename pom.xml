@@ -59,7 +59,7 @@
         <guice.version>7.0.0</guice.version>
         <guava.version>33.5.0-jre</guava.version>
         <jmdns.version>3.6.3</jmdns.version>
-        <jackson-databind.version>2.21.2</jackson-databind.version>
+        <jackson-databind.version>2.21.7</jackson-databind.version>
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
         <notify.version>4.5</notify.version>
         <jSystemThemeDetector.version>3.9.1</jSystemThemeDetector.version>
